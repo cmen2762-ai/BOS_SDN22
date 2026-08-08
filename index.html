@@ -96,8 +96,8 @@
                 <div class="absolute inset-2 border-2 border-indigo-400 border-b-transparent rounded-full animate-spin" style="animation-duration: 1.5s; animation-direction: reverse;"></div>
                 <img src="https://iili.io/BLlwHwQ.png" class="w-14 h-14 object-contain animate-pulse z-10" alt="Logo SDN 22">
             </div>
-            <h3 id="loader-text" class="mt-5 font-black text-blue-900 tracking-wide text-sm uppercase">Memuat Data Cloud...</h3>
-            <p id="loader-subtext" class="text-[11px] text-slate-500 font-semibold mt-1 italic">Mengambil data dari Google Sheet</p>
+            <h3 id="loader-text" class="mt-5 font-black text-blue-900 tracking-wide text-sm uppercase">Memuat Data</h3>
+            <p id="loader-subtext" class="text-[11px] text-slate-500 font-semibold mt-1 italic">Tunggu Sebentar</p>
         </div>
     </div>
 
@@ -108,7 +108,7 @@
                 <div id="progress-bar" class="bg-blue-600 h-full transition-all duration-300" style="width: 0%"></div>
             </div>
             <p id="progress-percent" class="text-2xl font-black text-blue-900">0%</p>
-            <p id="progress-status" class="text-xs text-slate-500 italic mt-2">Menghubungkan ke Cloud...</p>
+            <p id="progress-status" class="text-xs text-slate-500 italic mt-2">Menghubungkan ke Aplikasi...</p>
         </div>
     </div>
 
@@ -212,7 +212,7 @@
         <div class="login-left">
             <div class="w-full max-w-md">
                 <div class="text-center mb-8">
-                    <h1 class="text-3xl font-bold text-blue-900">SDN 22 Tanah Keras</h1>
+                    <h1 class="text-3xl font-bold text-blue-900">SDN 22 TANAH KERAS</h1>
                     <p class="text-slate-500 mt-2">Sistem Informasi Pengelolaan Kuitansi</p>
                 </div>
                 <div class="bg-white border border-slate-200 p-8 rounded-2xl shadow-xl">
@@ -270,7 +270,7 @@
                 <div class="border-t border-blue-800 my-4 pt-4">
                     <button onclick="startSyncProcess()" class="w-full flex items-center gap-3 p-3 rounded-lg bg-blue-800/50 hover:bg-blue-700 transition text-blue-100 font-bold text-sm uppercase">
                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357-2H15"></path></svg>
-                        Singkron Manual
+                        Tarik Data
                     </button>
                 </div>
                 <button onclick="logout()" class="w-full text-left p-3 rounded-lg bg-red-900/50 mt-2 text-red-100 hover:bg-red-800 transition">Keluar</button>
@@ -1075,7 +1075,7 @@
 
                 updateActiveUserBadge(matchedUser);
 
-                simulateProgress("Sinkronisasi Cloud", loadAllData).then(() => {
+                simulateProgress("Sedang Login", loadAllData).then(() => {
                     showSection('beranda');
                     notify(`Berhasil Masuk sebagai: ${matchedUser.name} (${matchedUser.role})`, "bg-green-600");
                 });
@@ -2066,8 +2066,8 @@
 
         function startSyncProcess() {
             showConfirm("Sinkronkan ulang database?", () => {
-                simulateProgress("Singkronisasi Database", loadAllData).then(() => {
-                    notify("Berhasil Singkron Data!", "bg-green-600");
+                simulateProgress("Tarik Data", loadAllData).then(() => {
+                    notify("Berhasil!", "bg-green-600");
                 });
             });
         }
