@@ -1,0 +1,2161 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Kuitansi Digital - SDN 22 Tanah Keras</title>
+    
+    <!-- Meta Tags untuk Full Screen (PWA Mode) -->
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="theme-color" content="#1e3a8a">
+    <meta name="apple-mobile-web-app-title" content="Kuitansi SDN22">
+    
+    <link rel="icon" type="image/png" href="https://iili.io/BLmT2LJ.md.png">
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <style>
+        .section-view { transition: opacity 0.2s ease-in-out; }
+        /* Ukuran F4 standar: 210mm x 330mm */
+        #print-template { font-family: 'Times New Roman', serif; color: black; width: 210mm; margin: 0 auto; }
+        @media print { .no-print { display: none !important; } body { background: white; } }
+        
+        .login-split { display: flex; min-height: 100vh; }
+        .login-left { flex: 1; display: flex; align-items: center; justify-content: center; background: white; padding: 2rem; }
+        .login-right { flex: 1.2; background: linear-gradient(135deg, #1e3a8a 0%, #1e40af 100%); display: flex; align-items: center; justify-content: center; padding: 4rem; color: white; position: relative; overflow: hidden; }
+        
+        @media (max-width: 768px) { 
+            .login-split { flex-direction: column; } 
+            .login-right { display: none; } 
+        }
+        
+        .loading-overlay { position: fixed; inset: 0; background: rgba(15, 23, 42, 0.7); backdrop-filter: blur(4px); display: flex; align-items: center; justify-content: center; z-index: 200; }
+        
+        /* Gaya Watermark */
+        .receipt-watermark {
+            position: absolute;
+            top: 55%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 120mm;
+            opacity: 0.1;
+            z-index: 0;
+            pointer-events: none;
+        }
+
+        .pagination-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        :viewport { width: device-width; }
+    </style>
+
+    <script>
+        const manifest = {
+            "name": "Kuitansi Digital SDN 22",
+            "short_name": "SDN22",
+            "start_url": ".",
+            "display": "standalone",
+            "background_color": "#f8fafc",
+            "theme_color": "#1e3a8a",
+            "icons": [
+                {
+                    "src": "https://iili.io/BLmT2LJ.md.png",
+                    "sizes": "192x192",
+                    "type": "image/png"
+                },
+                {
+                    "src": "https://iili.io/BLmT2LJ.md.png",
+                    "sizes": "512x512",
+                    "type": "image/png"
+                }
+            ]
+        };
+        const stringManifest = JSON.stringify(manifest);
+        const blob = new Blob([stringManifest], {type: 'application/json'});
+        const manifestURL = URL.createObjectURL(blob);
+        const link = document.createElement('link');
+        link.rel = 'manifest';
+        link.href = manifestURL;
+        document.head.appendChild(link);
+    </script>
+</head>
+<body class="bg-slate-50 font-sans text-slate-800">
+
+    <script>
+        const scriptURL = "https://script.google.com/macros/s/AKfycbz5iNkxUQoVJjTgIq1vLtW11M9yHfvPXkGK26naT2u6Yp6U6FFWnY25EUhZPHpYMmsc/exec"; 
+        const databaseURL = "https://docs.google.com/spreadsheets/d/1ZoBr1Yhw-O2fj1DMOhp5XNCg3PVkT0PNbMmtuyF95WE/edit?usp=sharing";
+    </script>
+
+    <div id="loader" class="loading-overlay">
+        <div class="bg-white/95 backdrop-blur-md p-8 rounded-3xl shadow-2xl border border-blue-100 flex flex-col items-center max-w-xs text-center">
+            <div class="relative w-28 h-28 flex items-center justify-center">
+                <div class="absolute inset-0 border-4 border-blue-200 border-t-blue-800 rounded-full animate-spin"></div>
+                <div class="absolute inset-2 border-2 border-indigo-400 border-b-transparent rounded-full animate-spin" style="animation-duration: 1.5s; animation-direction: reverse;"></div>
+                <img src="https://iili.io/BLlwHwQ.png" class="w-14 h-14 object-contain animate-pulse z-10" alt="Logo SDN 22">
+            </div>
+            <h3 id="loader-text" class="mt-5 font-black text-blue-900 tracking-wide text-sm uppercase">Memuat Data Cloud...</h3>
+            <p id="loader-subtext" class="text-[11px] text-slate-500 font-semibold mt-1 italic">Mengambil data dari Google Sheet</p>
+        </div>
+    </div>
+
+    <div id="progress-overlay" class="loading-overlay hidden">
+        <div class="bg-white p-8 rounded-2xl shadow-2xl w-80 text-center">
+            <h3 id="progress-title" class="font-bold text-blue-900 mb-4 uppercase">Sinkronisasi</h3>
+            <div class="w-full bg-slate-200 rounded-full h-4 mb-2 overflow-hidden">
+                <div id="progress-bar" class="bg-blue-600 h-full transition-all duration-300" style="width: 0%"></div>
+            </div>
+            <p id="progress-percent" class="text-2xl font-black text-blue-900">0%</p>
+            <p id="progress-status" class="text-xs text-slate-500 italic mt-2">Menghubungkan ke Cloud...</p>
+        </div>
+    </div>
+
+    <div id="confirm-overlay" class="loading-overlay hidden">
+        <div class="bg-white p-6 rounded-2xl shadow-2xl w-96">
+            <h3 class="text-lg font-bold text-slate-800 mb-2 uppercase">Konfirmasi</h3>
+            <p id="confirm-message" class="text-slate-600 mb-6">Apakah Anda yakin?</p>
+            <div class="flex gap-3 justify-end">
+                <button id="confirm-no" class="px-6 py-2 rounded-xl border font-bold text-slate-500 hover:bg-slate-50">TIDAK</button>
+                <button id="confirm-yes" class="px-6 py-2 rounded-xl bg-blue-700 text-white font-bold hover:bg-blue-800 shadow-lg">YA</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="cf-modal" class="loading-overlay hidden">
+        <div class="bg-white p-6 rounded-2xl shadow-2xl w-full max-w-lg mx-4">
+            <div class="flex justify-between items-center mb-6 border-b pb-3">
+                <h3 class="text-xl font-bold text-blue-900 uppercase">Tambah Transaksi Dana</h3>
+                <button onclick="closeCashFlowModal()" class="text-slate-400 hover:text-slate-600 font-bold text-xl">&times;</button>
+            </div>
+            <div class="space-y-4">
+                <div>
+                    <label class="block text-xs font-bold text-slate-500 uppercase mb-1">Tanggal Transaksi</label>
+                    <input type="date" id="cf-tanggal" class="w-full p-3 border rounded-xl outline-none focus:border-blue-500">
+                </div>
+                <div>
+                    <label class="block text-xs font-bold text-slate-500 uppercase mb-1">Deskripsi / Keperluan</label>
+                    <input type="text" id="cf-deskripsi" class="w-full p-3 border rounded-xl outline-none focus:border-blue-500" placeholder="Contoh: Penerimaan Dana BOSP Tahap I">
+                </div>
+                <div>
+                    <label class="block text-xs font-bold text-slate-500 uppercase mb-1">Jenis Transaksi</label>
+                    <select id="cf-jenis" class="w-full p-3 border rounded-xl outline-none bg-slate-50 focus:border-blue-500">
+                        <option value="masuk">Uang Masuk (Kredit)</option>
+                        <option value="keluar">Uang Keluar (Debet)</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-xs font-bold text-slate-500 uppercase mb-1">Nominal (Rp)</label>
+                    <input type="number" id="cf-nominal" class="w-full p-3 border-2 border-blue-400 rounded-xl font-bold text-lg text-blue-900 outline-none" placeholder="0">
+                </div>
+            </div>
+            <div class="mt-6 flex justify-end gap-3 border-t pt-4">
+                <button onclick="closeCashFlowModal()" class="px-5 py-2.5 rounded-xl border font-bold text-slate-500 hover:bg-slate-50">Batal</button>
+                <button onclick="saveCashFlow()" class="px-6 py-2.5 rounded-xl bg-blue-700 text-white font-bold hover:bg-blue-800 shadow-md">Simpan Transaksi</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="user-modal" class="loading-overlay hidden">
+        <div class="bg-white p-6 rounded-2xl shadow-2xl w-full max-w-lg mx-4 overflow-y-auto max-h-[90vh]">
+            <div class="flex justify-between items-center mb-6 border-b pb-3">
+                <h3 class="text-xl font-bold text-blue-900 uppercase">Tambah Pengguna Baru</h3>
+                <button onclick="closeUserModal()" class="text-slate-400 hover:text-slate-600 font-bold text-xl">&times;</button>
+            </div>
+            <div class="space-y-4">
+                <div>
+                    <label class="block text-xs font-bold text-slate-500 uppercase mb-1">Nama Lengkap</label>
+                    <input type="text" id="user-fullname" class="w-full p-3 border rounded-xl outline-none focus:border-blue-500" placeholder="Contoh: Drs. H. Ahmad Dahlan, M.Pd">
+                </div>
+                <div>
+                    <label class="block text-xs font-bold text-slate-500 uppercase mb-1">Username / Email</label>
+                    <input type="email" id="user-email" class="w-full p-3 border rounded-xl outline-none focus:border-blue-500" placeholder="contoh: ahmad@sdn22tk.sch.id">
+                </div>
+                <div>
+                    <label class="block text-xs font-bold text-slate-500 uppercase mb-1">Kata Sandi (Password)</label>
+                    <div class="relative">
+                        <input type="password" id="user-password" class="w-full p-3 border rounded-xl outline-none focus:border-blue-500 pr-12" placeholder="Masukkan Kata Sandi">
+                        <button type="button" onclick="toggleUserPasswordVisibility()" class="absolute right-3 top-3 text-xs text-blue-700 font-bold">Lihat</button>
+                    </div>
+                </div>
+                <div>
+                    <label class="block text-xs font-bold text-slate-500 uppercase mb-1">Peran / Jabatan</label>
+                    <select id="user-role" class="w-full p-3 border rounded-xl outline-none bg-slate-50 focus:border-blue-500 font-semibold">
+                        <option value="Admin">Admin</option>
+                        <option value="Kepala Sekolah">Kepala Sekolah</option>
+                        <option value="Bendahara">Bendahara</option>
+                        <option value="Pengurus Barang">Pengurus Barang</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-xs font-bold text-slate-500 uppercase mb-1">URL Image Foto Profil</label>
+                    <input type="text" id="user-photo" oninput="previewUserPhoto()" class="w-full p-3 border rounded-xl outline-none focus:border-blue-500" placeholder="https://domain.com/foto.jpg">
+                    <div class="mt-2 flex items-center gap-3 p-2 bg-slate-50 rounded-xl border">
+                        <img id="user-photo-preview" src="https://placehold.co/100x100/1e3a8a/ffffff?text=Foto" class="w-12 h-12 rounded-full object-cover border" alt="Preview Foto">
+                        <span class="text-xs text-slate-500 italic">Preview Foto Profil Pengguna</span>
+                    </div>
+                </div>
+                <div class="p-3 bg-blue-50 border border-blue-200 rounded-xl text-xs text-blue-900 flex items-start gap-2">
+                    <svg class="w-5 h-5 text-blue-700 shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 002-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path></svg>
+                    <span>Username/Email dan Kata Sandi akan <strong>otomatis dikirimkan secara langsung ke Email Pengguna</strong> setelah didaftarkan.</span>
+                </div>
+            </div>
+            <div class="mt-6 flex justify-end gap-3 border-t pt-4">
+                <button onclick="closeUserModal()" class="px-5 py-2.5 rounded-xl border font-bold text-slate-500 hover:bg-slate-50">Batal</button>
+                <button onclick="saveUser()" class="px-6 py-2.5 rounded-xl bg-blue-700 text-white font-bold hover:bg-blue-800 shadow-md">Simpan & Kirim Email</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="login-screen" class="login-split no-print">
+        <div class="login-left">
+            <div class="w-full max-w-md">
+                <div class="text-center mb-8">
+                    <h1 class="text-3xl font-bold text-blue-900">SDN 22 Tanah Keras</h1>
+                    <p class="text-slate-500 mt-2">Sistem Informasi Pengelolaan Kuitansi</p>
+                </div>
+                <div class="bg-white border border-slate-200 p-8 rounded-2xl shadow-xl">
+                    <div class="mb-6">
+                        <label class="block text-sm font-bold text-slate-700 mb-2">Username / Email</label>
+                        <input type="text" id="login-user" class="w-full p-3 border border-slate-300 rounded-xl outline-none" value="SDN22">
+                    </div>
+                    <div class="mb-8">
+                        <label class="block text-sm font-bold text-slate-700 mb-2">Kata Sandi</label>
+                        <input type="password" id="login-pass" class="w-full p-3 border border-slate-300 rounded-xl outline-none" value="12345">
+                    </div>
+                    <button onclick="checkLogin()" class="w-full bg-blue-700 hover:bg-blue-800 text-white font-bold py-4 rounded-xl shadow-lg transition transform active:scale-95">Masuk ke Sistem</button>
+                    <div id="login-error" class="mt-4 text-center text-red-500 text-sm font-bold hidden italic">Username/Sandi Salah.</div>
+                </div>
+            </div>
+        </div>
+        <div class="login-right">
+            <div class="relative z-10 max-w-xl text-center">
+                <h2 class="text-4xl font-serif leading-tight italic mb-6">"Pendidikan adalah tiket ke masa depan. Hari esok dimiliki oleh orang-orang yang mempersiapkan dirinya sejak hari ini."</h2>
+                <p class="text-xl text-blue-200">SDN 22 Tanah Keras</p>
+            </div>
+        </div>
+    </div>
+
+    <div id="main-app" class="hidden">
+        <aside class="fixed inset-y-0 left-0 w-64 bg-blue-900 text-white no-print flex flex-col z-30 shadow-2xl">
+            <!-- Sidebar Header Locked -->
+            <div class="p-5 border-b border-blue-800/80 shrink-0 bg-blue-950/40">
+                <div class="flex justify-center mb-3">
+                    <img src="https://iili.io/BLlwHwQ.png" class="w-28 h-auto drop-shadow-md" alt="Logo Sekolah">
+                </div>
+                <div class="flex items-center gap-3 p-2 bg-blue-800/50 rounded-xl border border-blue-700/50">
+                    <img id="sidebar-user-photo" src="https://iili.io/BLlwHwQ.png" class="w-10 h-10 rounded-full object-cover border-2 border-white/30 shrink-0" alt="Foto Admin">
+                    <div class="overflow-hidden">
+                        <p id="sidebar-user-name" class="font-bold text-xs text-white truncate">SDN 22 Tanah Keras</p>
+                        <span id="sidebar-user-role" class="inline-block px-2 py-0.5 rounded text-[10px] font-bold bg-blue-600 text-blue-100 uppercase">Admin</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Scrollable Navigation Items -->
+            <nav class="flex-1 p-4 space-y-2 overflow-y-auto">
+                <button onclick="showSection('beranda')" class="nav-btn w-full text-left p-3 rounded-lg hover:bg-blue-800 transition" id="btn-beranda">Beranda</button>
+                <button onclick="showSection('kop')" class="nav-btn w-full text-left p-3 rounded-lg hover:bg-blue-800 transition" id="btn-kop">KOP Surat</button>
+                <button onclick="showSection('pajak')" class="nav-btn w-full text-left p-3 rounded-lg hover:bg-blue-800 transition" id="btn-pajak">Data Pajak</button>
+                <button onclick="showSection('kuitansi')" class="nav-btn w-full text-left p-3 rounded-lg hover:bg-blue-800 transition" id="btn-kuitansi">Kuitansi</button>
+                <button onclick="showSection('belanja_modal')" class="nav-btn w-full text-left p-3 rounded-lg hover:bg-blue-800 transition" id="btn-belanja_modal">Belanja Modal</button>
+                <button onclick="showSection('cash_flow')" class="nav-btn w-full text-left p-3 rounded-lg hover:bg-blue-800 transition" id="btn-cash_flow">Dana Masuk & Keluar</button>
+                <button onclick="showSection('laporan')" class="nav-btn w-full text-left p-3 rounded-lg hover:bg-blue-800 transition" id="btn-laporan">Laporan Kuitansi</button>
+                <button onclick="showSection('arsip')" class="nav-btn w-full text-left p-3 rounded-lg hover:bg-blue-800 transition" id="btn-arsip">Arsip Kuitansi</button>
+                <button onclick="showSection('arsip_cash_flow')" class="nav-btn w-full text-left p-3 rounded-lg hover:bg-blue-800 transition" id="btn-arsip_cash_flow">Arsip Dana Kas</button>
+                <button onclick="showSection('ttd')" class="nav-btn w-full text-left p-3 rounded-lg hover:bg-blue-800 transition" id="btn-ttd">Penandatangan</button>
+                <button onclick="showSection('pengguna')" class="nav-btn w-full text-left p-3 rounded-lg hover:bg-blue-800 transition" id="btn-pengguna">Navigasi Pengguna</button>
+                
+                <div class="border-t border-blue-800 my-4 pt-4">
+                    <button onclick="startSyncProcess()" class="w-full flex items-center gap-3 p-3 rounded-lg bg-blue-800/50 hover:bg-blue-700 transition text-blue-100 font-bold text-sm uppercase">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357-2H15"></path></svg>
+                        Singkron Manual
+                    </button>
+                </div>
+                <button onclick="logout()" class="w-full text-left p-3 rounded-lg bg-red-900/50 mt-2 text-red-100 hover:bg-red-800 transition">Keluar</button>
+            </nav>
+        </aside>
+
+        <main class="ml-64 p-8 no-print">
+            <!-- Active User Banner Header -->
+            <div id="active-user-banner" class="mb-6 p-4 bg-white border border-slate-200 rounded-2xl shadow-sm flex flex-wrap items-center justify-between gap-4">
+                <div class="flex items-center gap-3">
+                    <div class="relative">
+                        <img id="header-user-photo" src="https://placehold.co/100x100/1e3a8a/ffffff?text=User" class="w-12 h-12 rounded-full object-cover border-2 border-blue-600 shadow-sm" alt="Foto Pengguna">
+                        <span class="absolute bottom-0 right-0 w-3.5 h-3.5 bg-emerald-500 border-2 border-white rounded-full" title="Status Online"></span>
+                    </div>
+                    <div>
+                        <div class="flex items-center gap-2">
+                            <span class="text-xs text-slate-400 font-bold uppercase">Terhubung Sebagai:</span>
+                            <span id="header-user-role-badge" class="px-2.5 py-0.5 rounded-full text-[10px] font-black bg-blue-100 text-blue-800 uppercase">Admin</span>
+                        </div>
+                        <h2 id="header-user-name" class="text-lg font-black text-blue-900 leading-tight">SDN 22 Tanah Keras</h2>
+                        <p id="header-user-email" class="text-xs text-slate-500 font-semibold">SDN22</p>
+                    </div>
+                </div>
+                <div class="flex items-center gap-2 bg-emerald-50 border border-emerald-200 px-4 py-2 rounded-xl text-emerald-800 text-xs font-bold">
+                    <span class="w-2.5 h-2.5 bg-emerald-500 rounded-full animate-pulse"></span>
+                    <span>PENGGUNA AKTIF (ONLINE)</span>
+                </div>
+            </div>
+
+            <section id="sec-beranda" class="section-view">
+                <!-- Banner Informasi Hapus Data (Atas Beranda) -->
+                <div class="mb-6 p-5 bg-blue-50 border-2 border-blue-600 rounded-2xl shadow-md flex items-center gap-4 text-blue-900">
+                    <svg class="w-8 h-8 text-blue-700 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                    </svg>
+                    <span class="text-base md:text-lg font-black tracking-wide uppercase">Informasi : Untuk Menghapus Data Hubungi Admin</span>
+                </div>
+
+                <!-- Welcome User Card -->
+                <div class="mb-8 bg-gradient-to-r from-blue-900 via-blue-800 to-indigo-900 rounded-2xl p-6 text-white shadow-lg flex flex-wrap items-center justify-between gap-6 relative overflow-hidden">
+                    <div class="flex items-center gap-5 relative z-10">
+                        <img id="welcome-user-photo" src="https://placehold.co/100x100/1e3a8a/ffffff?text=User" class="w-20 h-20 rounded-full object-cover border-4 border-white/20 shadow-md">
+                        <div>
+                            <span id="welcome-user-role-badge" class="px-3 py-1 bg-blue-700/80 border border-blue-500/50 rounded-full text-xs font-bold uppercase text-blue-200">Peran: Admin</span>
+                            <h3 id="welcome-user-name" class="text-2xl font-black mt-1">Selamat Datang, Pengguna!</h3>
+                            <p id="welcome-user-email" class="text-sm text-blue-200 mt-0.5">Username / Email: -</p>
+                            <p id="welcome-login-time" class="text-xs text-blue-300 italic mt-1">Waktu Masuk: -</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="bg-white p-8 rounded-xl shadow-sm border border-slate-200">
+                    <div class="flex justify-between items-center mb-6">
+                        <h2 class="text-2xl font-bold text-blue-900 uppercase">Statistik Database</h2>
+                        <a id="btn-cloud-db" target="_blank" class="bg-green-600 hover:bg-green-700 text-white px-6 py-3 rounded-xl font-bold shadow-lg transition transform active:scale-95 flex items-center gap-2">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
+                            Database
+                        </a>
+                    </div>
+                    
+                    <!-- Statistics Grid 1 -->
+                    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-4">
+                        <div class="p-5 bg-blue-900 text-white rounded-xl shadow-md">
+                            <span class="block text-blue-200 text-xs font-bold uppercase mb-1">Total Kuitansi Aktif</span>
+                            <h3 id="stat-total-kuitansi" class="text-3xl font-black">0</h3>
+                        </div>
+                        <div class="p-5 bg-green-600 text-white rounded-xl shadow-md">
+                            <span class="block text-green-200 text-xs font-bold uppercase mb-1">Total Pengeluaran</span>
+                            <h3 id="stat-total-pengeluaran" class="text-2xl font-black italic">Rp 0</h3>
+                        </div>
+                        <div class="p-5 bg-amber-500 text-white rounded-xl shadow-md">
+                            <span class="block text-amber-100 text-xs font-bold uppercase mb-1">Total Pajak</span>
+                            <h3 id="stat-total-pajak" class="text-2xl font-black italic">Rp 0</h3>
+                        </div>
+                        <div class="p-5 bg-red-600 text-white rounded-xl shadow-md">
+                            <span class="block text-red-100 text-xs font-bold uppercase mb-1">Jumlah Belanja Modal</span>
+                            <h3 id="stat-total-bm" class="text-2xl font-black italic">Rp 0</h3>
+                        </div>
+                    </div>
+
+                    <!-- Statistics Grid 2 -->
+                    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+                        <div class="p-5 bg-slate-800 text-white rounded-xl shadow-md">
+                            <span class="block text-slate-300 text-xs font-bold uppercase mb-1">Saldo Awal Kas</span>
+                            <h3 id="stat-saldo-awal" class="text-2xl font-black">Rp 0</h3>
+                        </div>
+                        <div class="p-5 bg-emerald-700 text-white rounded-xl shadow-md">
+                            <span class="block text-emerald-200 text-xs font-bold uppercase mb-1">Total Uang Masuk</span>
+                            <h3 id="stat-total-masuk" class="text-2xl font-black">Rp 0</h3>
+                        </div>
+                        <div class="p-5 bg-rose-700 text-white rounded-xl shadow-md">
+                            <span class="block text-rose-200 text-xs font-bold uppercase mb-1">Total Uang Keluar</span>
+                            <h3 id="stat-total-keluar" class="text-2xl font-black">Rp 0</h3>
+                        </div>
+                        <div class="p-5 bg-indigo-950 text-white rounded-xl shadow-md">
+                            <span class="block text-indigo-200 text-xs font-bold uppercase mb-1">Saldo Akhir Kas</span>
+                            <h3 id="stat-saldo-akhir" class="text-2xl font-black">Rp 0</h3>
+                        </div>
+                    </div>
+
+                    <h2 class="text-2xl font-bold text-blue-900 uppercase mb-4 pt-4 border-t border-slate-100">Informasi Aplikasi</h2>
+                    <div class="overflow-hidden rounded-xl border border-slate-200">
+                        <table class="w-full text-left">
+                            <tbody class="text-sm">
+                                <tr class="border-b bg-slate-50">
+                                    <td class="p-4 font-bold text-blue-900 w-48">Nama Aplikasi</td>
+                                    <td class="p-4">Sistem Manajemen BOSP</td>
+                                </tr>
+                                <tr class="border-b">
+                                    <td class="p-4 font-bold text-blue-900">Sekolah</td>
+                                    <td class="p-4">UPT SDN 22 Tanah Keras</td>
+                                </tr>
+                                <tr class="border-b bg-slate-50">
+                                    <td class="p-4 font-bold text-blue-900">NPSN</td>
+                                    <td class="p-4">10301884</td>
+                                </tr>
+                                <tr class="border-b">
+                                    <td class="p-4 font-bold text-blue-900">Alamat</td>
+                                    <td class="p-4">Tanah Keras - Gurun Panjang Barat</td>
+                                </tr>
+                                <tr class="border-b bg-slate-50">
+                                    <td class="p-4 font-bold text-blue-900">Email</td>
+                                    <td class="p-4 text-blue-600">UPTsdn22tanahkeras@gmail.com</td>
+                                </tr>
+                                <tr class="border-b">
+                                    <td class="p-4 font-bold text-blue-900">Website</td>
+                                    <td class="p-4 text-blue-600 underline">www.sdn22tk.my.id</td>
+                                </tr>
+                                <tr class="bg-slate-50">
+                                    <td class="p-4 font-bold text-blue-900">Dikelola Oleh</td>
+                                    <td class="p-4 font-bold">Fauzi, S.Hum</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </section>
+
+            <section id="sec-kop" class="section-view hidden">
+                <div class="bg-white p-8 rounded-xl shadow-sm border border-slate-200">
+                    <h2 class="text-2xl font-bold text-blue-900 mb-6 uppercase">Pengaturan KOP Surat</h2>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <input type="text" id="kop-logo-l" class="p-3 border rounded-xl" placeholder="URL Logo Kiri">
+                        <input type="text" id="kop-logo-r" class="p-3 border rounded-xl" placeholder="URL Logo Kanan">
+                        <input type="text" id="kop-pemda" class="p-3 border rounded-xl" placeholder="Pemda">
+                        <input type="text" id="kop-dinas" class="p-3 border rounded-xl" placeholder="Dinas">
+                        <input type="text" id="kop-sekolah" class="p-3 border rounded-xl" placeholder="Sekolah">
+                        <input type="text" id="kop-kecamatan" class="p-3 border rounded-xl" placeholder="Kecamatan">
+                        <input type="text" id="kop-alamat" class="p-3 border rounded-xl md:col-span-2" placeholder="Alamat">
+                        <input type="text" id="kop-email" class="p-3 border rounded-xl" placeholder="Email">
+                        <input type="text" id="kop-web" class="p-3 border rounded-xl" placeholder="Website">
+                    </div>
+                    <button onclick="saveKopConfig()" class="mt-8 bg-blue-700 text-white px-8 py-3 rounded-xl font-bold shadow-lg transition transform active:scale-95">Simpan Data KOP</button>
+                </div>
+            </section>
+
+            <section id="sec-pajak" class="section-view hidden">
+                <div class="bg-white p-8 rounded-xl shadow-sm border border-slate-200">
+                    <h2 class="text-2xl font-bold text-blue-900 mb-6 uppercase">Data Pajak</h2>
+                    <div class="flex gap-4 mb-4">
+                        <select id="tax-name-input" class="p-3 border rounded-xl flex-1 outline-none">
+                            <option value="" disabled selected>Pilih Pajak</option>
+                            <option value="PPN">PPN</option>
+                            <option value="PPH 21">PPH 21</option>
+                            <option value="PPH 23">PPH 23</option>
+                            <option value="Pajak Daerah">Pajak Daerah</option>
+                        </select>
+                        <input type="number" id="tax-rate-input" class="p-3 border rounded-xl w-32" placeholder="%">
+                        <button onclick="addTax()" class="bg-blue-700 text-white px-6 py-3 rounded-xl font-bold hover:bg-blue-800 transition">Tambah</button>
+                    </div>
+                    <div id="tax-list" class="grid grid-cols-1 md:grid-cols-3 gap-3"></div>
+                </div>
+            </section>
+
+            <section id="sec-kuitansi" class="section-view hidden">
+                <div class="bg-white p-8 rounded-xl shadow-sm border border-slate-200">
+                    <h2 class="text-2xl font-bold text-blue-900 mb-6 uppercase">Buat Kuitansi Baru</h2>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <input type="text" id="k-bku" class="p-3 border rounded-xl" placeholder="No. BKU">
+                        <input type="text" id="k-rekening" class="p-3 border rounded-xl" placeholder="Kode Rekening">
+                        <input type="text" id="k-dari" class="p-3 border rounded-xl" value="Bendahara BOS">
+                        <input type="text" id="k-penerima" class="p-3 border rounded-xl" placeholder="Nama Penerima">
+                        <input type="date" id="k-tanggal" class="p-3 border rounded-xl">
+                        <select id="k-pajak-select" onchange="updateCalculations()" class="p-3 border rounded-xl outline-none">
+                            <option value="none">Tanpa Pajak</option>
+                        </select>
+                        <textarea id="k-untuk" class="p-3 border rounded-xl md:col-span-2 h-24" placeholder="Untuk Pembayaran"></textarea>
+                        <input type="number" id="k-jumlah" oninput="updateCalculations()" class="p-3 border border-blue-400 rounded-xl font-bold text-xl" placeholder="Nominal Dasar (DPP)">
+                        <div class="p-4 bg-blue-50 rounded-xl border border-blue-200">
+                            <div class="flex justify-between font-black text-blue-900 text-2xl">
+                                <span>TOTAL:</span><span id="res-total-val">Rp 0</span>
+                            </div>
+                            <p id="res-terbilang" class="text-xs italic mt-2 text-slate-500 font-bold"></p>
+                        </div>
+                    </div>
+                    <div class="mt-8 flex gap-4">
+                        <button onclick="saveReceipt()" class="bg-green-600 text-white px-10 py-4 rounded-xl font-black shadow-lg hover:bg-green-700 transition">SIMPAN DATA</button>
+                        <button onclick="printDirectly()" class="bg-blue-600 text-white px-10 py-4 rounded-xl font-black shadow-lg hover:bg-green-700 transition">CETAK SAJA</button>
+                    </div>
+                </div>
+            </section>
+
+            <section id="sec-belanja_modal" class="section-view hidden">
+                <div class="bg-white p-8 rounded-xl shadow-sm border border-slate-200 mb-6">
+                    <h2 class="text-2xl font-bold text-blue-900 mb-6 uppercase">Input Belanja Modal</h2>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+                        <div>
+                            <label class="block text-xs font-bold text-slate-500 uppercase mb-1">Nama Barang</label>
+                            <input type="text" id="bm-nama" class="w-full p-3 border rounded-xl" placeholder="Contoh: Laptop Chromebook">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold text-slate-500 uppercase mb-1">Merek / Tipe</label>
+                            <input type="text" id="bm-merek" class="w-full p-3 border rounded-xl" placeholder="Contoh: Asus / C214">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold text-slate-500 uppercase mb-1">Jenis Belanja Modal</label>
+                            <input type="text" id="bm-jenis" class="w-full p-3 border rounded-xl" placeholder="Contoh: Peralatan & Mesin">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold text-slate-500 uppercase mb-1">Volume / Jumlah</label>
+                            <input type="text" id="bm-volume" oninput="calcBelanjaModalTotal()" class="w-full p-3 border rounded-xl" placeholder="Contoh: 3 Unit / 5 Buah">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold text-slate-500 uppercase mb-1">Harga Satuan (Rp)</label>
+                            <input type="number" id="bm-harga" oninput="calcBelanjaModalTotal()" class="w-full p-3 border rounded-xl" placeholder="Contoh: 2000000">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold text-slate-500 uppercase mb-1">Jumlah Harga (Rp)</label>
+                            <input type="number" id="bm-total-harga" class="w-full p-3 border rounded-xl bg-slate-100 font-bold text-blue-900" placeholder="0" readonly>
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold text-slate-500 uppercase mb-1">Tahun Belanja</label>
+                            <input type="number" id="bm-tahun" class="w-full p-3 border rounded-xl" placeholder="Contoh: 2026">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold text-slate-500 uppercase mb-1">Tanggal Transaksi</label>
+                            <input type="date" id="bm-tanggal" class="w-full p-3 border rounded-xl outline-none focus:border-blue-500">
+                        </div>
+                        <div class="md:col-span-2">
+                            <label class="block text-xs font-bold text-slate-500 uppercase mb-1">Kondisi / Kerusakan</label>
+                            <select id="bm-kerusakan" class="w-full p-3 border rounded-xl outline-none bg-slate-50">
+                                <option value="Baik">Baik</option>
+                                <option value="Rusak Ringan">Rusak Ringan</option>
+                                <option value="Rusak Sedang">Rusak Sedang</option>
+                                <option value="Rusak Berat">Rusak Berat</option>
+                                <option value="Hilang">Hilang</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="mb-4 p-4 bg-blue-50 rounded-xl border border-blue-200 flex justify-between items-center">
+                        <span class="text-xs font-bold text-blue-900 uppercase">Estimasi Total Harga:</span>
+                        <span id="bm-total-display" class="text-xl font-black text-blue-900">Rp 0</span>
+                    </div>
+                    <div class="flex gap-3">
+                        <button id="btn-save-bm" onclick="saveBelanjaModal()" class="bg-blue-700 text-white px-8 py-3 rounded-xl font-bold shadow-lg hover:bg-blue-800 transition">SIMPAN DATA BELANJA MODAL</button>
+                        <button id="btn-cancel-bm" onclick="cancelEditBelanjaModal()" class="bg-slate-500 text-white px-6 py-3 rounded-xl font-bold shadow-lg hover:bg-slate-600 transition hidden">Batal Edit</button>
+                    </div>
+                </div>
+
+                <div class="bg-white p-8 rounded-xl shadow-sm border border-slate-200">
+                    <div class="flex flex-wrap justify-between items-center mb-6 gap-4">
+                        <h2 class="text-2xl font-bold text-blue-900 uppercase">Daftar Belanja Modal</h2>
+                        <div class="flex flex-wrap gap-2 items-center">
+                            <input type="text" id="filter-bm" oninput="renderBelanjaModal()" class="p-3 border rounded-xl w-64 shadow-sm" placeholder="Cari Barang...">
+                            <select id="filter-tahun-bm" onchange="renderBelanjaModal()" class="p-3 border rounded-xl w-44 shadow-sm outline-none">
+                                <option value="all">Semua Tahun</option>
+                            </select>
+                            <button onclick="printBelanjaModal()" class="bg-blue-800 hover:bg-blue-900 text-white px-5 py-3 rounded-xl font-bold shadow-md transition flex items-center gap-2">
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"></path></svg>
+                                Cetak KOP
+                            </button>
+                            <button onclick="exportBelanjaModalExcel()" class="bg-emerald-600 hover:bg-emerald-700 text-white px-5 py-3 rounded-xl font-bold shadow-md transition flex items-center gap-2">
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
+                                Ekspor Excel
+                            </button>
+                        </div>
+                    </div>
+                    <div class="overflow-x-auto rounded-xl border shadow-sm">
+                        <table class="w-full text-left border-collapse">
+                            <thead>
+                                <tr class="bg-blue-900 text-white text-xs uppercase">
+                                    <th class="p-4 border">Nama Barang</th>
+                                    <th class="p-4 border">Merek / Tipe</th>
+                                    <th class="p-4 border">Jenis Belanja</th>
+                                    <th class="p-4 border text-center">Volume</th>
+                                    <th class="p-4 border text-right">Harga Satuan</th>
+                                    <th class="p-4 border text-right">Jumlah Harga</th>
+                                    <th class="p-4 border text-center">Tahun</th>
+                                    <th class="p-4 border text-center">Tanggal</th>
+                                    <th class="p-4 border text-center">Kondisi</th>
+                                    <th class="p-4 border text-center">Opsi</th>
+                                </tr>
+                            </thead>
+                            <tbody id="bm-table-body" class="text-xs"></tbody>
+                        </table>
+                    </div>
+                </div>
+            </section>
+
+            <section id="sec-cash_flow" class="section-view hidden">
+                <div class="bg-white p-6 rounded-xl shadow-sm border border-slate-200 mb-6">
+                    <div class="flex flex-wrap items-center justify-between gap-4">
+                        <div>
+                            <h3 class="text-lg font-bold text-blue-900 uppercase">Input Saldo Awal Kas</h3>
+                            <p class="text-xs text-slate-500">Setel saldo awal kas BOSP sebelum transaksi dimulai untuk perhitungan akumulasi otomatis.</p>
+                        </div>
+                        <div class="flex flex-wrap items-center gap-3">
+                            <span class="font-black text-slate-700 text-sm">Rp</span>
+                            <input type="number" id="cf-saldo-awal" oninput="renderCashFlow()" class="p-3 border-2 border-blue-400 rounded-xl font-black text-lg text-blue-900 w-52 outline-none focus:border-blue-600" placeholder="0">
+                            <button onclick="saveSaldoAwal()" class="bg-blue-700 hover:bg-blue-800 text-white px-5 py-3 rounded-xl font-bold shadow-md transition flex items-center gap-2">
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-3m-1 4l-3 3m0 0l-3-3m3 3V4"></path></svg>
+                                Simpan Saldo Awal
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4 mb-8">
+                    <div class="p-5 bg-slate-800 text-white rounded-xl shadow-md">
+                        <span class="block text-slate-300 text-xs font-bold uppercase mb-1">Saldo Awal</span>
+                        <h3 id="cf-stat-awal" class="text-2xl font-black">Rp 0</h3>
+                    </div>
+                    <div class="p-5 bg-emerald-700 text-white rounded-xl shadow-md">
+                        <span class="block text-emerald-200 text-xs font-bold uppercase mb-1">Total Uang Masuk</span>
+                        <h3 id="cf-stat-masuk" class="text-2xl font-black">Rp 0</h3>
+                    </div>
+                    <div class="p-5 bg-rose-700 text-white rounded-xl shadow-md">
+                        <span class="block text-rose-200 text-xs font-bold uppercase mb-1">Total Uang Keluar</span>
+                        <h3 id="cf-stat-keluar" class="text-2xl font-black">Rp 0</h3>
+                    </div>
+                    <div class="p-5 bg-blue-900 text-white rounded-xl shadow-md">
+                        <span class="block text-blue-200 text-xs font-bold uppercase mb-1">Saldo Akhir</span>
+                        <h3 id="cf-stat-saldo" class="text-2xl font-black">Rp 0</h3>
+                    </div>
+                </div>
+
+                <div class="bg-white p-8 rounded-xl shadow-sm border border-slate-200">
+                    <div class="flex flex-wrap justify-between items-center mb-6 gap-4">
+                        <h2 class="text-2xl font-bold text-blue-900 uppercase">Buku Kas Dana Masuk & Keluar</h2>
+                        <div class="flex flex-wrap gap-2 items-center">
+                            <input type="text" id="filter-cash_flow" oninput="renderCashFlow()" class="p-3 border rounded-xl w-64 shadow-sm" placeholder="Cari Transaksi...">
+                            <button onclick="openCashFlowModal()" class="bg-blue-700 hover:bg-blue-800 text-white px-5 py-3 rounded-xl font-bold shadow-md transition flex items-center gap-2">
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
+                                Tambah Transaksi
+                            </button>
+                            <button onclick="archiveCashFlowData()" class="bg-amber-600 hover:bg-amber-700 text-white px-5 py-3 rounded-xl font-bold shadow-md transition flex items-center gap-2">
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 8h14M5 8a2 2 0 110-4h14a2 2 0 110 4M5 8v10a2 2 0 002 2h10a2 2 0 002-2V8m-9 4h4"></path></svg>
+                                Arsipkan Data Kas
+                            </button>
+                            <button onclick="printCashFlow()" class="bg-blue-800 hover:bg-blue-900 text-white px-5 py-3 rounded-xl font-bold shadow-md transition flex items-center gap-2">
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"></path></svg>
+                                Cetak KOP
+                            </button>
+                            <button onclick="exportCashFlowExcel()" class="bg-emerald-600 hover:bg-emerald-700 text-white px-5 py-3 rounded-xl font-bold shadow-md transition flex items-center gap-2">
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
+                                Ekspor Excel
+                            </button>
+                        </div>
+                    </div>
+                    <div class="overflow-x-auto rounded-xl border shadow-sm">
+                        <table class="w-full text-left border-collapse">
+                            <thead>
+                                <tr class="bg-blue-900 text-white text-xs uppercase">
+                                    <th class="p-4 border text-center w-12">No</th>
+                                    <th class="p-4 border text-center w-32">Tanggal</th>
+                                    <th class="p-4 border">Deskripsi</th>
+                                    <th class="p-4 border text-right text-emerald-200">Uang Masuk (Rp)</th>
+                                    <th class="p-4 border text-right text-rose-200">Uang Keluar (Rp)</th>
+                                    <th class="p-4 border text-right">Saldo Akhir (Rp)</th>
+                                </tr>
+                            </thead>
+                            <tbody id="cf-table-body" class="text-xs"></tbody>
+                        </table>
+                    </div>
+                </div>
+            </section>
+
+            <section id="sec-laporan" class="section-view hidden">
+                <div class="bg-white p-8 rounded-xl shadow-sm border border-slate-200 mb-6">
+                    <h2 class="text-2xl font-bold text-blue-900 mb-4 uppercase">Riwayat & Laporan Kuitansi</h2>
+                    
+                    <div class="flex justify-between items-center mb-6 gap-4">
+                        <div class="flex gap-2 flex-1">
+                            <input type="text" id="filter-bku" oninput="resetPageAndRender()" class="p-3 border rounded-xl w-full md:w-72 shadow-sm" placeholder="Cari No. BKU / Penerima...">
+                            <button onclick="archiveAllData()" class="bg-amber-600 hover:bg-amber-700 text-white px-6 py-3 rounded-xl font-bold shadow-lg transition flex items-center gap-2">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 8h14M5 8a2 2 0 110-4h14a2 2 0 110 4M5 8v10a2 2 0 002 2h10a2 2 0 002-2V8m-9 4h4"></path></svg>
+                                Arsipkan Data
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="overflow-x-auto rounded-xl border shadow-sm">
+                        <table class="w-full text-left border-collapse">
+                            <thead><tr class="bg-blue-900 text-white text-xs uppercase">
+                                <th class="p-4 border">No. BKU</th><th class="p-4 border">Penerima</th><th class="p-4 border text-right">Total</th><th class="p-4 border text-center">Opsi</th>
+                            </tr></thead>
+                            <tbody id="report-table-body" class="text-xs"></tbody>
+                        </table>
+                    </div>
+
+                    <!-- Pagination -->
+                    <div class="mt-6 flex items-center justify-between">
+                        <p id="pagination-info" class="text-sm font-bold text-slate-500"></p>
+                        <div class="flex gap-2">
+                            <button id="prev-page-btn" onclick="prevPage()" class="pagination-btn px-4 py-2 bg-blue-100 text-blue-900 font-bold rounded-lg hover:bg-blue-200 transition">Sebelumnya</button>
+                            <button id="next-page-btn" onclick="nextPage()" class="pagination-btn px-4 py-2 bg-blue-900 text-white font-bold rounded-lg hover:bg-blue-800 transition shadow-md">Selanjutnya</button>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <section id="sec-arsip" class="section-view hidden">
+                <div class="bg-white p-8 rounded-xl shadow-sm border border-slate-200 mb-6">
+                    <h2 class="text-2xl font-bold text-blue-900 mb-4 uppercase">Arsip Kuitansi Tahunan</h2>
+                    
+                    <div class="flex flex-wrap items-center mb-6 gap-4">
+                        <div class="flex-1">
+                            <label class="block text-xs font-bold text-slate-400 uppercase mb-1">Cari BKU Arsip</label>
+                            <input type="text" id="filter-bku-arsip" oninput="resetPageArsipAndRender()" class="p-3 border rounded-xl w-full shadow-sm" placeholder="Cari No. BKU...">
+                        </div>
+                        <div class="w-full md:w-48">
+                            <label class="block text-xs font-bold text-slate-400 uppercase mb-1">Filter Tahun</label>
+                            <select id="filter-tahun-arsip" onchange="resetPageArsipAndRender()" class="p-3 border rounded-xl w-full shadow-sm outline-none">
+                                <option value="all">Semua Tahun</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="overflow-x-auto rounded-xl border shadow-sm">
+                        <table class="w-full text-left border-collapse">
+                            <thead><tr class="bg-slate-700 text-white text-xs uppercase">
+                                <th class="p-4 border">No. BKU</th><th class="p-4 border">Tanggal</th><th class="p-4 border">Penerima</th><th class="p-4 border text-right">Total</th><th class="p-4 border text-center">Opsi</th>
+                            </tr></thead>
+                            <tbody id="arsip-table-body" class="text-xs"></tbody>
+                        </table>
+                    </div>
+
+                    <div class="mt-6 flex items-center justify-between">
+                        <p id="pagination-info-arsip" class="text-sm font-bold text-slate-500"></p>
+                        <div class="flex gap-2">
+                            <button id="prev-page-btn-arsip" onclick="prevPageArsip()" class="pagination-btn px-4 py-2 bg-slate-100 text-slate-600 font-bold rounded-lg hover:bg-slate-200 transition">Sebelumnya</button>
+                            <button id="next-page-btn-arsip" onclick="nextPageArsip()" class="pagination-btn px-4 py-2 bg-slate-700 text-white font-bold rounded-lg hover:bg-slate-600 transition shadow-md">Selanjutnya</button>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <section id="sec-arsip_cash_flow" class="section-view hidden">
+                <div class="bg-white p-8 rounded-xl shadow-sm border border-slate-200 mb-6">
+                    <div class="flex flex-wrap justify-between items-center mb-6 gap-4">
+                        <h2 class="text-2xl font-bold text-blue-900 uppercase">Arsip Dana Masuk & Keluar</h2>
+                        <div class="flex flex-wrap gap-2 items-center">
+                            <button onclick="printArsipCashFlow()" class="bg-blue-800 hover:bg-blue-900 text-white px-5 py-3 rounded-xl font-bold shadow-md transition flex items-center gap-2">
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"></path></svg>
+                                Cetak KOP Arsip
+                            </button>
+                            <button onclick="exportArsipCashFlowExcel()" class="bg-emerald-600 hover:bg-emerald-700 text-white px-5 py-3 rounded-xl font-bold shadow-md transition flex items-center gap-2">
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
+                                Ekspor Excel
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="flex flex-wrap items-center mb-6 gap-4">
+                        <div class="flex-1">
+                            <label class="block text-xs font-bold text-slate-400 uppercase mb-1">Cari Transaksi Arsip</label>
+                            <input type="text" id="filter-arsip-cf" oninput="renderArsipCashFlow()" class="p-3 border rounded-xl w-full shadow-sm" placeholder="Cari Deskripsi / Tanggal...">
+                        </div>
+                        <div class="w-full md:w-48">
+                            <label class="block text-xs font-bold text-slate-400 uppercase mb-1">Filter Tahun</label>
+                            <select id="filter-tahun-arsip-cf" onchange="renderArsipCashFlow()" class="p-3 border rounded-xl w-full shadow-sm outline-none">
+                                <option value="all">Semua Tahun</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="overflow-x-auto rounded-xl border shadow-sm">
+                        <table class="w-full text-left border-collapse">
+                            <thead>
+                                <tr class="bg-slate-700 text-white text-xs uppercase">
+                                    <th class="p-4 border text-center w-12">No</th>
+                                    <th class="p-4 border text-center w-32">Tanggal</th>
+                                    <th class="p-4 border">Deskripsi</th>
+                                    <th class="p-4 border text-right text-emerald-300">Uang Masuk (Rp)</th>
+                                    <th class="p-4 border text-right text-rose-300">Uang Keluar (Rp)</th>
+                                    <th class="p-4 border text-center w-24">Tahun</th>
+                                </tr>
+                            </thead>
+                            <tbody id="arsip-cf-table-body" class="text-xs"></tbody>
+                        </table>
+                    </div>
+                </div>
+            </section>
+
+            <section id="sec-ttd" class="section-view hidden">
+                <div class="bg-white p-8 rounded-xl shadow-sm border border-slate-200">
+                    <h2 class="text-2xl font-bold text-blue-900 mb-6 uppercase">Penandatangan</h2>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div class="p-4 bg-slate-50 rounded-xl border">
+                            <input type="text" id="ttd-kepsek" class="w-full p-3 border rounded-lg mb-2" placeholder="Nama Kepala Sekolah">
+                            <input type="text" id="ttd-nip-kepsek" class="w-full p-3 border rounded-lg" placeholder="NIP">
+                        </div>
+                        <div class="p-4 bg-slate-50 rounded-xl border">
+                            <input type="text" id="ttd-bendahara" class="w-full p-3 border rounded-lg mb-2" placeholder="Nama Bendahara">
+                            <input type="text" id="ttd-nip-bendahara" class="w-full p-3 border rounded-lg" placeholder="NIP">
+                        </div>
+                    </div>
+                    <button onclick="saveSignatories()" class="mt-6 bg-blue-700 text-white px-8 py-3 rounded-xl font-bold shadow-md">Simpan Cloud TTD</button>
+                </div>
+            </section>
+
+            <section id="sec-pengguna" class="section-view hidden">
+                <div class="bg-white p-8 rounded-xl shadow-sm border border-slate-200">
+                    <div class="flex flex-wrap justify-between items-center mb-6 gap-4">
+                        <div>
+                            <h2 class="text-2xl font-bold text-blue-900 uppercase">Manajemen Pengguna Aplikasi</h2>
+                            <p class="text-xs text-slate-500">Kelola akun pengguna, peran, foto profil, dan pengiriman kredensial akun via Email.</p>
+                        </div>
+                        <div class="flex flex-wrap gap-2 items-center">
+                            <input type="text" id="filter-pengguna" oninput="renderUsers()" class="p-3 border rounded-xl w-64 shadow-sm" placeholder="Cari Nama / Email / Peran...">
+                            <button onclick="openUserModal()" class="bg-blue-700 hover:bg-blue-800 text-white px-5 py-3 rounded-xl font-bold shadow-md transition flex items-center gap-2">
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z"></path></svg>
+                                Tambah Data Pengguna
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-6">
+                        <div class="p-4 bg-blue-50 border border-blue-200 rounded-xl text-center">
+                            <span class="text-xs font-bold text-blue-700 uppercase">Admin</span>
+                            <h4 id="stat-role-admin" class="text-xl font-black text-blue-900">0</h4>
+                        </div>
+                        <div class="p-4 bg-emerald-50 border border-emerald-200 rounded-xl text-center">
+                            <span class="text-xs font-bold text-emerald-700 uppercase">Kepala Sekolah</span>
+                            <h4 id="stat-role-kepsek" class="text-xl font-black text-emerald-900">0</h4>
+                        </div>
+                        <div class="p-4 bg-amber-50 border border-amber-200 rounded-xl text-center">
+                            <span class="text-xs font-bold text-amber-700 uppercase">Bendahara</span>
+                            <h4 id="stat-role-bendahara" class="text-xl font-black text-amber-900">0</h4>
+                        </div>
+                        <div class="p-4 bg-purple-50 border border-purple-200 rounded-xl text-center">
+                            <span class="text-xs font-bold text-purple-700 uppercase">Pengurus Barang</span>
+                            <h4 id="stat-role-pengurus" class="text-xl font-black text-purple-900">0</h4>
+                        </div>
+                    </div>
+
+                    <div class="overflow-x-auto rounded-xl border shadow-sm">
+                        <table class="w-full text-left border-collapse">
+                            <thead>
+                                <tr class="bg-blue-900 text-white text-xs uppercase">
+                                    <th class="p-4 border text-center w-12">No</th>
+                                    <th class="p-4 border text-center w-20">Foto</th>
+                                    <th class="p-4 border">Nama Lengkap</th>
+                                    <th class="p-4 border">Username / Email</th>
+                                    <th class="p-4 border">Kata Sandi</th>
+                                    <th class="p-4 border text-center">Peran</th>
+                                    <th class="p-4 border text-center w-40">Opsi</th>
+                                </tr>
+                            </thead>
+                            <tbody id="user-table-body" class="text-xs"></tbody>
+                        </table>
+                    </div>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <div id="print-template" class="hidden">
+        <div style="padding: 10mm 10mm 0 10mm; position: relative; height: 330mm; min-height: 330mm; box-sizing: border-box; background: white; color: black; overflow: hidden;">
+            <img src="https://iili.io/BQfWTF9.md.png" class="receipt-watermark" alt="Watermark Logo">
+            
+            <div style="display: flex; align-items: center; border-bottom: 3px double black; padding-bottom: 10px; margin-bottom: 20px; position: relative; z-index: 10;">
+                <div style="width: 80px; text-align: center;"><img id="p-logo-l" style="max-width: 80px; max-height: 80px; display: none;"></div>
+                <div style="text-align: center; flex: 1;">
+                    <h3 id="p-kop-pemda" style="margin: 0; font-size: 15pt; text-transform: uppercase;"></h3>
+                    <h3 id="p-kop-dinas" style="margin: 0; font-size: 15pt; text-transform: uppercase;"></h3>
+                    <h2 id="p-kop-sekolah" style="margin: 0; font-size: 20pt; text-transform: uppercase; font-weight: bold;"></h2>
+                    <p id="p-kop-kec" style="margin: 0; font-size: 10pt; font-weight: bold;"></p>
+                    <p id="p-kop-alamat" style="margin: 0; font-size: 9pt;"></p>
+                    <p id="p-kop-kontak" style="margin: 0; font-size: 8pt; font-style: italic; color: blue;"></p>
+                </div>
+                <div style="width: 80px; text-align: center;"><img id="p-logo-r" style="max-width: 80px; max-height: 80px; display: none;"></div>
+            </div>
+            
+            <h1 style="text-align: center; font-size: 18pt; text-decoration: underline; margin-bottom: 5px; font-weight: bold; position: relative; z-index: 10;">KUITANSI</h1>
+            
+            <div style="display: flex; justify-content: flex-end; margin-bottom: 15px; font-size: 11pt; position: relative; z-index: 10;">
+                <table style="width: auto; border-collapse: collapse; background: transparent;">
+                    <tr><td style="padding-right: 5px;">Nomor BKU</td><td style="padding-right: 5px;">:</td><td style="font-weight: bold;" id="p-bku"></td></tr>
+                    <tr><td style="padding-right: 5px;">Kode Rekening</td><td style="padding-right: 5px;">:</td><td id="p-rekening"></td></tr>
+                </table>
+            </div>
+            
+            <table style="width: 100%; border-collapse: collapse; font-size: 11pt; line-height: 1.8; table-layout: fixed; position: relative; z-index: 10; background: transparent;">
+                <tr><td style="width: 150px;">Sudah Terima Dari</td><td style="width: 15px;">:</td><td id="p-dari"></td></tr>
+                <tr><td>Uang Sejumlah</td><td>:</td><td><div style="font-weight: bold; background: #eee; padding: 2px 10px; display: inline-block;">Rp <span id="p-jumlah-total"></span></div></td></tr>
+                <tr><td>Terbilang</td><td>:</td><td style="font-style: italic; font-weight: bold; word-break: break-word;" id="p-terbilang"></td></tr>
+                <tr><td>Untuk Pembayaran</td><td>:</td><td style="word-break: break-word;" id="p-untuk"></td></tr>
+            </table>
+
+            <div style="margin-top: 20px; margin-bottom: 30px; position: relative; z-index: 10;">
+                <p style="font-weight: bold; margin-bottom: 5px;">Rincian Pajak:</p>
+                <table style="width: 100%; border-collapse: collapse; font-size: 10pt; background: transparent;">
+                    <thead><tr style="background: transparent;">
+                        <th style="border: 1px solid black; padding: 8px; text-align: left; width: 60%; background: transparent;">Keterangan</th>
+                        <th style="border: 1px solid black; padding: 8px; text-align: right; width: 40%; background: transparent;">Jumlah (Rp)</th>
+                    </tr></thead>
+                    <tbody>
+                        <tr><td style="border: 1px solid black; padding: 6px; background: transparent;">Dasar Pengenaan Pajak (DPP)</td><td id="p-row-dpp" style="border: 1px solid black; padding: 6px; text-align: right; background: transparent;"></td></tr>
+                        <tr><td id="p-label-pajak" style="border: 1px solid black; padding: 6px; background: transparent;">Pajak</td><td id="p-row-pajak" style="border: 1px solid black; padding: 6px; text-align: right; background: transparent;">0</td></tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <div style="display: flex; justify-content: flex-end; margin-top: 40px; position: relative; z-index: 10;"><div style="width: 250px; text-align: center;"><p id="p-tgl-label" style="margin-bottom: 0;"></p><p style="margin: 0;">Yang Menerima,</p><div style="height: 70px;"></div><p style="font-weight: bold; text-decoration: underline; margin: 0;" id="p-penerima"></p></div></div>
+            <div style="display: flex; justify-content: space-between; margin-top: 20px; text-align: center; position: relative; z-index: 10;"><div style="width: 250px;"><p style="margin: 0;">Setuju Dibayar,</p><p style="margin: 0;">Kepala Sekolah,</p><div style="height: 70px;"></div><p style="font-weight: bold; text-decoration: underline; margin: 0;" id="p-ttd-kepsek"></p><p style="margin: 0;">NIP. <span id="p-ttd-nip-kepsek"></span></p></div><div style="width: 250px;"><p style="margin: 0;">Lunas Bayar,</p><p style="margin: 0;">Bendahara BOS,</p><div style="height: 70px;"></div><p style="font-weight: bold; text-decoration: underline; margin: 0;" id="p-ttd-bendahara"></p><p style="margin: 0;">NIP. <span id="p-ttd-nip-bendahara"></span></p></div></div>
+            
+            <div id="p-footer" style="position: absolute; bottom: 4mm; left: 10mm; right: 10mm; border-top: 1.5pt solid black; padding-top: 3px; padding-bottom: 2px; font-size: 8pt; font-weight: bold; font-style: italic; line-height: 1.1; background: white; z-index: 100;">
+                BKU: <span id="p-footer-bku"></span> | Kuitansi Ini di Cetak Pada Aplikasi Manajemen BOSP SDN 22 Tanah Keras | Dicetak pada: <span id="p-footer-time"></span>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let taxes = [];
+        let reports = [];
+        let archiveReports = [];
+        let belanjaModal = [];
+        let cashFlow = [];
+        let archiveCashFlow = [];
+        let users = [];
+        let saldoAwal = 0;
+        let signatories = {};
+        let kopConfig = { logoL: "", logoR: "", pemda: "", dinas: "", sekolah: "", kecamatan: "", alamat: "", email: "", web: "", mTop: 10, mBottom: 10, mLeft: 10, mRight: 10 };
+
+        let currentUser = null;
+        let currentPage = 1;
+        let currentArchivePage = 1;
+        const rowsPerPage = 7;
+        let editingBmIndex = -1;
+
+        function showLoader(title = "Memuat Data Cloud...", subtext = "Mengambil data dari Google Sheet") {
+            const loader = document.getElementById('loader');
+            if(loader) {
+                document.getElementById('loader-text').innerText = title;
+                document.getElementById('loader-subtext').innerText = subtext;
+                loader.classList.remove('hidden');
+            }
+        }
+
+        function hideLoader() {
+            const loader = document.getElementById('loader');
+            if(loader) loader.classList.add('hidden');
+        }
+
+        function updateActiveUserBadge(u) {
+            if (!u) return;
+            const displayName = u.name || u.fullname || "Pengguna";
+            const displayRole = u.role || "Admin";
+            const displayEmail = u.email || "-";
+            const displayPhoto = u.photo || ("https://placehold.co/100x100/1e3a8a/ffffff?text=" + encodeURIComponent(displayName.charAt(0).toUpperCase()));
+
+            // Sidebar Profile
+            if (document.getElementById('sidebar-user-name')) document.getElementById('sidebar-user-name').innerText = displayName;
+            if (document.getElementById('sidebar-user-role')) document.getElementById('sidebar-user-role').innerText = displayRole;
+            if (document.getElementById('sidebar-user-photo')) document.getElementById('sidebar-user-photo').src = displayPhoto;
+
+            // Header Banner
+            if (document.getElementById('header-user-name')) document.getElementById('header-user-name').innerText = displayName;
+            if (document.getElementById('header-user-role-badge')) document.getElementById('header-user-role-badge').innerText = displayRole;
+            if (document.getElementById('header-user-email')) document.getElementById('header-user-email').innerText = displayEmail;
+            if (document.getElementById('header-user-photo')) document.getElementById('header-user-photo').src = displayPhoto;
+
+            // Welcome Card in Beranda
+            if (document.getElementById('welcome-user-name')) document.getElementById('welcome-user-name').innerText = "Selamat Datang, " + displayName + "!";
+            if (document.getElementById('welcome-user-role-badge')) document.getElementById('welcome-user-role-badge').innerText = "Peran: " + displayRole;
+            if (document.getElementById('welcome-user-email')) document.getElementById('welcome-user-email').innerText = "Username / Email: " + displayEmail;
+            if (document.getElementById('welcome-user-photo')) document.getElementById('welcome-user-photo').src = displayPhoto;
+            if (document.getElementById('welcome-login-time')) {
+                const now = new Date();
+                document.getElementById('welcome-login-time').innerText = "Waktu Masuk: " + now.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' }) + " WIB";
+            }
+
+            // Apply Role Permissions on Sidebar Buttons
+            applyRolePermissions(displayRole);
+        }
+
+        function applyRolePermissions(role) {
+            const r = role || "Admin";
+            
+            const toggleBtn = (id, allowed) => {
+                const btn = document.getElementById(id);
+                if (btn) {
+                    if (allowed) btn.classList.remove('hidden');
+                    else btn.classList.add('hidden');
+                }
+            };
+
+            const isAdminOrKepsek = (r === "Admin" || r === "Kepala Sekolah");
+            const isBendahara = (r === "Bendahara");
+            const isPengurus = (r === "Pengurus Barang");
+
+            toggleBtn('btn-beranda', true); // Semua Peran
+            toggleBtn('btn-kop', isAdminOrKepsek);
+            toggleBtn('btn-pajak', isAdminOrKepsek || isBendahara);
+            toggleBtn('btn-kuitansi', isAdminOrKepsek || isBendahara);
+            toggleBtn('btn-belanja_modal', isAdminOrKepsek || isPengurus);
+            toggleBtn('btn-cash_flow', isAdminOrKepsek || isBendahara);
+            toggleBtn('btn-laporan', isAdminOrKepsek || isBendahara);
+            toggleBtn('btn-arsip', isAdminOrKepsek);
+            toggleBtn('btn-arsip_cash_flow', isAdminOrKepsek);
+            toggleBtn('btn-ttd', isAdminOrKepsek);
+            toggleBtn('btn-pengguna', isAdminOrKepsek);
+            toggleBtn('btn-cloud-db', isAdminOrKepsek);
+        }
+
+        function isSectionAllowed(id, role) {
+            const r = role || "Admin";
+            if (r === "Admin" || r === "Kepala Sekolah") return true;
+            
+            if (r === "Bendahara") {
+                return ['beranda', 'pajak', 'kuitansi', 'cash_flow', 'laporan'].includes(id);
+            }
+            
+            if (r === "Pengurus Barang") {
+                return ['beranda', 'belanja_modal'].includes(id);
+            }
+            
+            return id === 'beranda';
+        }
+
+        async function loadAllData() {
+            showLoader("Memuat Data Cloud...", "Mengambil data kuitansi dari Google Sheet");
+            try {
+                const cacheBuster = "?cb=" + Date.now();
+                const response = await fetch(scriptURL + cacheBuster);
+                const data = await response.json();
+
+                reports = data.reports || [];
+                archiveReports = data.archive || [];
+                belanjaModal = data.belanjaModal || [];
+                cashFlow = data.cashFlow || [];
+                archiveCashFlow = data.archiveCashFlow || [];
+                users = data.users || [];
+                kopConfig = data.kop || kopConfig;
+                taxes = data.taxes || [];
+                signatories = data.signatories || {};
+                saldoAwal = Math.round(parseFloat(data.saldoAwal) || 0);
+
+                if (document.getElementById('cf-saldo-awal')) {
+                    document.getElementById('cf-saldo-awal').value = saldoAwal;
+                }
+
+                updateUIFromData();
+                renderTaxList();
+                updateTaxSelect();
+                renderReports();
+                renderArchive();
+                renderBelanjaModal();
+                renderCashFlow();
+                renderArsipCashFlow();
+                renderUsers();
+                updateHomeStats();
+                populateArchiveYears();
+                populateArsipCfYears();
+
+                notify("Data Cloud Berhasil Dimuat!", "bg-green-600");
+            } catch (err) {
+                console.error("Error loading cloud data:", err);
+                notify("Gagal Memuat Data Cloud. Periksa Koneksi!", "bg-red-600");
+            } finally {
+                hideLoader();
+            }
+        }
+
+        async function checkLogin() {
+            const userVal = (document.getElementById('login-user')?.value || "").trim();
+            const passVal = (document.getElementById('login-pass')?.value || "").trim();
+
+            let matchedUser = null;
+
+            if (userVal === "SDN22" && passVal === "12345") {
+                matchedUser = {
+                    name: "SDN 22 Tanah Keras (Admin)",
+                    email: "SDN22",
+                    password: "12345",
+                    role: "Admin",
+                    photo: "https://iili.io/BLlwHwQ.png"
+                };
+            } else {
+                matchedUser = users.find(u => 
+                    (String(u.email || "").toLowerCase() === userVal.toLowerCase() || 
+                     String(u.name || "").toLowerCase() === userVal.toLowerCase()) && 
+                    String(u.password) === passVal
+                );
+            }
+
+            if (matchedUser) {
+                currentUser = matchedUser;
+                document.getElementById('login-screen').classList.add('hidden');
+                document.getElementById('main-app').classList.remove('hidden');
+
+                updateActiveUserBadge(matchedUser);
+
+                simulateProgress("Sinkronisasi Cloud", loadAllData).then(() => {
+                    showSection('beranda');
+                    notify(`Berhasil Masuk sebagai: ${matchedUser.name} (${matchedUser.role})`, "bg-green-600");
+                });
+            } else { 
+                document.getElementById('login-error').classList.remove('hidden'); 
+            }
+        }
+
+        function showSection(id) {
+            const role = currentUser ? currentUser.role : "Admin";
+            if (!isSectionAllowed(id, role)) {
+                notify(`Akses Ditolak: Peran '${role}' tidak diizinkan membuka menu ini!`, "bg-red-600");
+                id = 'beranda';
+            }
+
+            document.querySelectorAll('.section-view').forEach(s => s.classList.add('hidden'));
+            const targetSec = document.getElementById('sec-' + id);
+            if (targetSec) targetSec.classList.remove('hidden');
+
+            if(id === 'laporan') resetPageAndRender();
+            if(id === 'arsip') resetPageArsipAndRender();
+            if(id === 'belanja_modal') renderBelanjaModal();
+            if(id === 'cash_flow') renderCashFlow();
+            if(id === 'arsip_cash_flow') renderArsipCashFlow();
+            if(id === 'pengguna') renderUsers();
+        }
+
+        function resetPageAndRender() { currentPage = 1; renderReports(); }
+
+        function renderReports() {
+            const tbody = document.getElementById('report-table-body');
+            if(!tbody) return;
+
+            const filter = (document.getElementById('filter-bku')?.value || "").toLowerCase();
+            const filtered = reports.filter(r => 
+                String(r.bku || "").toLowerCase().includes(filter) ||
+                String(r.penerima || "").toLowerCase().includes(filter) ||
+                String(r.untuk || "").toLowerCase().includes(filter)
+            );
+
+            filtered.sort((a,b) => { 
+                const numA = parseInt(String(a.bku).match(/\d+/)) || 0; 
+                const numB = parseInt(String(b.bku).match(/\d+/)) || 0; 
+                return numA - numB; 
+            });
+
+            const totalItems = filtered.length;
+            const totalPages = Math.ceil(totalItems / rowsPerPage) || 1;
+            if (currentPage > totalPages) currentPage = totalPages;
+            const startIndex = (currentPage - 1) * rowsPerPage;
+            const paginatedItems = filtered.slice(startIndex, startIndex + rowsPerPage);
+
+            tbody.innerHTML = paginatedItems.map((r) => {
+                const actualIdx = reports.indexOf(r);
+                return `<tr class="border-b hover:bg-slate-50 transition">
+                    <td class="p-4 font-bold text-blue-800">${r.bku || '-'}</td>
+                    <td class="p-4 font-semibold text-slate-800">${r.penerima || '-'}</td>
+                    <td class="p-4 text-right font-bold text-blue-900">Rp ${Number(r.jumlah || 0).toLocaleString('id-ID')}</td>
+                    <td class="p-4 text-center space-x-2">
+                        <button onclick="printFromHistory(${actualIdx})" class="text-blue-600 font-bold hover:underline">Cetak</button>
+                        <button onclick="deleteRecord(${actualIdx})" class="text-red-500 font-bold hover:underline">Hapus</button>
+                    </td>
+                </tr>`;
+            }).join('');
+
+            if (document.getElementById('pagination-info')) {
+                document.getElementById('pagination-info').innerText = `Halaman ${currentPage} dari ${totalPages} (${totalItems} Data)`;
+            }
+            if (document.getElementById('prev-page-btn')) document.getElementById('prev-page-btn').disabled = currentPage === 1;
+            if (document.getElementById('next-page-btn')) document.getElementById('next-page-btn').disabled = currentPage === totalPages;
+        }
+
+        function nextPage() { currentPage++; renderReports(); }
+        function prevPage() { currentPage--; renderReports(); }
+
+        function openUserModal() {
+            document.getElementById('user-modal').classList.remove('hidden');
+            document.getElementById('user-fullname').value = "";
+            document.getElementById('user-email').value = "";
+            document.getElementById('user-password').value = "";
+            document.getElementById('user-role').value = "Admin";
+            document.getElementById('user-photo').value = "";
+            previewUserPhoto();
+        }
+
+        function closeUserModal() {
+            document.getElementById('user-modal').classList.add('hidden');
+        }
+
+        function toggleUserPasswordVisibility() {
+            const passInput = document.getElementById('user-password');
+            if (passInput.type === 'password') {
+                passInput.type = 'text';
+            } else {
+                passInput.type = 'password';
+            }
+        }
+
+        function previewUserPhoto() {
+            const photoUrl = document.getElementById('user-photo')?.value || "";
+            const previewImg = document.getElementById('user-photo-preview');
+            if (previewImg) {
+                previewImg.src = photoUrl.trim() !== "" ? photoUrl : "https://placehold.co/100x100/1e3a8a/ffffff?text=Foto";
+                previewImg.onerror = () => {
+                    previewImg.src = "https://placehold.co/100x100/1e3a8a/ffffff?text=Foto";
+                };
+            }
+        }
+
+        async function saveUser() {
+            const name = document.getElementById('user-fullname').value.trim();
+            const email = document.getElementById('user-email').value.trim();
+            const password = document.getElementById('user-password').value;
+            const role = document.getElementById('user-role').value;
+            const photo = document.getElementById('user-photo').value.trim();
+
+            if (!name || !email || !password) {
+                return notify("Lengkapi Nama, Username/Email, dan Password!", "bg-red-600");
+            }
+
+            const newUser = {
+                name,
+                email,
+                password,
+                role,
+                photo: photo || "https://placehold.co/100x100/1e3a8a/ffffff?text=" + encodeURIComponent(name.charAt(0).toUpperCase()),
+                createdAt: new Date().toISOString()
+            };
+
+            notify("Sedang Menyimpan & Mengirim Email Akun...", "bg-blue-600");
+
+            const res = await apiRequest({ action: "saveUser", ...newUser }, "Menyimpan & Mengirim Email...");
+
+            users.push(newUser);
+            renderUsers();
+            closeUserModal();
+
+            notify(`Pengguna Berhasil Ditambahkan! Email dikirim ke ${email}`, "bg-green-600");
+        }
+
+        function renderUsers() {
+            const tbody = document.getElementById('user-table-body');
+            if (!tbody) return;
+
+            const filter = (document.getElementById('filter-pengguna')?.value || "").toLowerCase();
+
+            const filtered = users.filter(u => 
+                String(u.name || "").toLowerCase().includes(filter) ||
+                String(u.email || "").toLowerCase().includes(filter) ||
+                String(u.role || "").toLowerCase().includes(filter)
+            );
+
+            let cAdmin = 0, cKepsek = 0, cBendahara = 0, cPengurus = 0;
+            users.forEach(u => {
+                if (u.role === "Admin") cAdmin++;
+                if (u.role === "Kepala Sekolah") cKepsek++;
+                if (u.role === "Bendahara") cBendahara++;
+                if (u.role === "Pengurus Barang") cPengurus++;
+            });
+
+            if (document.getElementById('stat-role-admin')) document.getElementById('stat-role-admin').innerText = cAdmin;
+            if (document.getElementById('stat-role-kepsek')) document.getElementById('stat-role-kepsek').innerText = cKepsek;
+            if (document.getElementById('stat-role-bendahara')) document.getElementById('stat-role-bendahara').innerText = cBendahara;
+            if (document.getElementById('stat-role-pengurus')) document.getElementById('stat-role-pengurus').innerText = cPengurus;
+
+            tbody.innerHTML = filtered.map((u, idx) => {
+                const actualIdx = users.indexOf(u);
+                let roleBadge = "bg-blue-100 text-blue-800";
+                if (u.role === "Kepala Sekolah") roleBadge = "bg-emerald-100 text-emerald-800";
+                if (u.role === "Bendahara") roleBadge = "bg-amber-100 text-amber-800";
+                if (u.role === "Pengurus Barang") roleBadge = "bg-purple-100 text-purple-800";
+
+                const userPhoto = u.photo || ("https://placehold.co/100x100/1e3a8a/ffffff?text=" + encodeURIComponent((u.name || "P").charAt(0)));
+
+                return `<tr class="border-b hover:bg-slate-50 transition">
+                    <td class="p-4 text-center font-bold text-slate-500">${idx + 1}</td>
+                    <td class="p-4 text-center">
+                        <img src="${userPhoto}" onerror="this.src='https://placehold.co/100x100/1e3a8a/ffffff?text=User'" class="w-10 h-10 rounded-full object-cover border mx-auto shadow-sm" alt="${u.name}">
+                    </td>
+                    <td class="p-4 font-bold text-slate-800">${u.name}</td>
+                    <td class="p-4 font-semibold text-blue-900">${u.email}</td>
+                    <td class="p-4 font-mono text-slate-600">•••••••• <span class="text-[10px] text-slate-400">(${u.password})</span></td>
+                    <td class="p-4 text-center">
+                        <span class="px-3 py-1 rounded-full text-xs font-bold ${roleBadge}">${u.role}</span>
+                    </td>
+                    <td class="p-4 text-center space-x-2">
+                        <button onclick="resendCredentials(${actualIdx})" class="text-blue-600 font-bold hover:underline" title="Kirim Email Kredensial">Kirim Email</button>
+                        <button onclick="deleteUser(${actualIdx})" class="text-red-500 font-bold hover:underline">Hapus</button>
+                    </td>
+                </tr>`;
+            }).join('');
+        }
+
+        async function resendCredentials(idx) {
+            const u = users[idx];
+            if (!u) return;
+            showConfirm(`Kirim ulang email kredensial ke ${u.email}?`, async () => {
+                notify(`Mengirim kredensial ke ${u.email}...`, "bg-blue-600");
+                await apiRequest({ action: "resendUserCredentials", ...u }, "Mengirim Email...");
+                notify(`Kredensial terkirim ke ${u.email}!`, "bg-green-600");
+            });
+        }
+
+        async function deleteUser(idx) {
+            const u = users[idx];
+            if (!u) return;
+            showConfirm(`Hapus pengguna ${u.name} (${u.email})?`, async () => {
+                users.splice(idx, 1);
+                renderUsers();
+                notify("Berhasil Menghapus Pengguna!", "bg-slate-700");
+            });
+        }
+
+        function calcBelanjaModalTotal() {
+            const volStr = document.getElementById('bm-volume')?.value || "";
+            const rawHarga = parseFloat(document.getElementById('bm-harga')?.value) || 0;
+            const hargaSatuan = Math.round(rawHarga);
+            const match = volStr.match(/\d+(\.\d+)?/);
+            const qty = match ? parseFloat(match[0]) : 1;
+            const total = Math.round(qty * hargaSatuan);
+            if(document.getElementById('bm-total-harga')) document.getElementById('bm-total-harga').value = total;
+            if(document.getElementById('bm-total-display')) document.getElementById('bm-total-display').innerText = formatIDR(total);
+        }
+
+        async function saveBelanjaModal() {
+            const nama = document.getElementById('bm-nama').value;
+            const merek = document.getElementById('bm-merek').value;
+            const jenis = document.getElementById('bm-jenis').value;
+            const volume = document.getElementById('bm-volume').value || "1 Unit";
+            const rawHarga = parseFloat(document.getElementById('bm-harga').value) || 0;
+            const harga = Math.round(rawHarga);
+            const match = volume.match(/\d+(\.\d+)?/);
+            const qty = match ? parseFloat(match[0]) : 1;
+            const rawTotalHarga = parseFloat(document.getElementById('bm-total-harga').value) || (qty * harga);
+            const totalHarga = Math.round(rawTotalHarga);
+            const tahun = parseInt(document.getElementById('bm-tahun').value) || new Date().getFullYear();
+            const inputTgl = document.getElementById('bm-tanggal').value;
+            const tanggal = inputTgl ? inputTgl : new Date().toISOString().slice(0, 10);
+            const kerusakan = document.getElementById('bm-kerusakan').value;
+
+            if(!nama || !merek || !jenis) return notify("Lengkapi data Belanja Modal!", "bg-red-600");
+
+            const item = { 
+                nama, merek, jenis, volume, harga, totalHarga, tahun, kerusakan, tanggal
+            };
+            
+            if (editingBmIndex >= 0) {
+                notify("Sedang Memperbarui Belanja Modal...", "bg-amber-600");
+                const res = await apiRequest({ action: "saveBelanjaModal", ...item }, "Memperbarui Belanja Modal...");
+                if(res?.status === "success" || res?.status !== "error") {
+                    belanjaModal[editingBmIndex] = item;
+                    renderBelanjaModal();
+                    resetFormBelanjaModal();
+                    updateHomeStats();
+                    notify("Berhasil Memperbarui Belanja Modal!", "bg-green-600");
+                }
+            } else {
+                notify("Sedang Menyimpan Belanja Modal...", "bg-blue-600");
+                const res = await apiRequest({ action: "saveBelanjaModal", ...item }, "Menyimpan Belanja Modal...");
+                if(res?.status === "success" || res?.status !== "error") {
+                    belanjaModal.push(item);
+                    renderBelanjaModal();
+                    resetFormBelanjaModal();
+                    updateHomeStats();
+                    notify("Berhasil Menyimpan Belanja Modal!", "bg-green-600");
+                }
+            }
+        }
+
+        function editBelanjaModal(idx) {
+            const b = belanjaModal[idx];
+            if (!b) return;
+            editingBmIndex = idx;
+            document.getElementById('bm-nama').value = b.nama || "";
+            document.getElementById('bm-merek').value = b.merek || "";
+            document.getElementById('bm-jenis').value = b.jenis || "";
+            document.getElementById('bm-volume').value = b.volume || "";
+            if (document.getElementById('bm-harga')) document.getElementById('bm-harga').value = Math.round(parseFloat(b.harga) || 0);
+            if (document.getElementById('bm-total-harga')) document.getElementById('bm-total-harga').value = Math.round(parseFloat(b.totalHarga) || 0);
+            document.getElementById('bm-tahun').value = b.tahun || new Date().getFullYear();
+            if (document.getElementById('bm-tanggal')) {
+                const dStr = b.tanggal ? new Date(b.tanggal).toISOString().slice(0, 10) : new Date().toISOString().slice(0, 10);
+                document.getElementById('bm-tanggal').value = dStr;
+            }
+            document.getElementById('bm-kerusakan').value = b.kerusakan || "Baik";
+
+            calcBelanjaModalTotal();
+
+            const saveBtn = document.getElementById('btn-save-bm');
+            if (saveBtn) {
+                saveBtn.innerText = "UPDATE DATA BELANJA MODAL";
+                saveBtn.className = "bg-amber-600 text-white px-8 py-3 rounded-xl font-bold shadow-lg hover:bg-amber-700 transition";
+            }
+            const cancelBtn = document.getElementById('btn-cancel-bm');
+            if (cancelBtn) cancelBtn.classList.remove('hidden');
+
+            document.getElementById('sec-belanja_modal').scrollIntoView({ behavior: 'smooth' });
+        }
+
+        function cancelEditBelanjaModal() {
+            resetFormBelanjaModal();
+        }
+
+        function resetFormBelanjaModal() {
+            editingBmIndex = -1;
+            document.getElementById('bm-nama').value = "";
+            document.getElementById('bm-merek').value = "";
+            document.getElementById('bm-jenis').value = "";
+            document.getElementById('bm-volume').value = "";
+            if(document.getElementById('bm-harga')) document.getElementById('bm-harga').value = "";
+            if(document.getElementById('bm-total-harga')) document.getElementById('bm-total-harga').value = "";
+            if(document.getElementById('bm-total-display')) document.getElementById('bm-total-display').innerText = "Rp 0";
+            document.getElementById('bm-tahun').value = new Date().getFullYear();
+            if (document.getElementById('bm-tanggal')) document.getElementById('bm-tanggal').value = new Date().toISOString().slice(0, 10);
+            document.getElementById('bm-kerusakan').value = "Baik";
+
+            const saveBtn = document.getElementById('btn-save-bm');
+            if (saveBtn) {
+                saveBtn.innerText = "SIMPAN DATA BELANJA MODAL";
+                saveBtn.className = "bg-blue-700 text-white px-8 py-3 rounded-xl font-bold shadow-lg hover:bg-blue-800 transition";
+            }
+            const cancelBtn = document.getElementById('btn-cancel-bm');
+            if (cancelBtn) cancelBtn.classList.add('hidden');
+        }
+
+        function populateBelanjaModalYears() {
+            const select = document.getElementById('filter-tahun-bm');
+            if (!select) return;
+            const currentSelected = select.value || "all";
+            const years = [...new Set(belanjaModal.map(b => {
+                const yr = b.tahun || new Date(b.tanggal || Date.now()).getFullYear();
+                return isNaN(yr) ? null : parseInt(yr);
+            }).filter(y => y !== null))].sort((a,b) => b - a);
+
+            let html = '<option value="all">Semua Tahun</option>';
+            years.forEach(y => html += `<option value="${y}">${y}</option>`);
+            select.innerHTML = html;
+            select.value = currentSelected;
+        }
+
+        function renderBelanjaModal() {
+            const tbody = document.getElementById('bm-table-body');
+            if(!tbody) return;
+            populateBelanjaModalYears();
+
+            const filter = (document.getElementById('filter-bm')?.value || "").toLowerCase();
+            const yearFilter = document.getElementById('filter-tahun-bm')?.value || "all";
+
+            const filtered = belanjaModal.filter(b => {
+                const itemYear = String(b.tahun || new Date(b.tanggal || Date.now()).getFullYear());
+                const matchYear = yearFilter === "all" || itemYear === yearFilter;
+                const matchText = String(b.nama).toLowerCase().includes(filter) ||
+                                  String(b.merek).toLowerCase().includes(filter) ||
+                                  String(b.jenis).toLowerCase().includes(filter) ||
+                                  String(b.volume || '').toLowerCase().includes(filter);
+                return matchYear && matchText;
+            });
+
+            tbody.innerHTML = filtered.map((b) => {
+                const actualIdx = belanjaModal.indexOf(b);
+                let badgeClass = "bg-green-100 text-green-800";
+                if(b.kerusakan === "Rusak Ringan") badgeClass = "bg-yellow-100 text-yellow-800";
+                if(b.kerusakan === "Rusak Sedang") badgeClass = "bg-orange-100 text-orange-800";
+                if(b.kerusakan === "Rusak Berat") badgeClass = "bg-red-100 text-red-800";
+                if(b.kerusakan === "Hilang") badgeClass = "bg-purple-100 text-purple-800";
+                const displayYear = b.tahun || (b.tanggal ? new Date(b.tanggal).getFullYear() : '-');
+                const displayDate = b.tanggal ? new Date(b.tanggal).toLocaleDateString('id-ID') : '-';
+                const displayVolume = b.volume || '1 Unit';
+                const hargaSatuan = Math.round(parseFloat(b.harga) || 0);
+                const totalHarga = Math.round(parseFloat(b.totalHarga) || (hargaSatuan * (parseFloat(displayVolume.match(/\d+(\.\d+)?/)?.[0]) || 1)));
+
+                return `<tr class="border-b hover:bg-slate-50 transition">
+                    <td class="p-4 font-bold text-slate-800">${b.nama}</td>
+                    <td class="p-4 text-slate-600">${b.merek}</td>
+                    <td class="p-4 text-slate-600">${b.jenis}</td>
+                    <td class="p-4 text-center font-semibold text-slate-700">${displayVolume}</td>
+                    <td class="p-4 text-right font-semibold text-slate-700">${hargaSatuan > 0 ? formatIDR(hargaSatuan) : '-'}</td>
+                    <td class="p-4 text-right font-bold text-blue-900">${totalHarga > 0 ? formatIDR(totalHarga) : '-'}</td>
+                    <td class="p-4 text-center font-bold text-slate-700">${displayYear}</td>
+                    <td class="p-4 text-center text-slate-600">${displayDate}</td>
+                    <td class="p-4 text-center">
+                        <span class="px-3 py-1 rounded-full text-xs font-bold ${badgeClass}">${b.kerusakan}</span>
+                    </td>
+                    <td class="p-4 text-center flex justify-center gap-2">
+                        <button onclick="editBelanjaModal(${actualIdx})" class="text-amber-600 font-bold hover:underline">Edit</button>
+                    </td>
+                </tr>`;
+            }).join('');
+        }
+
+        async function saveSaldoAwal() {
+            const inputVal = Math.round(parseFloat(document.getElementById('cf-saldo-awal')?.value) || 0);
+            saldoAwal = inputVal;
+            renderCashFlow();
+            updateHomeStats();
+            notify("Sedang Menyimpan Saldo Awal...", "bg-blue-600");
+            const res = await apiRequest({ action: "saveSaldoAwal", saldoAwal: saldoAwal }, "Menyimpan Saldo Awal...");
+            if (res?.status === "success" || res?.status !== "error") {
+                notify("Berhasil Menyimpan Saldo Awal Kas!", "bg-green-600");
+            }
+        }
+
+        function openCashFlowModal() {
+            document.getElementById('cf-modal').classList.remove('hidden');
+            document.getElementById('cf-tanggal').value = new Date().toISOString().slice(0, 10);
+            document.getElementById('cf-deskripsi').value = "";
+            document.getElementById('cf-nominal').value = "";
+            document.getElementById('cf-jenis').value = "masuk";
+        }
+
+        function closeCashFlowModal() {
+            document.getElementById('cf-modal').classList.add('hidden');
+        }
+
+        async function saveCashFlow() {
+            const tanggal = document.getElementById('cf-tanggal').value;
+            const deskripsi = document.getElementById('cf-deskripsi').value;
+            const jenis = document.getElementById('cf-jenis').value;
+            const nominal = Math.round(parseFloat(document.getElementById('cf-nominal').value) || 0);
+
+            if(!tanggal || !deskripsi || nominal <= 0) {
+                return notify("Lengkapi data transaksi dengan benar!", "bg-red-600");
+            }
+
+            const masuk = jenis === 'masuk' ? nominal : 0;
+            const keluar = jenis === 'keluar' ? nominal : 0;
+
+            const item = { tanggal, deskripsi, masuk, keluar };
+
+            notify("Sedang Menyimpan Transaksi Dana...", "bg-blue-600");
+            const res = await apiRequest({ action: "saveCashFlow", ...item }, "Menyimpan Transaksi...");
+            if(res?.status === "success" || res?.status !== "error") {
+                cashFlow.push(item);
+                renderCashFlow();
+                closeCashFlowModal();
+                updateHomeStats();
+                notify("Berhasil Menyimpan Transaksi Dana!", "bg-green-600");
+            }
+        }
+
+        function renderCashFlow() {
+            const tbody = document.getElementById('cf-table-body');
+            if(!tbody) return;
+
+            const inputAwal = Math.round(parseFloat(document.getElementById('cf-saldo-awal')?.value) || 0);
+            saldoAwal = inputAwal;
+
+            document.getElementById('cf-stat-awal').innerText = formatIDR(saldoAwal);
+
+            cashFlow.sort((a,b) => new Date(a.tanggal) - new Date(b.tanggal));
+
+            let runningSaldo = saldoAwal;
+            let totalMasuk = 0;
+            let totalKeluar = 0;
+
+            const calculatedFlow = cashFlow.map((item) => {
+                const masuk = Math.round(parseFloat(item.masuk) || 0);
+                const keluar = Math.round(parseFloat(item.keluar) || 0);
+                totalMasuk += masuk;
+                totalKeluar += keluar;
+                runningSaldo += (masuk - keluar);
+                return { ...item, saldo: runningSaldo };
+            });
+
+            document.getElementById('cf-stat-masuk').innerText = formatIDR(totalMasuk);
+            document.getElementById('cf-stat-keluar').innerText = formatIDR(totalKeluar);
+            document.getElementById('cf-stat-saldo').innerText = formatIDR(runningSaldo);
+
+            const filter = (document.getElementById('filter-cash_flow')?.value || "").toLowerCase();
+            const filtered = calculatedFlow.filter(c => 
+                String(c.deskripsi).toLowerCase().includes(filter) ||
+                String(c.tanggal).toLowerCase().includes(filter)
+            );
+
+            tbody.innerHTML = filtered.map((c, idx) => {
+                const tgl = new Date(c.tanggal).toLocaleDateString('id-ID');
+
+                return `<tr class="border-b hover:bg-slate-50 transition">
+                    <td class="p-4 text-center font-bold text-slate-500">${idx + 1}</td>
+                    <td class="p-4 text-center font-semibold text-slate-700">${tgl}</td>
+                    <td class="p-4 font-bold text-slate-800">${c.deskripsi}</td>
+                    <td class="p-4 text-right font-bold text-emerald-600">${c.masuk > 0 ? 'Rp ' + Number(c.masuk).toLocaleString('id-ID') : '-'}</td>
+                    <td class="p-4 text-right font-bold text-rose-600">${c.keluar > 0 ? 'Rp ' + Number(c.keluar).toLocaleString('id-ID') : '-'}</td>
+                    <td class="p-4 text-right font-black text-blue-900">Rp ${Number(c.saldo).toLocaleString('id-ID')}</td>
+                </tr>`;
+            }).join('');
+        }
+
+        async function archiveCashFlowData() {
+            if (!cashFlow || cashFlow.length === 0) {
+                return notify("Tidak ada data Dana Masuk & Keluar untuk diarsipkan!", "bg-amber-600");
+            }
+
+            showConfirm("Arsipkan SELURUH data Dana Masuk & Keluar saat ini?", async () => {
+                notify("Sedang Mengarsipkan Dana Kas...", "bg-amber-600");
+
+                const archivedItems = cashFlow.map(item => ({
+                    ...item,
+                    tahun: new Date(item.tanggal).getFullYear() || new Date().getFullYear(),
+                    archivedAt: new Date().toISOString()
+                }));
+
+                archiveCashFlow.push(...archivedItems);
+
+                await apiRequest({ action: "archiveCashFlow", archivedData: archivedItems }, "Mengarsipkan Kas...");
+
+                cashFlow = [];
+                renderCashFlow();
+                renderArsipCashFlow();
+                populateArsipCfYears();
+
+                notify("Berhasil Mengarsipkan Dana Masuk & Keluar!", "bg-green-600");
+            });
+        }
+
+        function populateArsipCfYears() {
+            const select = document.getElementById('filter-tahun-arsip-cf');
+            if (!select) return;
+            const currentSelected = select.value || "all";
+            const years = [...new Set(archiveCashFlow.map(c => {
+                const yr = c.tahun || new Date(c.tanggal || Date.now()).getFullYear();
+                return isNaN(yr) ? null : parseInt(yr);
+            }).filter(y => y !== null))].sort((a,b) => b - a);
+
+            let html = '<option value="all">Semua Tahun</option>';
+            years.forEach(y => html += `<option value="${y}">${y}</option>`);
+            select.innerHTML = html;
+            select.value = currentSelected;
+        }
+
+        function renderArsipCashFlow() {
+            const tbody = document.getElementById('arsip-cf-table-body');
+            if(!tbody) return;
+            populateArsipCfYears();
+
+            const filter = (document.getElementById('filter-arsip-cf')?.value || "").toLowerCase();
+            const yearFilter = document.getElementById('filter-tahun-arsip-cf')?.value || "all";
+
+            const filtered = archiveCashFlow.filter(c => {
+                const itemYear = String(c.tahun || new Date(c.tanggal || Date.now()).getFullYear());
+                const matchYear = yearFilter === "all" || itemYear === yearFilter;
+                const matchText = String(c.deskripsi).toLowerCase().includes(filter) ||
+                                  String(c.tanggal).toLowerCase().includes(filter);
+                return matchYear && matchText;
+            });
+
+            filtered.sort((a,b) => new Date(a.tanggal) - new Date(b.tanggal));
+
+            tbody.innerHTML = filtered.map((c, idx) => {
+                const tgl = new Date(c.tanggal).toLocaleDateString('id-ID');
+                const yr = c.tahun || new Date(c.tanggal).getFullYear();
+
+                return `<tr class="border-b hover:bg-slate-50 transition">
+                    <td class="p-4 text-center font-bold text-slate-500">${idx + 1}</td>
+                    <td class="p-4 text-center font-semibold text-slate-700">${tgl}</td>
+                    <td class="p-4 font-bold text-slate-800">${c.deskripsi}</td>
+                    <td class="p-4 text-right font-bold text-emerald-600">${c.masuk > 0 ? 'Rp ' + Number(c.masuk).toLocaleString('id-ID') : '-'}</td>
+                    <td class="p-4 text-right font-bold text-rose-600">${c.keluar > 0 ? 'Rp ' + Number(c.keluar).toLocaleString('id-ID') : '-'}</td>
+                    <td class="p-4 text-center font-bold text-slate-700">${yr}</td>
+                </tr>`;
+            }).join('');
+        }
+
+        function updateHomeStats() {
+            // Kuitansi Stats
+            document.getElementById('stat-total-kuitansi').innerText = reports.length;
+            const total = reports.reduce((a, b) => a + (Math.round(parseFloat(b.jumlah)) || 0), 0);
+            const totalTax = reports.reduce((a, b) => a + (Math.round(parseFloat(b.taxVal)) || 0), 0);
+            document.getElementById('stat-total-pengeluaran').innerText = formatIDR(total);
+            document.getElementById('stat-total-pajak').innerText = formatIDR(totalTax);
+
+            // Belanja Modal Stats (Warna Merah)
+            const totalBm = belanjaModal.reduce((a, b) => {
+                const hSatuan = Math.round(parseFloat(b.harga) || 0);
+                const matchVol = String(b.volume || '').match(/\d+(\.\d+)?/);
+                const qty = matchVol ? parseFloat(matchVol[0]) : 1;
+                const totalH = Math.round(parseFloat(b.totalHarga) || (hSatuan * qty));
+                return a + totalH;
+            }, 0);
+            if (document.getElementById('stat-total-bm')) {
+                document.getElementById('stat-total-bm').innerText = formatIDR(totalBm);
+            }
+
+            // Dana Kas Stats (Saldo Awal, Masuk, Keluar, Saldo Akhir)
+            let totalMasuk = 0;
+            let totalKeluar = 0;
+            cashFlow.forEach(c => {
+                totalMasuk += (Math.round(parseFloat(c.masuk)) || 0);
+                totalKeluar += (Math.round(parseFloat(c.keluar)) || 0);
+            });
+            const saldoAkhir = saldoAwal + totalMasuk - totalKeluar;
+
+            if (document.getElementById('stat-saldo-awal')) document.getElementById('stat-saldo-awal').innerText = formatIDR(saldoAwal);
+            if (document.getElementById('stat-total-masuk')) document.getElementById('stat-total-masuk').innerText = formatIDR(totalMasuk);
+            if (document.getElementById('stat-total-keluar')) document.getElementById('stat-total-keluar').innerText = formatIDR(totalKeluar);
+            if (document.getElementById('stat-saldo-akhir')) document.getElementById('stat-saldo-akhir').innerText = formatIDR(saldoAkhir);
+        }
+
+        function populateArchiveYears() {
+            const select = document.getElementById('filter-tahun-arsip');
+            if(!select) return;
+            const years = [...new Set(archiveReports.map(r => {
+                const date = new Date(r.tanggal);
+                return isNaN(date.getFullYear()) ? null : date.getFullYear();
+            }).filter(y => y !== null))].sort((a,b) => b - a);
+            
+            let html = '<option value="all">Semua Tahun</option>';
+            years.forEach(y => html += `<option value="${y}">${y}</option>`);
+            select.innerHTML = html;
+        }
+
+        function renderArchive() {
+            const tbody = document.getElementById('arsip-table-body');
+            if(!tbody) return;
+            populateArchiveYears();
+
+            const bkuFilter = (document.getElementById('filter-bku-arsip')?.value || "").toLowerCase();
+            const yearFilter = document.getElementById('filter-tahun-arsip')?.value || "all";
+            
+            let filtered = archiveReports.filter(r => {
+                const bkuMatch = String(r.bku).toLowerCase().includes(bkuFilter);
+                const yearMatch = yearFilter === "all" || String(new Date(r.tanggal).getFullYear()) === yearFilter;
+                return bkuMatch && yearMatch;
+            });
+
+            filtered.sort((a,b) => {
+                const numA = parseInt(String(a.bku).match(/\d+/)) || 0;
+                const numB = parseInt(String(b.bku).match(/\d+/)) || 0;
+                return numA - numB;
+            });
+
+            const totalItems = filtered.length;
+            const totalPages = Math.ceil(totalItems / rowsPerPage) || 1;
+            if (currentArchivePage > totalPages) currentArchivePage = totalPages;
+
+            const startIndex = (currentArchivePage - 1) * rowsPerPage;
+            const paginatedItems = filtered.slice(startIndex, startIndex + rowsPerPage);
+
+            tbody.innerHTML = paginatedItems.map((r) => {
+                const actualIdx = archiveReports.indexOf(r);
+                const tgl = new Date(r.tanggal).toLocaleDateString('id-ID');
+                return `<tr class="border-b hover:bg-slate-50 transition"><td class="p-4 font-bold text-slate-700">${r.bku}</td><td class="p-4">${tgl}</td><td class="p-4 italic">${r.penerima}</td><td class="p-4 text-right font-bold">Rp ${Number(r.jumlah).toLocaleString('id-ID')}</td><td class="p-4 text-center"><button onclick="printFromArchive(${actualIdx})" class="text-slate-600 font-bold hover:underline">Cetak</button></td></tr>`;
+            }).join('');
+
+            if (document.getElementById('pagination-info-arsip')) {
+                document.getElementById('pagination-info-arsip').innerText = `Halaman ${currentArchivePage} dari ${totalPages} (${totalItems} Arsip)`;
+            }
+            if (document.getElementById('prev-page-btn-arsip')) document.getElementById('prev-page-btn-arsip').disabled = currentArchivePage === 1;
+            if (document.getElementById('next-page-btn-arsip')) document.getElementById('next-page-btn-arsip').disabled = currentArchivePage === totalPages;
+        }
+
+        function resetPageArsipAndRender() { currentArchivePage = 1; renderArchive(); }
+        function nextPageArsip() { currentArchivePage++; renderArchive(); }
+        function prevPageArsip() { currentArchivePage--; renderArchive(); }
+
+        function renderTaxList() { document.getElementById('tax-list').innerHTML = (taxes || []).map(t => `<div class="bg-white p-3 border rounded-xl font-bold text-xs shadow-sm">${t.name} (${t.rate}%)</div>`).join(''); }
+        function updateTaxSelect() {
+            const s = document.getElementById('k-pajak-select'); if(!s) return;
+            s.innerHTML = '<option value="none">Tanpa Pajak</option>';
+            taxes.forEach((t, i) => s.innerHTML += `<option value="${i}">${t.name} (${t.rate}%)</option>`);
+        }
+
+        function toTitleCase(str) { 
+            return str.split(' ').map(word => word ? word.charAt(0).toUpperCase() + word.slice(1).toLowerCase() : "").join(' '); 
+        }
+
+        function updateCalculations() {
+            const amountInput = Math.round(parseFloat(document.getElementById('k-jumlah').value) || 0);
+            const idx = document.getElementById('k-pajak-select').value;
+            let taxVal = 0, taxName = "Tanpa Pajak", taxRate = 0, dpp = amountInput;
+            if(idx !== "none" && taxes[idx]) { taxRate = taxes[idx].rate; taxVal = Math.round(amountInput * (taxRate / 100)); taxName = taxes[idx].name; dpp = amountInput; } else { taxVal = 0; dpp = 0; }
+            const total = amountInput + taxVal;
+            const formattedTerbilang = toTitleCase(terbilang(total) + " rupiah");
+            document.getElementById('res-total-val').innerText = formatIDR(total);
+            document.getElementById('res-terbilang').innerText = formattedTerbilang;
+            return { dpp, total, taxName, taxVal, taxRate };
+        }
+
+        function formatIDR(n) { return new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', maximumFractionDigits: 0 }).format(Math.round(n)); }
+        function terbilang(n) {
+            n = Math.floor(n); if (n === 0) return "nol";
+            function konversi(angka) {
+                let kata = ["", "satu", "dua", "tiga", "empat", "lima", "enam", "tujuh", "delapan", "sembilan", "sepuluh", "sebelas"];
+                if (angka < 12) return " " + kata[angka];
+                else if (angka < 20) return konversi(angka - 10) + " belas";
+                else if (angka < 100) return konversi(Math.floor(angka / 10)) + " puluh" + konversi(angka % 10);
+                else if (angka < 200) return " seratus" + konversi(angka - 100);
+                else if (angka < 1000) return konversi(Math.floor(angka / 100)) + " ratus" + konversi(angka % 100);
+                else if (angka < 2000) return " seribu" + konversi(angka - 1000);
+                else if (angka < 1000000) return konversi(Math.floor(angka / 1000)) + " ribu" + konversi(angka % 1000);
+                else if (angka < 1000000000) return konversi(Math.floor(angka / 1000000)) + " juta" + konversi(angka % 1000000);
+                return "";
+            }
+            return konversi(n).trim().replace(/\s+/g, ' ');
+        }
+
+        async function saveReceipt() {
+            const calc = updateCalculations();
+            if(!document.getElementById('k-bku').value) return notify("No BKU wajib!", "bg-red-600");
+            notify("Sedang Menyimpan Kuitansi...", "bg-blue-600");
+            const data = {
+                action: "saveReceipt", bku: document.getElementById('k-bku').value,
+                rekening: document.getElementById('k-rekening').value, dari: document.getElementById('k-dari').value,
+                penerima: document.getElementById('k-penerima').value, tanggal: document.getElementById('k-tanggal').value,
+                untuk: document.getElementById('k-untuk').value, taxName: calc.taxName, taxVal: calc.taxVal,
+                taxRate: calc.taxRate, dpp: calc.dpp, terbilang: document.getElementById('res-terbilang').innerText, jumlah: calc.total
+            };
+            const res = await apiRequest(data, "Menyimpan...");
+            if(res?.status === "success" || res?.status !== "error") { 
+                reports.push(data); 
+                notify("Berhasil Menyimpan Kuitansi!", "bg-green-600"); 
+                updateHomeStats();
+                resetForm();
+                renderReports();
+            }
+        }
+
+        async function deleteRecord(idx) {
+            const bku = reports[idx].bku;
+            showConfirm(`Hapus kuitansi ${bku}?`, async () => {
+                notify("Sedang Menghapus...", "bg-amber-600");
+                const res = await apiRequest({ action: "deleteReceipt", bku: bku }, "Menghapus...");
+                if(res?.status === "success" || res?.status !== "error") { 
+                    reports.splice(idx, 1); 
+                    renderReports(); 
+                    updateHomeStats(); 
+                    notify("Berhasil Menghapus Kuitansi!", "bg-slate-700");
+                }
+            });
+        }
+
+        function printBelanjaModal() {
+            const filter = (document.getElementById('filter-bm')?.value || "").toLowerCase();
+            const yearFilter = document.getElementById('filter-tahun-bm')?.value || "all";
+
+            const filtered = belanjaModal.filter(b => {
+                const itemYear = String(b.tahun || new Date(b.tanggal || Date.now()).getFullYear());
+                const matchYear = yearFilter === "all" || itemYear === yearFilter;
+                const matchText = String(b.nama).toLowerCase().includes(filter) ||
+                                  String(b.merek).toLowerCase().includes(filter) ||
+                                  String(b.jenis).toLowerCase().includes(filter);
+                return matchYear && matchText;
+            });
+
+            if (filtered.length === 0) return notify("Tidak ada data Belanja Modal untuk dicetak!", "bg-amber-600");
+
+            const printWin = window.open('', '_blank');
+            if (!printWin) return;
+
+            let rowsHtml = filtered.map((b, i) => {
+                const hargaSat = Math.round(parseFloat(b.harga) || 0);
+                const displayVol = b.volume || "1 Unit";
+                const totalH = Math.round(parseFloat(b.totalHarga) || (hargaSat * (parseFloat(displayVol.match(/\d+(\.\d+)?/)?.[0]) || 1)));
+                const displayDate = b.tanggal ? new Date(b.tanggal).toLocaleDateString('id-ID') : '-';
+                return `<tr>
+                    <td style="border: 1px solid black; padding: 6px; text-align: center;">${i + 1}</td>
+                    <td style="border: 1px solid black; padding: 6px;">${b.nama}</td>
+                    <td style="border: 1px solid black; padding: 6px;">${b.merek}</td>
+                    <td style="border: 1px solid black; padding: 6px;">${b.jenis}</td>
+                    <td style="border: 1px solid black; padding: 6px; text-align: center;">${displayVol}</td>
+                    <td style="border: 1px solid black; padding: 6px; text-align: right;">${hargaSat > 0 ? 'Rp ' + hargaSat.toLocaleString('id-ID') : '-'}</td>
+                    <td style="border: 1px solid black; padding: 6px; text-align: right; font-weight: bold;">${totalH > 0 ? 'Rp ' + totalH.toLocaleString('id-ID') : '-'}</td>
+                    <td style="border: 1px solid black; padding: 6px; text-align: center;">${b.tahun || '-'}</td>
+                    <td style="border: 1px solid black; padding: 6px; text-align: center;">${displayDate}</td>
+                    <td style="border: 1px solid black; padding: 6px; text-align: center;">${b.kerusakan}</td>
+                </tr>`;
+            }).join('');
+
+            const grandTotal = filtered.reduce((a, b) => a + (Math.round(parseFloat(b.totalHarga)) || ((Math.round(parseFloat(b.harga)) || 0) * (parseFloat(String(b.volume || '').match(/\d+(\.\d+)?/)?.[0]) || 1))), 0);
+
+            const kopHeader = `<div style="display: flex; align-items: center; border-bottom: 3px double black; padding-bottom: 10px; margin-bottom: 20px;">
+                <div style="width: 80px; text-align: center;">${kopConfig.logoL ? `<img src="${kopConfig.logoL}" style="max-width:80px;">` : ''}</div>
+                <div style="text-align: center; flex: 1;">
+                    <h3 style="margin:0; font-size:14pt; text-transform:uppercase;">${kopConfig.pemda || ''}</h3>
+                    <h3 style="margin:0; font-size:14pt; text-transform:uppercase;">${kopConfig.dinas || ''}</h3>
+                    <h2 style="margin:0; font-size:18pt; text-transform:uppercase; font-weight:bold;">${kopConfig.sekolah || ''}</h2>
+                    <p style="margin:0; font-size:10pt; font-weight:bold;">${kopConfig.kecamatan ? 'KECAMATAN ' + kopConfig.kecamatan.toUpperCase() : ''}</p>
+                    <p style="margin:0; font-size:9pt;">${kopConfig.alamat || ''}</p>
+                </div>
+                <div style="width: 80px; text-align: center;">${kopConfig.logoR ? `<img src="${kopConfig.logoR}" style="max-width:80px;">` : ''}</div>
+            </div>`;
+
+            const content = `<html><head><title>Laporan Belanja Modal</title><style>@page { size: 210mm 330mm; margin: 15mm; } body { font-family: 'Times New Roman', serif; }</style></head><body onload="window.print(); window.close();">${kopHeader}<h2 style="text-align:center; text-decoration:underline; font-size:14pt; margin-bottom:20px;">LAPORAN DATA BELANJA MODAL</h2><table style="width:100%; border-collapse:collapse; font-size:10pt;"><thead><tr style="background:#eee;"><th style="border:1px solid black; padding:8px;">No</th><th style="border:1px solid black; padding:8px;">Nama Barang</th><th style="border:1px solid black; padding:8px;">Merek / Tipe</th><th style="border:1px solid black; padding:8px;">Jenis Belanja</th><th style="border:1px solid black; padding:8px;">Volume</th><th style="border:1px solid black; padding:8px;">Harga Satuan</th><th style="border:1px solid black; padding:8px;">Jumlah Harga</th><th style="border:1px solid black; padding:8px;">Tahun</th><th style="border:1px solid black; padding:8px;">Tanggal</th><th style="border:1px solid black; padding:8px;">Kondisi</th></tr></thead><tbody>${rowsHtml}<tr><td colspan="6" style="border:1px solid black; padding:8px; font-weight:bold; text-align:right;">TOTAL SELURUH BELANJA MODAL:</td><td style="border:1px solid black; padding:8px; font-weight:black; text-align:right;">Rp ${grandTotal.toLocaleString('id-ID')}</td><td colspan="3" style="border:1px solid black;"></td></tr></tbody></table></body></html>`;
+            printWin.document.open(); printWin.document.write(content); printWin.document.close();
+        }
+
+        function exportBelanjaModalExcel() {
+            if (belanjaModal.length === 0) return notify("Tidak ada data Belanja Modal untuk diekspor!", "bg-amber-600");
+            let csv = "No,Nama Barang,Merek / Tipe,Jenis Belanja Modal,Volume / Jumlah,Harga Satuan (Rp),Jumlah Harga (Rp),Tahun Belanja,Tanggal Transaksi,Kondisi\n";
+            belanjaModal.forEach((b, i) => {
+                const hargaSat = Math.round(parseFloat(b.harga) || 0);
+                const displayVol = b.volume || "1 Unit";
+                const totalH = Math.round(parseFloat(b.totalHarga) || (hargaSat * (parseFloat(displayVol.match(/\d+(\.\d+)?/)?.[0]) || 1)));
+                const displayDate = b.tanggal ? new Date(b.tanggal).toLocaleDateString('id-ID') : '-';
+                csv += `"${i+1}","${b.nama}","${b.merek}","${b.jenis}","${displayVol}","${hargaSat}","${totalH}","${b.tahun || '-'}","${displayDate}","${b.kerusakan}"\n`;
+            });
+            const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+            const link = document.createElement("a");
+            link.href = URL.createObjectURL(blob);
+            link.download = `Belanja_Modal_SDN22_${new Date().toISOString().slice(0,10)}.csv`;
+            link.click();
+        }
+
+        function printCashFlow() {
+            if (cashFlow.length === 0) return notify("Tidak ada data Dana Masuk & Keluar untuk dicetak!", "bg-amber-600");
+
+            const printWin = window.open('', '_blank');
+            if (!printWin) return;
+
+            let runningSaldo = saldoAwal;
+            let totalMasuk = 0;
+            let totalKeluar = 0;
+
+            let rowsHtml = cashFlow.map((c, i) => {
+                const masuk = Math.round(parseFloat(c.masuk) || 0);
+                const keluar = Math.round(parseFloat(c.keluar) || 0);
+                totalMasuk += masuk;
+                totalKeluar += keluar;
+                runningSaldo += (masuk - keluar);
+                const tgl = new Date(c.tanggal).toLocaleDateString('id-ID');
+
+                return `<tr>
+                    <td style="border: 1px solid black; padding: 6px; text-align: center;">${i + 1}</td>
+                    <td style="border: 1px solid black; padding: 6px; text-align: center;">${tgl}</td>
+                    <td style="border: 1px solid black; padding: 6px;">${c.deskripsi}</td>
+                    <td style="border: 1px solid black; padding: 6px; text-align: right;">${masuk > 0 ? 'Rp ' + masuk.toLocaleString('id-ID') : '-'}</td>
+                    <td style="border: 1px solid black; padding: 6px; text-align: right;">${keluar > 0 ? 'Rp ' + keluar.toLocaleString('id-ID') : '-'}</td>
+                    <td style="border: 1px solid black; padding: 6px; text-align: right; font-weight: bold;">Rp ${runningSaldo.toLocaleString('id-ID')}</td>
+                </tr>`;
+            }).join('');
+
+            const kopHeader = `<div style="display: flex; align-items: center; border-bottom: 3px double black; padding-bottom: 10px; margin-bottom: 20px;">
+                <div style="width: 80px; text-align: center;">${kopConfig.logoL ? `<img src="${kopConfig.logoL}" style="max-width:80px;">` : ''}</div>
+                <div style="text-align: center; flex: 1;">
+                    <h3 style="margin:0; font-size:14pt; text-transform:uppercase;">${kopConfig.pemda || ''}</h3>
+                    <h3 style="margin:0; font-size:14pt; text-transform:uppercase;">${kopConfig.dinas || ''}</h3>
+                    <h2 style="margin:0; font-size:18pt; text-transform:uppercase; font-weight:bold;">${kopConfig.sekolah || ''}</h2>
+                    <p style="margin:0; font-size:10pt; font-weight:bold;">${kopConfig.kecamatan ? 'KECAMATAN ' + kopConfig.kecamatan.toUpperCase() : ''}</p>
+                    <p style="margin:0; font-size:9pt;">${kopConfig.alamat || ''}</p>
+                </div>
+                <div style="width: 80px; text-align: center;">${kopConfig.logoR ? `<img src="${kopConfig.logoR}" style="max-width:80px;">` : ''}</div>
+            </div>`;
+
+            const content = `<html><head><title>Buku Kas Dana Masuk & Keluar</title><style>@page { size: 210mm 330mm; margin: 15mm; } body { font-family: 'Times New Roman', serif; }</style></head><body onload="window.print(); window.close();">${kopHeader}<h2 style="text-align:center; text-decoration:underline; font-size:14pt; margin-bottom:20px;">BUKU KAS DANA MASUK & KELUAR</h2><table style="width:100%; border-collapse:collapse; font-size:10pt;"><thead><tr style="background:#eee;"><th style="border:1px solid black; padding:8px;">No</th><th style="border:1px solid black; padding:8px;">Tanggal</th><th style="border:1px solid black; padding:8px;">Deskripsi / Keperluan</th><th style="border:1px solid black; padding:8px;">Uang Masuk (Rp)</th><th style="border:1px solid black; padding:8px;">Uang Keluar (Rp)</th><th style="border:1px solid black; padding:8px;">Saldo Akhir (Rp)</th></tr></thead><tbody><tr><td style="border:1px solid black; padding:6px; text-align:center;">-</td><td style="border:1px solid black; padding:6px; text-align:center;">-</td><td style="border:1px solid black; padding:6px; font-weight:bold;">SALDO AWAL KAS BOSP</td><td style="border:1px solid black; padding:6px; text-align:right;">-</td><td style="border:1px solid black; padding:6px; text-align:right;">-</td><td style="border:1px solid black; padding:6px; text-align:right; font-weight:bold;">Rp ${saldoAwal.toLocaleString('id-ID')}</td></tr>${rowsHtml}<tr style="background:#f8fafc;"><td colspan="3" style="border:1px solid black; padding:8px; font-weight:bold; text-align:right;">TOTAL KAS:</td><td style="border:1px solid black; padding:8px; font-weight:bold; text-align:right;">Rp ${totalMasuk.toLocaleString('id-ID')}</td><td style="border:1px solid black; padding:8px; font-weight:bold; text-align:right;">Rp ${totalKeluar.toLocaleString('id-ID')}</td><td style="border:1px solid black; padding:8px; font-weight:bold; text-align:right;">Rp ${runningSaldo.toLocaleString('id-ID')}</td></tr></tbody></table></body></html>`;
+            printWin.document.open(); printWin.document.write(content); printWin.document.close();
+        }
+
+        function exportCashFlowExcel() {
+            if (cashFlow.length === 0) return notify("Tidak ada data Kas untuk diekspor!", "bg-amber-600");
+            let csv = "No,Tanggal,Deskripsi / Keperluan,Uang Masuk (Rp),Uang Keluar (Rp),Saldo Akhir (Rp)\n";
+            let runningSaldo = saldoAwal;
+            csv += `0,"-","SALDO AWAL KAS BOSP",0,0,${saldoAwal}\n`;
+            cashFlow.forEach((c, i) => {
+                const masuk = Math.round(parseFloat(c.masuk) || 0);
+                const keluar = Math.round(parseFloat(c.keluar) || 0);
+                runningSaldo += (masuk - keluar);
+                const tgl = new Date(c.tanggal).toLocaleDateString('id-ID');
+                csv += `"${i+1}","${tgl}","${c.deskripsi}","${masuk}","${keluar}","${runningSaldo}"\n`;
+            });
+            const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+            const link = document.createElement("a");
+            link.href = URL.createObjectURL(blob);
+            link.download = `Kas_BOSP_SDN22_${new Date().toISOString().slice(0,10)}.csv`;
+            link.click();
+        }
+
+        function printArsipCashFlow() {
+            if (archiveCashFlow.length === 0) return notify("Tidak ada data Arsip Kas untuk dicetak!", "bg-amber-600");
+
+            const printWin = window.open('', '_blank');
+            if (!printWin) return;
+
+            const filter = (document.getElementById('filter-arsip-cf')?.value || "").toLowerCase();
+            const yearFilter = document.getElementById('filter-tahun-arsip-cf')?.value || "all";
+
+            const filtered = archiveCashFlow.filter(c => {
+                const itemYear = String(c.tahun || new Date(c.tanggal || Date.now()).getFullYear());
+                const matchYear = yearFilter === "all" || itemYear === yearFilter;
+                const matchText = String(c.deskripsi).toLowerCase().includes(filter) ||
+                                  String(c.tanggal).toLowerCase().includes(filter);
+                return matchYear && matchText;
+            });
+
+            let rowsHtml = filtered.map((c, i) => {
+                const masuk = Math.round(parseFloat(c.masuk) || 0);
+                const keluar = Math.round(parseFloat(c.keluar) || 0);
+                const tgl = new Date(c.tanggal).toLocaleDateString('id-ID');
+                const yr = c.tahun || new Date(c.tanggal).getFullYear();
+
+                return `<tr>
+                    <td style="border: 1px solid black; padding: 6px; text-align: center;">${i + 1}</td>
+                    <td style="border: 1px solid black; padding: 6px; text-align: center;">${tgl}</td>
+                    <td style="border: 1px solid black; padding: 6px;">${c.deskripsi}</td>
+                    <td style="border: 1px solid black; padding: 6px; text-align: right;">${masuk > 0 ? 'Rp ' + masuk.toLocaleString('id-ID') : '-'}</td>
+                    <td style="border: 1px solid black; padding: 6px; text-align: right;">${keluar > 0 ? 'Rp ' + keluar.toLocaleString('id-ID') : '-'}</td>
+                    <td style="border: 1px solid black; padding: 6px; text-align: center;">${yr}</td>
+                </tr>`;
+            }).join('');
+
+            const kopHeader = `<div style="display: flex; align-items: center; border-bottom: 3px double black; padding-bottom: 10px; margin-bottom: 20px;">
+                <div style="width: 80px; text-align: center;">${kopConfig.logoL ? `<img src="${kopConfig.logoL}" style="max-width:80px;">` : ''}</div>
+                <div style="text-align: center; flex: 1;">
+                    <h3 style="margin:0; font-size:14pt; text-transform:uppercase;">${kopConfig.pemda || ''}</h3>
+                    <h3 style="margin:0; font-size:14pt; text-transform:uppercase;">${kopConfig.dinas || ''}</h3>
+                    <h2 style="margin:0; font-size:18pt; text-transform:uppercase; font-weight:bold;">${kopConfig.sekolah || ''}</h2>
+                    <p style="margin:0; font-size:10pt; font-weight:bold;">${kopConfig.kecamatan ? 'KECAMATAN ' + kopConfig.kecamatan.toUpperCase() : ''}</p>
+                    <p style="margin:0; font-size:9pt;">${kopConfig.alamat || ''}</p>
+                </div>
+                <div style="width: 80px; text-align: center;">${kopConfig.logoR ? `<img src="${kopConfig.logoR}" style="max-width:80px;">` : ''}</div>
+            </div>`;
+
+            const content = `<html><head><title>Arsip Dana Masuk & Keluar</title><style>@page { size: 210mm 330mm; margin: 15mm; } body { font-family: 'Times New Roman', serif; }</style></head><body onload="window.print(); window.close();">${kopHeader}<h2 style="text-align:center; text-decoration:underline; font-size:14pt; margin-bottom:20px;">ARSIP DANA MASUK & KELUAR</h2><table style="width:100%; border-collapse:collapse; font-size:10pt;"><thead><tr style="background:#eee;"><th style="border:1px solid black; padding:8px;">No</th><th style="border:1px solid black; padding:8px;">Tanggal</th><th style="border:1px solid black; padding:8px;">Deskripsi</th><th style="border:1px solid black; padding:8px;">Uang Masuk (Rp)</th><th style="border:1px solid black; padding:8px;">Uang Keluar (Rp)</th><th style="border:1px solid black; padding:8px;">Tahun</th></tr></thead><tbody>${rowsHtml}</tbody></table></body></html>`;
+            printWin.document.open(); printWin.document.write(content); printWin.document.close();
+        }
+
+        function exportArsipCashFlowExcel() {
+            if (archiveCashFlow.length === 0) return notify("Tidak ada data Arsip Kas untuk diekspor!", "bg-amber-600");
+            let csv = "No,Tanggal,Deskripsi,Uang Masuk (Rp),Uang Keluar (Rp),Tahun\n";
+            archiveCashFlow.forEach((c, i) => {
+                const masuk = Math.round(parseFloat(c.masuk) || 0);
+                const keluar = Math.round(parseFloat(c.keluar) || 0);
+                const tgl = new Date(c.tanggal).toLocaleDateString('id-ID');
+                const yr = c.tahun || new Date(c.tanggal).getFullYear();
+                csv += `"${i+1}","${tgl}","${c.deskripsi}","${masuk}","${keluar}","${yr}"\n`;
+            });
+            const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+            const link = document.createElement("a");
+            link.href = URL.createObjectURL(blob);
+            link.download = `Arsip_Kas_SDN22_${new Date().toISOString().slice(0,10)}.csv`;
+            link.click();
+        }
+
+        function showConfirm(msg, onYes) {
+            const overlay = document.getElementById('confirm-overlay');
+            document.getElementById('confirm-message').innerText = msg;
+            overlay.classList.remove('hidden');
+            const yesBtn = document.getElementById('confirm-yes');
+            const noBtn = document.getElementById('confirm-no');
+            const cleanup = () => { overlay.classList.add('hidden'); yesBtn.onclick = null; noBtn.onclick = null; };
+            yesBtn.onclick = () => { cleanup(); onYes(); };
+            noBtn.onclick = () => { cleanup(); };
+        }
+
+        async function simulateProgress(title, dataFunction) {
+            const overlay = document.getElementById('progress-overlay');
+            const bar = document.getElementById('progress-bar');
+            const text = document.getElementById('progress-percent');
+            document.getElementById('progress-title').innerText = title;
+            overlay.classList.remove('hidden');
+            bar.style.width = '0%';
+            text.innerText = '0%';
+            let dataPromise = dataFunction ? dataFunction() : Promise.resolve();
+            for(let i = 1; i <= 90; i++) {
+                await new Promise(r => setTimeout(r, 10));
+                bar.style.width = i + '%';
+                text.innerText = i + '%';
+            }
+            await dataPromise;
+            for(let i = 91; i <= 100; i++) {
+                await new Promise(r => setTimeout(r, 5));
+                bar.style.width = i + '%';
+                text.innerText = i + '%';
+            }
+            setTimeout(() => overlay.classList.add('hidden'), 300);
+        }
+
+        function notify(txt, color = "bg-blue-900") {
+            const div = document.createElement('div');
+            div.className = `fixed bottom-5 right-5 ${color} text-white p-4 rounded-xl shadow-2xl z-[250] font-bold transform transition-all duration-300 translate-y-10 opacity-0`;
+            div.innerText = txt; 
+            document.body.appendChild(div);
+            setTimeout(() => div.classList.remove('translate-y-10', 'opacity-0'), 10);
+            setTimeout(() => { div.classList.add('translate-y-10', 'opacity-0'); setTimeout(() => div.remove(), 300); }, 3000);
+        }
+
+        async function apiRequest(data, loadingText = "Memproses...") {
+            showLoader(loadingText, "Menghubungkan ke server Google Apps Script...");
+            try {
+                const response = await fetch(scriptURL, { method: 'POST', body: JSON.stringify(data) });
+                return await response.json();
+            } catch (err) {
+                notify("Gagal Terhubung: " + err.message, "bg-red-600");
+                return { status: "error" };
+            } finally { 
+                hideLoader(); 
+            }
+        }
+
+        function startSyncProcess() {
+            showConfirm("Sinkronkan ulang database?", () => {
+                simulateProgress("Singkronisasi Database", loadAllData).then(() => {
+                    notify("Berhasil Singkron Data!", "bg-green-600");
+                });
+            });
+        }
+
+        function printDirectly() {
+            const calc = updateCalculations();
+            if(!document.getElementById('k-bku').value) return notify("Lengkapi data kuitansi!", "bg-red-600");
+            openPrintWindow({ bku: document.getElementById('k-bku').value, rekening: document.getElementById('k-rekening').value, dari: document.getElementById('k-dari').value, penerima: document.getElementById('k-penerima').value, tanggal: document.getElementById('k-tanggal').value, untuk: document.getElementById('k-untuk').value, terbilang: document.getElementById('res-terbilang').innerText, taxName: calc.taxName, taxVal: calc.taxVal, taxRate: calc.taxRate, dpp: calc.dpp, jumlah: calc.total });
+        }
+
+        function printFromHistory(idx) { if(reports[idx]) openPrintWindow(reports[idx]); }
+        function printFromArchive(idx) { if(archiveReports[idx]) openPrintWindow(archiveReports[idx]); }
+        function logout() { location.reload(); }
+        function resetForm() { ['k-bku', 'k-penerima', 'k-jumlah', 'k-untuk', 'k-tanggal', 'k-rekening'].forEach(id => { if(document.getElementById(id)) document.getElementById(id).value = ""; }); if(document.getElementById('k-pajak-select')) document.getElementById('k-pajak-select').value = "none"; updateCalculations(); }
+
+        function openPrintWindow(d) {
+            const printWin = window.open('', '_blank');
+            if(!printWin) return;
+            const template = document.getElementById('print-template').innerHTML;
+            const formatDate = (ds) => ds ? new Date(ds).toLocaleDateString('id-ID', { year: 'numeric', month: 'long', day: 'numeric' }) : "";
+            const escapeStr = (s) => String(s || "").replace(/"/g, '\\"').replace(/\n/g, ' ');
+            const finalDppDisplay = (parseFloat(d.taxRate || 0) > 0) ? Math.round(parseFloat(d.dpp || 0)) : 0;
+            const finalTaxValDisplay = (parseFloat(d.taxRate || 0) > 0) ? Math.round(parseFloat(d.taxVal || 0)) : 0;
+            const displayTaxName = d.taxRate ? `${d.taxName} ${d.taxRate}%` : (d.taxName || 'Pajak');
+            const now = new Date();
+            const days = ['Minggu', 'Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu'];
+            const months = ['Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni', 'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'];
+            const printTime = days[now.getDay()] + ', ' + now.getDate() + ' ' + months[now.getMonth()] + ' ' + now.getFullYear() + ' ' + now.getHours().toString().padStart(2, '0') + '.' + now.getMinutes().toString().padStart(2, '0') + '.' + now.getSeconds().toString().padStart(2, '0');
+            const htmlContent = `<html><head><title>Kuitansi ${d.bku}</title><style>@page { size: 210mm 330mm; margin: 0; } body { font-family: 'Times New Roman', serif; padding: 0; margin: 0; background: white; color: black; } table { width: 100%; border-collapse: collapse; background: transparent; } td, th { vertical-align: top; padding: 2px 0; background: transparent; } .receipt-watermark { position: absolute; top: 55%; left: 50%; transform: translate(-50%, -50%); width: 120mm; opacity: 0.1; z-index: 0; pointer-events: none; } </style></head><body onload="window.print(); window.close();">${template}<script>function fill() { document.getElementById('p-kop-pemda').innerText = "${escapeStr(kopConfig.pemda)}"; document.getElementById('p-kop-dinas').innerText = "${escapeStr(kopConfig.dinas)}"; document.getElementById('p-kop-sekolah').innerText = "${escapeStr(kopConfig.sekolah)}"; document.getElementById('p-kop-kec').innerText = "${escapeStr(kopConfig.kecamatan)}".toUpperCase() ? "KECAMATAN " + "${escapeStr(kopConfig.kecamatan)}".toUpperCase() : ""; document.getElementById('p-kop-alamat').innerText = "${escapeStr(kopConfig.alamat)}"; let kontak = "${escapeStr(kopConfig.email)}" ? "Email: " + "${escapeStr(kopConfig.email)}" : ""; if("${escapeStr(kopConfig.web)}") kontak += (kontak ? " | " : "") + "Website: " + "${escapeStr(kopConfig.web)}"; document.getElementById('p-kop-kontak').innerText = kontak; if("${kopConfig.logoL}") { document.getElementById('p-logo-l').src = "${kopConfig.logoL}"; document.getElementById('p-logo-l').style.display='block'; } if("${kopConfig.logoR}") { document.getElementById('p-logo-r').src = "${kopConfig.logoR}"; document.getElementById('p-logo-r').style.display='block'; } document.getElementById('p-bku').innerText = "${escapeStr(d.bku)}"; document.getElementById('p-rekening').innerText = "${escapeStr(d.rekening)}"; document.getElementById('p-dari').innerText = "${escapeStr(d.dari)}"; document.getElementById('p-jumlah-total').innerText = "${Math.round(parseFloat(d.jumlah)).toLocaleString('id-ID')}"; document.getElementById('p-terbilang').innerText = "${escapeStr(d.terbilang)}"; document.getElementById('p-untuk').innerText = "${escapeStr(d.untuk)}"; document.getElementById('p-penerima').innerText = "${escapeStr(d.penerima)}"; document.getElementById('p-tgl-label').innerText = "Tanah Keras, " + "${formatDate(d.tanggal)}"; document.getElementById('p-row-dpp').innerText = "${finalDppDisplay.toLocaleString('id-ID')}"; document.getElementById('p-label-pajak').innerText = "Pajak (${displayTaxName})"; document.getElementById('p-row-pajak').innerText = "${finalTaxValDisplay.toLocaleString('id-ID')}"; document.getElementById('p-ttd-kepsek').innerText = "${escapeStr(signatories.kepsek || '..................')}"; document.getElementById('p-ttd-nip-kepsek').innerText = "${escapeStr(signatories.nipKepsek || '..................')}"; document.getElementById('p-ttd-bendahara').innerText = "${escapeStr(signatories.bendahara || '..................')}"; document.getElementById('p-ttd-nip-bendahara').innerText = "${escapeStr(signatories.nipBendahara || '..................')}"; document.getElementById('p-footer-bku').innerText = "${escapeStr(d.bku)}"; document.getElementById('p-footer-time').innerText = "${printTime}"; } fill(); <\/script></body></html>`;
+            printWin.document.open(); printWin.document.write(htmlContent); printWin.document.close();
+        }
+
+        function updateUIFromData() {
+            if(kopConfig) {
+                if(document.getElementById('kop-logo-l')) document.getElementById('kop-logo-l').value = kopConfig.logoL || "";
+                if(document.getElementById('kop-logo-r')) document.getElementById('kop-logo-r').value = kopConfig.logoR || "";
+                if(document.getElementById('kop-pemda')) document.getElementById('kop-pemda').value = kopConfig.pemda || "";
+                if(document.getElementById('kop-dinas')) document.getElementById('kop-dinas').value = kopConfig.dinas || "";
+                if(document.getElementById('kop-sekolah')) document.getElementById('kop-sekolah').value = kopConfig.sekolah || "";
+                if(document.getElementById('kop-kecamatan')) document.getElementById('kop-kecamatan').value = kopConfig.kecamatan || "";
+                if(document.getElementById('kop-alamat')) document.getElementById('kop-alamat').value = kopConfig.alamat || "";
+                if(document.getElementById('kop-email')) document.getElementById('kop-email').value = kopConfig.email || "";
+                if(document.getElementById('kop-web')) document.getElementById('kop-web').value = kopConfig.web || "";
+            }
+            if(signatories) {
+                if(document.getElementById('ttd-kepsek')) document.getElementById('ttd-kepsek').value = signatories.kepsek || "";
+                if(document.getElementById('ttd-nip-kepsek')) document.getElementById('ttd-nip-kepsek').value = signatories.nipKepsek || "";
+                if(document.getElementById('ttd-bendahara')) document.getElementById('ttd-bendahara').value = signatories.bendahara || "";
+                if(document.getElementById('ttd-nip-bendahara')) document.getElementById('ttd-nip-bendahara').value = signatories.nipBendahara || "";
+            }
+            const dbBtn = document.getElementById('btn-cloud-db');
+            if(dbBtn) dbBtn.href = databaseURL;
+        }
+
+        async function saveKopConfig() {
+            const data = { action: "saveKop", logoL: document.getElementById('kop-logo-l').value, logoR: document.getElementById('kop-logo-r').value, pemda: document.getElementById('kop-pemda').value, dinas: document.getElementById('kop-dinas').value, sekolah: document.getElementById('kop-sekolah').value, kecamatan: document.getElementById('kop-kecamatan').value, alamat: document.getElementById('kop-alamat').value, email: document.getElementById('kop-email').value, web: document.getElementById('kop-web').value, mTop: 10, mBottom: 10, mLeft: 10, mRight: 10 };
+            const res = await apiRequest(data, "Menyimpan Data KOP...");
+            if(res?.status === "success" || res?.status !== "error") { kopConfig = data; notify("Data KOP Disimpan!", "bg-blue-600"); }
+        }
+
+        async function addTax() {
+            const name = document.getElementById('tax-name-input').value;
+            const rate = parseFloat(document.getElementById('tax-rate-input').value);
+            if(!name || isNaN(rate)) return notify("Lengkapi data pajak!", "bg-red-600");
+            const newTaxes = [...taxes, { name, rate }];
+            const res = await apiRequest({ action: "saveTax", taxes: newTaxes }, "Menyimpan Pajak...");
+            if(res?.status === "success" || res?.status !== "error") { taxes = newTaxes; renderTaxList(); updateTaxSelect(); notify("Pajak Ditambahkan!", "bg-blue-600"); }
+        }
+
+        async function saveSignatories() {
+            const data = { action: "saveTTD", kepsek: document.getElementById('ttd-kepsek').value, nipKepsek: document.getElementById('ttd-nip-kepsek').value, bendahara: document.getElementById('ttd-bendahara').value, nipBendahara: document.getElementById('ttd-nip-bendahara').value };
+            const res = await apiRequest(data, "Menyimpan TTD...");
+            if(res?.status === "success" || res?.status !== "error") { signatories = data; notify("Data TTD Disimpan!", "bg-blue-600"); }
+        }
+
+        window.onload = () => {
+            if (document.getElementById('bm-tahun')) {
+                document.getElementById('bm-tahun').value = new Date().getFullYear();
+            }
+            if (document.getElementById('bm-tanggal')) {
+                document.getElementById('bm-tanggal').value = new Date().toISOString().slice(0, 10);
+            }
+
+            // Immediately load data upon launching/opening the app link with animated logo spinner
+            loadAllData().then(() => {
+                console.log("Auto-fetch completed on launch.");
+            });
+        };
+    </script>
+</body>
+</html>
