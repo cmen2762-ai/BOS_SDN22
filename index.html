@@ -2156,9 +2156,9 @@
         }
 
         function startSyncProcess() {
-            showConfirm("Sinkronkan ulang database?", () => {
-                simulateProgress("Singkronisasi Database", loadAllData).then(() => {
-                    notify("Berhasil Singkron Data!", "bg-green-600");
+            showConfirm("Tarik Data?", () => {
+                simulateProgress("Tarik Data Database", loadAllData).then(() => {
+                    notify("Berhasil Tarik Data!", "bg-green-600");
                 });
             });
         }
