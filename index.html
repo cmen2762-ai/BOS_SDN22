@@ -1003,7 +1003,7 @@
         }
 
         async function loadAllData() {
-            showLoader("Memuat Data Cloud...", "Mengambil data kuitansi dari Google Sheet");
+            showLoader("Memuat Data...", "Tunggu Sebentar");
             try {
                 const cacheBuster = "?cb=" + Date.now();
                 const response = await fetch(scriptURL + cacheBuster);
