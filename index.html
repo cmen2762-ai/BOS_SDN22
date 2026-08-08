@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>SDN 22 Tanah Keras</title>
+    <title>Manajemen BOSP-SDN 22 Tanah Keras</title>
     
     <!-- Meta Tags untuk Full Screen (PWA Mode) -->
     <meta name="apple-mobile-web-app-capable" content="yes">
@@ -85,7 +85,7 @@
 <body class="bg-slate-50 font-sans text-slate-800">
 
     <script>
-        const scriptURL = "https://script.google.com/macros/s/AKfycbz5iNkxUQoVJjTgIq1vLtW11M9yHfvPXkGK26naT2u6Yp6U6FFWnY25EUhZPHpYMmsc/exec"; 
+        const scriptURL = "https://script.google.com/macros/s/AKfycbx-sT657xXO4268dSC4f8Ep36SPrDyKbwEHF2D0BANM2IV0zFsOxNXvFalozWh6yz_l/exec"; 
         const databaseURL = "https://docs.google.com/spreadsheets/d/1ZoBr1Yhw-O2fj1DMOhp5XNCg3PVkT0PNbMmtuyF95WE/edit?usp=sharing";
     </script>
 
@@ -96,7 +96,7 @@
                 <div class="absolute inset-2 border-2 border-indigo-400 border-b-transparent rounded-full animate-spin" style="animation-duration: 1.5s; animation-direction: reverse;"></div>
                 <img src="https://iili.io/BLlwHwQ.png" class="w-14 h-14 object-contain animate-pulse z-10" alt="Logo SDN 22">
             </div>
-            <h3 id="loader-text" class="mt-5 font-black text-blue-900 tracking-wide text-sm uppercase">Memuat Data</h3>
+            <h3 id="loader-text" class="mt-5 font-black text-blue-900 tracking-wide text-sm uppercase">Memuat Data...</h3>
             <p id="loader-subtext" class="text-[11px] text-slate-500 font-semibold mt-1 italic">Tunggu Sebentar</p>
         </div>
     </div>
@@ -108,7 +108,7 @@
                 <div id="progress-bar" class="bg-blue-600 h-full transition-all duration-300" style="width: 0%"></div>
             </div>
             <p id="progress-percent" class="text-2xl font-black text-blue-900">0%</p>
-            <p id="progress-status" class="text-xs text-slate-500 italic mt-2">Menuju ke Aplikasi...</p>
+            <p id="progress-status" class="text-xs text-slate-500 italic mt-2">Tunggu Sebentar</p>
         </div>
     </div>
 
@@ -170,7 +170,8 @@
                 </div>
                 <div>
                     <label class="block text-xs font-bold text-slate-500 uppercase mb-1">Username / Email</label>
-                    <input type="email" id="user-email" class="w-full p-3 border rounded-xl outline-none focus:border-blue-500" placeholder="contoh: ahmad@sdn22tk.sch.id">
+                    <input type="email" id="user-email" oninput="validateEmailInput()" class="w-full p-3 border rounded-xl outline-none focus:border-blue-500" placeholder="contoh: ahmad@sdn22tk.sch.id">
+                    <p id="user-email-feedback" class="text-[11px] font-bold text-red-500 mt-1 hidden"></p>
                 </div>
                 <div>
                     <label class="block text-xs font-bold text-slate-500 uppercase mb-1">Kata Sandi (Password)</label>
@@ -198,7 +199,7 @@
                 </div>
                 <div class="p-3 bg-blue-50 border border-blue-200 rounded-xl text-xs text-blue-900 flex items-start gap-2">
                     <svg class="w-5 h-5 text-blue-700 shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 002-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path></svg>
-                    <span>Username/Email dan Kata Sandi akan <strong>otomatis dikirimkan secara langsung ke Email Pengguna</strong> setelah didaftarkan.</span>
+                    <span>Username/Email akan <strong>diverifikasi secara otomatis</strong>. Jika email aktif, kredensial akun dikirimkan langsung ke Email Pengguna.</span>
                 </div>
             </div>
             <div class="mt-6 flex justify-end gap-3 border-t pt-4">
@@ -212,17 +213,17 @@
         <div class="login-left">
             <div class="w-full max-w-md">
                 <div class="text-center mb-8">
-                    <h1 class="text-3xl font-bold text-blue-900">SDN 22 TANAH KERAS</h1>
+                    <h1 class="text-3xl font-bold text-blue-900">SDN 22 Tanah Keras</h1>
                     <p class="text-slate-500 mt-2">Sistem Informasi Pengelolaan Kuitansi</p>
                 </div>
                 <div class="bg-white border border-slate-200 p-8 rounded-2xl shadow-xl">
                     <div class="mb-6">
                         <label class="block text-sm font-bold text-slate-700 mb-2">Username / Email</label>
-                        <input type="text" id="login-user" class="w-full p-3 border border-slate-300 rounded-xl outline-none" value="">
+                        <input type="text" id="login-user" class="w-full p-3 border border-slate-300 rounded-xl outline-none" value="SDN22">
                     </div>
                     <div class="mb-8">
                         <label class="block text-sm font-bold text-slate-700 mb-2">Kata Sandi</label>
-                        <input type="password" id="login-pass" class="w-full p-3 border border-slate-300 rounded-xl outline-none" value="">
+                        <input type="password" id="login-pass" class="w-full p-3 border border-slate-300 rounded-xl outline-none" value="12345">
                     </div>
                     <button onclick="checkLogin()" class="w-full bg-blue-700 hover:bg-blue-800 text-white font-bold py-4 rounded-xl shadow-lg transition transform active:scale-95">Masuk ke Sistem</button>
                     <div id="login-error" class="mt-4 text-center text-red-500 text-sm font-bold hidden italic">Username/Sandi Salah.</div>
@@ -253,27 +254,56 @@
                 </div>
             </div>
 
-            <!-- Scrollable Navigation Items -->
             <nav class="flex-1 p-4 space-y-2 overflow-y-auto">
-                <button onclick="showSection('beranda')" class="nav-btn w-full text-left p-3 rounded-lg hover:bg-blue-800 transition" id="btn-beranda">Beranda</button>
-                <button onclick="showSection('kop')" class="nav-btn w-full text-left p-3 rounded-lg hover:bg-blue-800 transition" id="btn-kop">KOP Surat</button>
-                <button onclick="showSection('pajak')" class="nav-btn w-full text-left p-3 rounded-lg hover:bg-blue-800 transition" id="btn-pajak">Data Pajak</button>
-                <button onclick="showSection('kuitansi')" class="nav-btn w-full text-left p-3 rounded-lg hover:bg-blue-800 transition" id="btn-kuitansi">Kuitansi</button>
-                <button onclick="showSection('belanja_modal')" class="nav-btn w-full text-left p-3 rounded-lg hover:bg-blue-800 transition" id="btn-belanja_modal">Belanja Modal</button>
-                <button onclick="showSection('cash_flow')" class="nav-btn w-full text-left p-3 rounded-lg hover:bg-blue-800 transition" id="btn-cash_flow">Dana Masuk & Keluar</button>
-                <button onclick="showSection('laporan')" class="nav-btn w-full text-left p-3 rounded-lg hover:bg-blue-800 transition" id="btn-laporan">Laporan Kuitansi</button>
-                <button onclick="showSection('arsip')" class="nav-btn w-full text-left p-3 rounded-lg hover:bg-blue-800 transition" id="btn-arsip">Arsip Kuitansi</button>
-                <button onclick="showSection('arsip_cash_flow')" class="nav-btn w-full text-left p-3 rounded-lg hover:bg-blue-800 transition" id="btn-arsip_cash_flow">Arsip Dana Kas</button>
-                <button onclick="showSection('ttd')" class="nav-btn w-full text-left p-3 rounded-lg hover:bg-blue-800 transition" id="btn-ttd">Penandatangan</button>
-                <button onclick="showSection('pengguna')" class="nav-btn w-full text-left p-3 rounded-lg hover:bg-blue-800 transition" id="btn-pengguna">Navigasi Pengguna</button>
-                
+                <!-- Top Navigation: Beranda -->
+                <button onclick="showSection('beranda')" class="nav-btn w-full text-left p-3 rounded-lg hover:bg-blue-800 transition font-bold" id="btn-beranda">Beranda</button>
+
+                <!-- Categorized Group 1: PENGATURAN -->
+                <div id="cat-pengaturan" class="pt-3 pb-1">
+                    <p class="px-3 text-[10px] font-black tracking-wider text-blue-300 uppercase border-b border-blue-800/60 pb-1 mb-2">PENGATURAN</p>
+                    <div class="space-y-1">
+                        <button onclick="showSection('kop')" class="nav-btn w-full text-left p-3 rounded-lg hover:bg-blue-800 transition" id="btn-kop">KOP Surat</button>
+                        <button onclick="showSection('pajak')" class="nav-btn w-full text-left p-3 rounded-lg hover:bg-blue-800 transition" id="btn-pajak">Data Pajak</button>
+                        <button onclick="showSection('ttd')" class="nav-btn w-full text-left p-3 rounded-lg hover:bg-blue-800 transition" id="btn-ttd">Penandatangan</button>
+                        <button onclick="showSection('pengguna')" class="nav-btn w-full text-left p-3 rounded-lg hover:bg-blue-800 transition" id="btn-pengguna">Navigasi Pengguna</button>
+                    </div>
+                </div>
+
+                <!-- Categorized Group 2: KUITANSI BOS -->
+                <div id="cat-kuitansi" class="pt-3 pb-1">
+                    <p class="px-3 text-[10px] font-black tracking-wider text-blue-300 uppercase border-b border-blue-800/60 pb-1 mb-2">KUITANSI BOS</p>
+                    <div class="space-y-1">
+                        <button onclick="showSection('kuitansi')" class="nav-btn w-full text-left p-3 rounded-lg hover:bg-blue-800 transition" id="btn-kuitansi">Kuitansi</button>
+                        <button onclick="showSection('laporan')" class="nav-btn w-full text-left p-3 rounded-lg hover:bg-blue-800 transition" id="btn-laporan">Laporan Kuitansi</button>
+                        <button onclick="showSection('arsip')" class="nav-btn w-full text-left p-3 rounded-lg hover:bg-blue-800 transition" id="btn-arsip">Arsip Kuitansi</button>
+                    </div>
+                </div>
+
+                <!-- Categorized Group 3: BELANJA MODAL -->
+                <div id="cat-belanja_modal" class="pt-3 pb-1">
+                    <p class="px-3 text-[10px] font-black tracking-wider text-blue-300 uppercase border-b border-blue-800/60 pb-1 mb-2">BELANJA MODAL</p>
+                    <div class="space-y-1">
+                        <button onclick="showSection('belanja_modal')" class="nav-btn w-full text-left p-3 rounded-lg hover:bg-blue-800 transition" id="btn-belanja_modal">Belanja Modal</button>
+                    </div>
+                </div>
+
+                <!-- Categorized Group 4: DANA MASUK & KELUAR -->
+                <div id="cat-cash_flow" class="pt-3 pb-1">
+                    <p class="px-3 text-[10px] font-black tracking-wider text-blue-300 uppercase border-b border-blue-800/60 pb-1 mb-2">DANA MASUK & KELUAR</p>
+                    <div class="space-y-1">
+                        <button onclick="showSection('cash_flow')" class="nav-btn w-full text-left p-3 rounded-lg hover:bg-blue-800 transition" id="btn-cash_flow">Dana Masuk & Keluar</button>
+                        <button onclick="showSection('arsip_cash_flow')" class="nav-btn w-full text-left p-3 rounded-lg hover:bg-blue-800 transition" id="btn-arsip_cash_flow">Arsip Dana Kas</button>
+                    </div>
+                </div>
+
+                <!-- Divider & Utility Buttons -->
                 <div class="border-t border-blue-800 my-4 pt-4">
                     <button onclick="startSyncProcess()" class="w-full flex items-center gap-3 p-3 rounded-lg bg-blue-800/50 hover:bg-blue-700 transition text-blue-100 font-bold text-sm uppercase">
                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357-2H15"></path></svg>
                         Tarik Data
                     </button>
                 </div>
-                <button onclick="logout()" class="w-full text-left p-3 rounded-lg bg-red-900/50 mt-2 text-red-100 hover:bg-red-800 transition">Keluar</button>
+                <button onclick="logout()" class="w-full text-left p-3 rounded-lg bg-red-900/50 mt-2 text-red-100 hover:bg-red-800 transition font-bold">Keluar</button>
             </nav>
         </aside>
 
@@ -294,9 +324,12 @@
                         <p id="header-user-email" class="text-xs text-slate-500 font-semibold">SDN22</p>
                     </div>
                 </div>
-                <div class="flex items-center gap-2 bg-emerald-50 border border-emerald-200 px-4 py-2 rounded-xl text-emerald-800 text-xs font-bold">
-                    <span class="w-2.5 h-2.5 bg-emerald-500 rounded-full animate-pulse"></span>
-                    <span>PENGGUNA AKTIF (ONLINE)</span>
+
+                <div class="flex flex-wrap items-center gap-3">
+                    <div class="flex items-center gap-2 bg-emerald-50 border border-emerald-200 px-4 py-2 rounded-xl text-emerald-800 text-xs font-bold">
+                        <span class="w-2.5 h-2.5 bg-emerald-500 rounded-full animate-pulse"></span>
+                        <span>PENGGUNA AKTIF (ONLINE)</span>
+                    </div>
                 </div>
             </div>
 
@@ -671,7 +704,6 @@
                         </table>
                     </div>
 
-                    <!-- Pagination -->
                     <div class="mt-6 flex items-center justify-between">
                         <p id="pagination-info" class="text-sm font-bold text-slate-500"></p>
                         <div class="flex gap-2">
@@ -778,7 +810,7 @@
                             <input type="text" id="ttd-nip-bendahara" class="w-full p-3 border rounded-lg" placeholder="NIP">
                         </div>
                     </div>
-                    <button onclick="saveSignatories()" class="mt-6 bg-blue-700 text-white px-8 py-3 rounded-xl font-bold shadow-md">Simpan Cloud TTD</button>
+                    <button onclick="saveSignatories()" class="mt-6 bg-blue-700 text-white px-8 py-3 rounded-xl font-bold shadow-md">Simpan TTD</button>
                 </div>
             </section>
 
@@ -912,7 +944,29 @@
         const rowsPerPage = 7;
         let editingBmIndex = -1;
 
-        function showLoader(title = "Memuat Data", subtext = "Tunggu Sebentar") {
+        // Validation Helper for Email Format
+        function isValidEmail(email) {
+            const re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            return re.test(String(email).toLowerCase());
+        }
+
+        function validateEmailInput() {
+            const emailInput = document.getElementById('user-email');
+            const feedback = document.getElementById('user-email-feedback');
+            if (!emailInput || !feedback) return;
+
+            const val = emailInput.value.trim();
+            if (val.length === 0) {
+                feedback.classList.add('hidden');
+            } else if (!isValidEmail(val)) {
+                feedback.innerText = "Format Email tidak valid / tidak terdaftar!";
+                feedback.classList.remove('hidden');
+            } else {
+                feedback.classList.add('hidden');
+            }
+        }
+
+        function showLoader(title = "Memuat Data...", subtext = "Tunggu Sebentar") {
             const loader = document.getElementById('loader');
             if(loader) {
                 document.getElementById('loader-text').innerText = title;
@@ -954,7 +1008,7 @@
                 document.getElementById('welcome-login-time').innerText = "Waktu Masuk: " + now.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' }) + " WIB";
             }
 
-            // Apply Role Permissions on Sidebar Buttons
+            // Apply Role Permissions on Sidebar Buttons & Category Headers
             applyRolePermissions(displayRole);
         }
 
@@ -973,17 +1027,32 @@
             const isBendahara = (r === "Bendahara");
             const isPengurus = (r === "Pengurus Barang");
 
-            toggleBtn('btn-beranda', true); // Semua Peran
+            // Top Item
+            toggleBtn('btn-beranda', true);
+
+            // Group 1: PENGATURAN
+            toggleBtn('cat-pengaturan', isAdminOrKepsek || isBendahara);
             toggleBtn('btn-kop', isAdminOrKepsek);
             toggleBtn('btn-pajak', isAdminOrKepsek || isBendahara);
-            toggleBtn('btn-kuitansi', isAdminOrKepsek || isBendahara);
-            toggleBtn('btn-belanja_modal', isAdminOrKepsek || isPengurus);
-            toggleBtn('btn-cash_flow', isAdminOrKepsek || isBendahara);
-            toggleBtn('btn-laporan', isAdminOrKepsek || isBendahara);
-            toggleBtn('btn-arsip', isAdminOrKepsek);
-            toggleBtn('btn-arsip_cash_flow', isAdminOrKepsek);
             toggleBtn('btn-ttd', isAdminOrKepsek);
             toggleBtn('btn-pengguna', isAdminOrKepsek);
+
+            // Group 2: KUITANSI BOS
+            toggleBtn('cat-kuitansi', isAdminOrKepsek || isBendahara);
+            toggleBtn('btn-kuitansi', isAdminOrKepsek || isBendahara);
+            toggleBtn('btn-laporan', isAdminOrKepsek || isBendahara);
+            toggleBtn('btn-arsip', isAdminOrKepsek);
+
+            // Group 3: BELANJA MODAL
+            toggleBtn('cat-belanja_modal', isAdminOrKepsek || isPengurus);
+            toggleBtn('btn-belanja_modal', isAdminOrKepsek || isPengurus);
+
+            // Group 4: DANA MASUK & KELUAR
+            toggleBtn('cat-cash_flow', isAdminOrKepsek || isBendahara);
+            toggleBtn('btn-cash_flow', isAdminOrKepsek || isBendahara);
+            toggleBtn('btn-arsip_cash_flow', isAdminOrKepsek);
+
+            // Database Button on Dashboard (Restricted exclusively to Admin & Kepsek)
             toggleBtn('btn-cloud-db', isAdminOrKepsek);
         }
 
@@ -1158,6 +1227,8 @@
             document.getElementById('user-password').value = "";
             document.getElementById('user-role').value = "Admin";
             document.getElementById('user-photo').value = "";
+            const feedback = document.getElementById('user-email-feedback');
+            if (feedback) feedback.classList.add('hidden');
             previewUserPhoto();
         }
 
@@ -1196,6 +1267,11 @@
                 return notify("Lengkapi Nama, Username/Email, dan Password!", "bg-red-600");
             }
 
+            // Client-side syntax validation
+            if (!isValidEmail(email)) {
+                return notify("Format Email tidak valid atau alamat email salah!", "bg-red-600");
+            }
+
             const newUser = {
                 name,
                 email,
@@ -1205,15 +1281,21 @@
                 createdAt: new Date().toISOString()
             };
 
-            notify("Sedang Menyimpan & Mengirim Email Akun...", "bg-blue-600");
+            notify("Sedang Menyimpan & Verifikasi Email...", "bg-blue-600");
 
             const res = await apiRequest({ action: "saveUser", ...newUser }, "Menyimpan & Mengirim Email...");
+
+            if (res?.status === "email_failed") {
+                notify("Peringatan: User tersimpan, namun Email tidak aktif / gagal dikirim!", "bg-amber-600");
+            } else if (res?.status === "error") {
+                return notify("Gagal Menyimpan Pengguna!", "bg-red-600");
+            } else {
+                notify(`Pengguna Berhasil Ditambahkan! Kredensial dikirim ke ${email}`, "bg-green-600");
+            }
 
             users.push(newUser);
             renderUsers();
             closeUserModal();
-
-            notify(`Pengguna Berhasil Ditambahkan! Email dikirim ke ${email}`, "bg-green-600");
         }
 
         function renderUsers() {
@@ -1272,10 +1354,19 @@
         async function resendCredentials(idx) {
             const u = users[idx];
             if (!u) return;
+
+            if (!isValidEmail(u.email)) {
+                return notify(`Email ${u.email} tidak valid / format salah!`, "bg-red-600");
+            }
+
             showConfirm(`Kirim ulang email kredensial ke ${u.email}?`, async () => {
                 notify(`Mengirim kredensial ke ${u.email}...`, "bg-blue-600");
-                await apiRequest({ action: "resendUserCredentials", ...u }, "Mengirim Email...");
-                notify(`Kredensial terkirim ke ${u.email}!`, "bg-green-600");
+                const res = await apiRequest({ action: "resendUserCredentials", ...u }, "Mengirim Email...");
+                if (res?.status === "email_failed") {
+                    notify(`Gagal: Email ${u.email} tidak aktif / tidak terdaftar!`, "bg-amber-600");
+                } else {
+                    notify(`Kredensial terkirim ke ${u.email}!`, "bg-green-600");
+                }
             });
         }
 
@@ -1459,7 +1550,7 @@
                     <td class="p-4 text-center">
                         <span class="px-3 py-1 rounded-full text-xs font-bold ${badgeClass}">${b.kerusakan}</span>
                     </td>
-                    <td class="p-4 text-center flex justify-center gap-2">
+                    <td class="p-4 text-center">
                         <button onclick="editBelanjaModal(${actualIdx})" class="text-amber-600 font-bold hover:underline">Edit</button>
                     </td>
                 </tr>`;
@@ -2066,8 +2157,8 @@
 
         function startSyncProcess() {
             showConfirm("Sinkronkan ulang database?", () => {
-                simulateProgress("Tarik Data", loadAllData).then(() => {
-                    notify("Berhasil!", "bg-green-600");
+                simulateProgress("Singkronisasi Database", loadAllData).then(() => {
+                    notify("Berhasil Singkron Data!", "bg-green-600");
                 });
             });
         }
@@ -2151,7 +2242,7 @@
                 document.getElementById('bm-tanggal').value = new Date().toISOString().slice(0, 10);
             }
 
-            // Immediately load data upon launching/opening the app link with animated logo spinner
+            // Load data on app startup
             loadAllData().then(() => {
                 console.log("Auto-fetch completed on launch.");
             });
