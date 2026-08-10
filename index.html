@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Manajemen BOSP-SDN 22 Tanah Keras</title>
+    <title>SDN 22 Tanah Keras</title>
     
     <!-- Meta Tags untuk Full Screen (PWA Mode) -->
     <meta name="apple-mobile-web-app-capable" content="yes">
@@ -15,6 +15,8 @@
     <link rel="icon" type="image/png" href="https://iili.io/BLmT2LJ.md.png">
     <script src="https://cdn.tailwindcss.com"></script>
     
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+
     <style>
         .section-view { transition: opacity 0.2s ease-in-out; }
         /* Ukuran F4 standar: 210mm x 330mm */
@@ -55,7 +57,7 @@
     <script>
         const manifest = {
             "name": "Kuitansi Digital SDN 22",
-            "short_name": "",
+            "short_name": "SDN22",
             "start_url": ".",
             "display": "standalone",
             "background_color": "#f8fafc",
@@ -85,7 +87,7 @@
 <body class="bg-slate-50 font-sans text-slate-800">
 
     <script>
-        const scriptURL = "https://script.google.com/macros/s/AKfycbx-sT657xXO4268dSC4f8Ep36SPrDyKbwEHF2D0BANM2IV0zFsOxNXvFalozWh6yz_l/exec"; 
+        const scriptURL = "https://script.google.com/macros/s/AKfycbwlEjd3_p-zKpBkFa3p72YhSwIjCNGFqP9uY_CI30gsZfCwiS2nS3Lgxq2gMUKO903H/exec"; 
         const databaseURL = "https://docs.google.com/spreadsheets/d/1ZoBr1Yhw-O2fj1DMOhp5XNCg3PVkT0PNbMmtuyF95WE/edit?usp=sharing";
     </script>
 
@@ -96,7 +98,7 @@
                 <div class="absolute inset-2 border-2 border-indigo-400 border-b-transparent rounded-full animate-spin" style="animation-duration: 1.5s; animation-direction: reverse;"></div>
                 <img src="https://iili.io/BLlwHwQ.png" class="w-14 h-14 object-contain animate-pulse z-10" alt="Logo SDN 22">
             </div>
-            <h3 id="loader-text" class="mt-5 font-black text-blue-900 tracking-wide text-sm uppercase">Memuat Data...</h3>
+            <h3 id="loader-text" class="mt-5 font-black text-blue-900 tracking-wide text-sm uppercase">Memuat Data Aplikasi</h3>
             <p id="loader-subtext" class="text-[11px] text-slate-500 font-semibold mt-1 italic">Tunggu Sebentar</p>
         </div>
     </div>
@@ -137,6 +139,13 @@
                 <div>
                     <label class="block text-xs font-bold text-slate-500 uppercase mb-1">Deskripsi / Keperluan</label>
                     <input type="text" id="cf-deskripsi" class="w-full p-3 border rounded-xl outline-none focus:border-blue-500" placeholder="Contoh: Penerimaan Dana BOSP Tahap I">
+                </div>
+                <div>
+                    <label class="block text-xs font-bold text-slate-500 uppercase mb-1">Jenis BOSP</label>
+                    <select id="cf-jenis-bosp" class="w-full p-3 border rounded-xl outline-none bg-slate-50 focus:border-blue-500 font-semibold">
+                        <option value="Bos Reguler">Bos Reguler</option>
+                        <option value="Bos Kinerja">Bos Kinerja</option>
+                    </select>
                 </div>
                 <div>
                     <label class="block text-xs font-bold text-slate-500 uppercase mb-1">Jenis Transaksi</label>
@@ -219,11 +228,11 @@
                 <div class="bg-white border border-slate-200 p-8 rounded-2xl shadow-xl">
                     <div class="mb-6">
                         <label class="block text-sm font-bold text-slate-700 mb-2">Username / Email</label>
-                        <input type="text" id="login-user" class="w-full p-3 border border-slate-300 rounded-xl outline-none" value="">
+                        <input type="text" id="login-user" class="w-full p-3 border border-slate-300 rounded-xl outline-none" value="SDN22">
                     </div>
                     <div class="mb-8">
                         <label class="block text-sm font-bold text-slate-700 mb-2">Kata Sandi</label>
-                        <input type="password" id="login-pass" class="w-full p-3 border border-slate-300 rounded-xl outline-none" value="">
+                        <input type="password" id="login-pass" class="w-full p-3 border border-slate-300 rounded-xl outline-none" value="12345">
                     </div>
                     <button onclick="checkLogin()" class="w-full bg-blue-700 hover:bg-blue-800 text-white font-bold py-4 rounded-xl shadow-lg transition transform active:scale-95">Masuk ke Sistem</button>
                     <div id="login-error" class="mt-4 text-center text-red-500 text-sm font-bold hidden italic">Username/Sandi Salah.</div>
@@ -265,7 +274,7 @@
                         <button onclick="showSection('kop')" class="nav-btn w-full text-left p-3 rounded-lg hover:bg-blue-800 transition" id="btn-kop">KOP Surat</button>
                         <button onclick="showSection('pajak')" class="nav-btn w-full text-left p-3 rounded-lg hover:bg-blue-800 transition" id="btn-pajak">Data Pajak</button>
                         <button onclick="showSection('ttd')" class="nav-btn w-full text-left p-3 rounded-lg hover:bg-blue-800 transition" id="btn-ttd">Penandatangan</button>
-                        <button onclick="showSection('pengguna')" class="nav-btn w-full text-left p-3 rounded-lg hover:bg-blue-800 transition" id="btn-pengguna">Navigasi Pengguna</button>
+                        <button onclick="showSection('pengguna')" class="nav-btn w-full text-left p-3 rounded-lg hover:bg-blue-800 transition" id="btn-pengguna">Pengguna</button>
                     </div>
                 </div>
 
@@ -357,7 +366,7 @@
 
                 <div class="bg-white p-8 rounded-xl shadow-sm border border-slate-200">
                     <div class="flex justify-between items-center mb-6">
-                        <h2 class="text-2xl font-bold text-blue-900 uppercase">Statistik Database</h2>
+                        <h2 class="text-2xl font-bold text-blue-900 uppercase">Statistik Aplikasi</h2>
                         <a id="btn-cloud-db" target="_blank" class="bg-green-600 hover:bg-green-700 text-white px-6 py-3 rounded-xl font-bold shadow-lg transition transform active:scale-95 flex items-center gap-2">
                             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
                             Database
@@ -520,7 +529,10 @@
                         </div>
                         <div>
                             <label class="block text-xs font-bold text-slate-500 uppercase mb-1">Jenis Belanja Modal</label>
-                            <input type="text" id="bm-jenis" class="w-full p-3 border rounded-xl" placeholder="Contoh: Peralatan & Mesin">
+                            <select id="bm-jenis" class="w-full p-3 border rounded-xl outline-none bg-slate-50 font-semibold">
+                                <option value="Belanja Modal Peralatan dan Mesin">Belanja Modal Peralatan dan Mesin</option>
+                                <option value="Belanja Modal Aset Tetap Lainnya">Belanja Modal Aset Tetap Lainnya</option>
+                            </select>
                         </div>
                         <div>
                             <label class="block text-xs font-bold text-slate-500 uppercase mb-1">Volume / Jumlah</label>
@@ -568,12 +580,17 @@
                         <h2 class="text-2xl font-bold text-blue-900 uppercase">Daftar Belanja Modal</h2>
                         <div class="flex flex-wrap gap-2 items-center">
                             <input type="text" id="filter-bm" oninput="renderBelanjaModal()" class="p-3 border rounded-xl w-64 shadow-sm" placeholder="Cari Barang...">
+                            <select id="filter-jenis-bm" onchange="renderBelanjaModal()" class="p-3 border rounded-xl w-56 shadow-sm outline-none">
+                                <option value="all">Semua Jenis Belanja</option>
+                                <option value="Belanja Modal Peralatan dan Mesin">Belanja Modal Peralatan dan Mesin</option>
+                                <option value="Belanja Modal Aset Tetap Lainnya">Belanja Modal Aset Tetap Lainnya</option>
+                            </select>
                             <select id="filter-tahun-bm" onchange="renderBelanjaModal()" class="p-3 border rounded-xl w-44 shadow-sm outline-none">
                                 <option value="all">Semua Tahun</option>
                             </select>
                             <button onclick="printBelanjaModal()" class="bg-blue-800 hover:bg-blue-900 text-white px-5 py-3 rounded-xl font-bold shadow-md transition flex items-center gap-2">
                                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"></path></svg>
-                                Cetak KOP
+                                Cetak
                             </button>
                             <button onclick="exportBelanjaModalExcel()" class="bg-emerald-600 hover:bg-emerald-700 text-white px-5 py-3 rounded-xl font-bold shadow-md transition flex items-center gap-2">
                                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
@@ -645,6 +662,11 @@
                         <h2 class="text-2xl font-bold text-blue-900 uppercase">Buku Kas Dana Masuk & Keluar</h2>
                         <div class="flex flex-wrap gap-2 items-center">
                             <input type="text" id="filter-cash_flow" oninput="renderCashFlow()" class="p-3 border rounded-xl w-64 shadow-sm" placeholder="Cari Transaksi...">
+                            <select id="filter-bosp-cash_flow" onchange="renderCashFlow()" class="p-3 border rounded-xl w-44 shadow-sm outline-none">
+                                <option value="all">Semua Jenis BOSP</option>
+                                <option value="Bos Reguler">Bos Reguler</option>
+                                <option value="Bos Kinerja">Bos Kinerja</option>
+                            </select>
                             <button onclick="openCashFlowModal()" class="bg-blue-700 hover:bg-blue-800 text-white px-5 py-3 rounded-xl font-bold shadow-md transition flex items-center gap-2">
                                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
                                 Tambah Transaksi
@@ -655,7 +677,7 @@
                             </button>
                             <button onclick="printCashFlow()" class="bg-blue-800 hover:bg-blue-900 text-white px-5 py-3 rounded-xl font-bold shadow-md transition flex items-center gap-2">
                                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"></path></svg>
-                                Cetak KOP
+                                Cetak
                             </button>
                             <button onclick="exportCashFlowExcel()" class="bg-emerald-600 hover:bg-emerald-700 text-white px-5 py-3 rounded-xl font-bold shadow-md transition flex items-center gap-2">
                                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
@@ -670,6 +692,7 @@
                                     <th class="p-4 border text-center w-12">No</th>
                                     <th class="p-4 border text-center w-32">Tanggal</th>
                                     <th class="p-4 border">Deskripsi</th>
+                                    <th class="p-4 border text-center w-32">Jenis BOSP</th>
                                     <th class="p-4 border text-right text-emerald-200">Uang Masuk (Rp)</th>
                                     <th class="p-4 border text-right text-rose-200">Uang Keluar (Rp)</th>
                                     <th class="p-4 border text-right">Saldo Akhir (Rp)</th>
@@ -757,7 +780,7 @@
                         <div class="flex flex-wrap gap-2 items-center">
                             <button onclick="printArsipCashFlow()" class="bg-blue-800 hover:bg-blue-900 text-white px-5 py-3 rounded-xl font-bold shadow-md transition flex items-center gap-2">
                                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"></path></svg>
-                                Cetak KOP Arsip
+                                Cetak Arsip
                             </button>
                             <button onclick="exportArsipCashFlowExcel()" class="bg-emerald-600 hover:bg-emerald-700 text-white px-5 py-3 rounded-xl font-bold shadow-md transition flex items-center gap-2">
                                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
@@ -771,7 +794,15 @@
                             <label class="block text-xs font-bold text-slate-400 uppercase mb-1">Cari Transaksi Arsip</label>
                             <input type="text" id="filter-arsip-cf" oninput="renderArsipCashFlow()" class="p-3 border rounded-xl w-full shadow-sm" placeholder="Cari Deskripsi / Tanggal...">
                         </div>
-                        <div class="w-full md:w-48">
+                        <div class="w-full md:w-44">
+                            <label class="block text-xs font-bold text-slate-400 uppercase mb-1">Jenis BOSP</label>
+                            <select id="filter-bosp-arsip-cf" onchange="renderArsipCashFlow()" class="p-3 border rounded-xl w-full shadow-sm outline-none">
+                                <option value="all">Semua Jenis</option>
+                                <option value="Bos Reguler">Bos Reguler</option>
+                                <option value="Bos Kinerja">Bos Kinerja</option>
+                            </select>
+                        </div>
+                        <div class="w-full md:w-44">
                             <label class="block text-xs font-bold text-slate-400 uppercase mb-1">Filter Tahun</label>
                             <select id="filter-tahun-arsip-cf" onchange="renderArsipCashFlow()" class="p-3 border rounded-xl w-full shadow-sm outline-none">
                                 <option value="all">Semua Tahun</option>
@@ -786,6 +817,7 @@
                                     <th class="p-4 border text-center w-12">No</th>
                                     <th class="p-4 border text-center w-32">Tanggal</th>
                                     <th class="p-4 border">Deskripsi</th>
+                                    <th class="p-4 border text-center w-32">Jenis BOSP</th>
                                     <th class="p-4 border text-right text-emerald-300">Uang Masuk (Rp)</th>
                                     <th class="p-4 border text-right text-rose-300">Uang Keluar (Rp)</th>
                                     <th class="p-4 border text-center w-24">Tahun</th>
@@ -944,7 +976,7 @@
         const rowsPerPage = 7;
         let editingBmIndex = -1;
 
-        // Validation Helper for Email Format
+        // Validation & Helper Utilities
         function isValidEmail(email) {
             const re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
             return re.test(String(email).toLowerCase());
@@ -966,7 +998,7 @@
             }
         }
 
-        function showLoader(title = "Memuat Data...", subtext = "Tunggu Sebentar") {
+        function showLoader(title = "Memuat Data Aplikasi", subtext = "Tunggu Sebentar") {
             const loader = document.getElementById('loader');
             if(loader) {
                 document.getElementById('loader-text').innerText = title;
@@ -1072,7 +1104,7 @@
         }
 
         async function loadAllData() {
-            showLoader("Memuat Data...", "Tunggu Sebentar");
+            showLoader("Memuat Data Aplikasi", "Tunggu Sebentar");
             try {
                 const cacheBuster = "?cb=" + Date.now();
                 const response = await fetch(scriptURL + cacheBuster);
@@ -1106,7 +1138,7 @@
                 populateArchiveYears();
                 populateArsipCfYears();
 
-                notify("Data Berhasil Dimuat!", "bg-green-600");
+                notify("Data Cloud Berhasil Dimuat!", "bg-green-600");
             } catch (err) {
                 console.error("Error loading cloud data:", err);
                 notify("Gagal Memuat Data Cloud. Periksa Koneksi!", "bg-red-600");
@@ -1267,7 +1299,6 @@
                 return notify("Lengkapi Nama, Username/Email, dan Password!", "bg-red-600");
             }
 
-            // Client-side syntax validation
             if (!isValidEmail(email)) {
                 return notify("Format Email tidak valid atau alamat email salah!", "bg-red-600");
             }
@@ -1442,7 +1473,7 @@
             editingBmIndex = idx;
             document.getElementById('bm-nama').value = b.nama || "";
             document.getElementById('bm-merek').value = b.merek || "";
-            document.getElementById('bm-jenis').value = b.jenis || "";
+            document.getElementById('bm-jenis').value = b.jenis || "Belanja Modal Peralatan dan Mesin";
             document.getElementById('bm-volume').value = b.volume || "";
             if (document.getElementById('bm-harga')) document.getElementById('bm-harga').value = Math.round(parseFloat(b.harga) || 0);
             if (document.getElementById('bm-total-harga')) document.getElementById('bm-total-harga').value = Math.round(parseFloat(b.totalHarga) || 0);
@@ -1474,7 +1505,7 @@
             editingBmIndex = -1;
             document.getElementById('bm-nama').value = "";
             document.getElementById('bm-merek').value = "";
-            document.getElementById('bm-jenis').value = "";
+            document.getElementById('bm-jenis').value = "Belanja Modal Peralatan dan Mesin";
             document.getElementById('bm-volume').value = "";
             if(document.getElementById('bm-harga')) document.getElementById('bm-harga').value = "";
             if(document.getElementById('bm-total-harga')) document.getElementById('bm-total-harga').value = "";
@@ -1514,15 +1545,17 @@
 
             const filter = (document.getElementById('filter-bm')?.value || "").toLowerCase();
             const yearFilter = document.getElementById('filter-tahun-bm')?.value || "all";
+            const jenisFilter = document.getElementById('filter-jenis-bm')?.value || "all";
 
             const filtered = belanjaModal.filter(b => {
                 const itemYear = String(b.tahun || new Date(b.tanggal || Date.now()).getFullYear());
                 const matchYear = yearFilter === "all" || itemYear === yearFilter;
+                const matchJenis = jenisFilter === "all" || b.jenis === jenisFilter;
                 const matchText = String(b.nama).toLowerCase().includes(filter) ||
                                   String(b.merek).toLowerCase().includes(filter) ||
                                   String(b.jenis).toLowerCase().includes(filter) ||
                                   String(b.volume || '').toLowerCase().includes(filter);
-                return matchYear && matchText;
+                return matchYear && matchJenis && matchText;
             });
 
             tbody.innerHTML = filtered.map((b) => {
@@ -1573,6 +1606,7 @@
             document.getElementById('cf-modal').classList.remove('hidden');
             document.getElementById('cf-tanggal').value = new Date().toISOString().slice(0, 10);
             document.getElementById('cf-deskripsi').value = "";
+            if (document.getElementById('cf-jenis-bosp')) document.getElementById('cf-jenis-bosp').value = "Bos Reguler";
             document.getElementById('cf-nominal').value = "";
             document.getElementById('cf-jenis').value = "masuk";
         }
@@ -1584,6 +1618,7 @@
         async function saveCashFlow() {
             const tanggal = document.getElementById('cf-tanggal').value;
             const deskripsi = document.getElementById('cf-deskripsi').value;
+            const jenisBosp = document.getElementById('cf-jenis-bosp')?.value || "Bos Reguler";
             const jenis = document.getElementById('cf-jenis').value;
             const nominal = Math.round(parseFloat(document.getElementById('cf-nominal').value) || 0);
 
@@ -1594,7 +1629,7 @@
             const masuk = jenis === 'masuk' ? nominal : 0;
             const keluar = jenis === 'keluar' ? nominal : 0;
 
-            const item = { tanggal, deskripsi, masuk, keluar };
+            const item = { tanggal, deskripsi, jenisBosp, masuk, keluar };
 
             notify("Sedang Menyimpan Transaksi Dana...", "bg-blue-600");
             const res = await apiRequest({ action: "saveCashFlow", ...item }, "Menyimpan Transaksi...");
@@ -1635,19 +1670,29 @@
             document.getElementById('cf-stat-keluar').innerText = formatIDR(totalKeluar);
             document.getElementById('cf-stat-saldo').innerText = formatIDR(runningSaldo);
 
-            const filter = (document.getElementById('filter-cash_flow')?.value || "").toLowerCase();
-            const filtered = calculatedFlow.filter(c => 
-                String(c.deskripsi).toLowerCase().includes(filter) ||
-                String(c.tanggal).toLowerCase().includes(filter)
-            );
+            const filterText = (document.getElementById('filter-cash_flow')?.value || "").toLowerCase();
+            const filterBosp = document.getElementById('filter-bosp-cash_flow')?.value || "all";
+
+            const filtered = calculatedFlow.filter(c => {
+                const matchText = String(c.deskripsi).toLowerCase().includes(filterText) ||
+                                  String(c.jenisBosp || "").toLowerCase().includes(filterText) ||
+                                  String(c.tanggal).toLowerCase().includes(filterText);
+                const matchBosp = filterBosp === "all" || (c.jenisBosp || "Bos Reguler") === filterBosp;
+                return matchText && matchBosp;
+            });
 
             tbody.innerHTML = filtered.map((c, idx) => {
                 const tgl = new Date(c.tanggal).toLocaleDateString('id-ID');
+                const bospVal = c.jenisBosp || "Bos Reguler";
+                const bospBadge = bospVal === "Bos Kinerja" ? "bg-purple-100 text-purple-800" : "bg-blue-100 text-blue-800";
 
                 return `<tr class="border-b hover:bg-slate-50 transition">
                     <td class="p-4 text-center font-bold text-slate-500">${idx + 1}</td>
                     <td class="p-4 text-center font-semibold text-slate-700">${tgl}</td>
                     <td class="p-4 font-bold text-slate-800">${c.deskripsi}</td>
+                    <td class="p-4 text-center">
+                        <span class="px-2.5 py-1 rounded-full text-[11px] font-extrabold ${bospBadge}">${bospVal}</span>
+                    </td>
                     <td class="p-4 text-right font-bold text-emerald-600">${c.masuk > 0 ? 'Rp ' + Number(c.masuk).toLocaleString('id-ID') : '-'}</td>
                     <td class="p-4 text-right font-bold text-rose-600">${c.keluar > 0 ? 'Rp ' + Number(c.keluar).toLocaleString('id-ID') : '-'}</td>
                     <td class="p-4 text-right font-black text-blue-900">Rp ${Number(c.saldo).toLocaleString('id-ID')}</td>
@@ -1704,13 +1749,17 @@
 
             const filter = (document.getElementById('filter-arsip-cf')?.value || "").toLowerCase();
             const yearFilter = document.getElementById('filter-tahun-arsip-cf')?.value || "all";
+            const bospFilter = document.getElementById('filter-bosp-arsip-cf')?.value || "all";
 
             const filtered = archiveCashFlow.filter(c => {
                 const itemYear = String(c.tahun || new Date(c.tanggal || Date.now()).getFullYear());
+                const itemBosp = c.jenisBosp || "Bos Reguler";
                 const matchYear = yearFilter === "all" || itemYear === yearFilter;
+                const matchBosp = bospFilter === "all" || itemBosp === bospFilter;
                 const matchText = String(c.deskripsi).toLowerCase().includes(filter) ||
+                                  String(c.jenisBosp || "").toLowerCase().includes(filter) ||
                                   String(c.tanggal).toLowerCase().includes(filter);
-                return matchYear && matchText;
+                return matchYear && matchBosp && matchText;
             });
 
             filtered.sort((a,b) => new Date(a.tanggal) - new Date(b.tanggal));
@@ -1718,11 +1767,16 @@
             tbody.innerHTML = filtered.map((c, idx) => {
                 const tgl = new Date(c.tanggal).toLocaleDateString('id-ID');
                 const yr = c.tahun || new Date(c.tanggal).getFullYear();
+                const bospVal = c.jenisBosp || "Bos Reguler";
+                const bospBadge = bospVal === "Bos Kinerja" ? "bg-purple-100 text-purple-800" : "bg-blue-100 text-blue-800";
 
                 return `<tr class="border-b hover:bg-slate-50 transition">
                     <td class="p-4 text-center font-bold text-slate-500">${idx + 1}</td>
                     <td class="p-4 text-center font-semibold text-slate-700">${tgl}</td>
                     <td class="p-4 font-bold text-slate-800">${c.deskripsi}</td>
+                    <td class="p-4 text-center">
+                        <span class="px-2.5 py-1 rounded-full text-[11px] font-extrabold ${bospBadge}">${bospVal}</span>
+                    </td>
                     <td class="p-4 text-right font-bold text-emerald-600">${c.masuk > 0 ? 'Rp ' + Number(c.masuk).toLocaleString('id-ID') : '-'}</td>
                     <td class="p-4 text-right font-bold text-rose-600">${c.keluar > 0 ? 'Rp ' + Number(c.keluar).toLocaleString('id-ID') : '-'}</td>
                     <td class="p-4 text-center font-bold text-slate-700">${yr}</td>
@@ -1901,14 +1955,16 @@
         function printBelanjaModal() {
             const filter = (document.getElementById('filter-bm')?.value || "").toLowerCase();
             const yearFilter = document.getElementById('filter-tahun-bm')?.value || "all";
+            const jenisFilter = document.getElementById('filter-jenis-bm')?.value || "all";
 
             const filtered = belanjaModal.filter(b => {
                 const itemYear = String(b.tahun || new Date(b.tanggal || Date.now()).getFullYear());
                 const matchYear = yearFilter === "all" || itemYear === yearFilter;
+                const matchJenis = jenisFilter === "all" || b.jenis === jenisFilter;
                 const matchText = String(b.nama).toLowerCase().includes(filter) ||
                                   String(b.merek).toLowerCase().includes(filter) ||
                                   String(b.jenis).toLowerCase().includes(filter);
-                return matchYear && matchText;
+                return matchYear && matchJenis && matchText;
             });
 
             if (filtered.length === 0) return notify("Tidak ada data Belanja Modal untuk dicetak!", "bg-amber-600");
@@ -1953,21 +2009,89 @@
             printWin.document.open(); printWin.document.write(content); printWin.document.close();
         }
 
+        function exportToExcelEngine(dataArray, fileName, sheetName) {
+            if (typeof XLSX !== 'undefined') {
+                const ws = XLSX.utils.json_to_sheet(dataArray);
+                const wb = XLSX.utils.book_new();
+                XLSX.utils.book_append_sheet(wb, ws, sheetName || "Data");
+                
+                // Set auto column widths
+                if (dataArray.length > 0) {
+                    const colWidths = Object.keys(dataArray[0]).map(key => {
+                        const maxLen = Math.max(
+                            key.toString().length,
+                            ...dataArray.map(row => (row[key] !== null && row[key] !== undefined ? row[key].toString().length : 0))
+                        );
+                        return { wch: Math.min(Math.max(maxLen + 3, 10), 60) };
+                    });
+                    ws['!cols'] = colWidths;
+                }
+                
+                XLSX.writeFile(wb, fileName + ".xlsx");
+            } else {
+                exportXmlExcelFallback(dataArray, fileName);
+            }
+        }
+
+        function exportXmlExcelFallback(dataArray, fileName) {
+            if (!dataArray || dataArray.length === 0) return;
+            const headers = Object.keys(dataArray[0]);
+            let xml = `<html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:x="urn:schemas-microsoft-com:office:excel" xmlns="http://www.w3.org/TR/REC-html40">
+            <head><meta charset="utf-8"><style>table, td, th { border: 1px solid black; border-collapse: collapse; } th { background-color: #1e3a8a; color: white; font-weight: bold; }</style></head>
+            <body><table><thead><tr>${headers.map(h => `<th>${h}</th>`).join('')}</tr></thead><tbody>`;
+            
+            dataArray.forEach(row => {
+                xml += `<tr>${headers.map(h => `<td>${row[h] !== undefined ? row[h] : ''}</td>`).join('')}</tr>`;
+            });
+            xml += `</tbody></table></body></html>`;
+
+            const blob = new Blob([xml], { type: 'application/vnd.ms-excel;charset=utf-8;' });
+            const link = document.createElement("a");
+            link.href = URL.createObjectURL(blob);
+            link.download = fileName + ".xls";
+            link.click();
+        }
+
         function exportBelanjaModalExcel() {
-            if (belanjaModal.length === 0) return notify("Tidak ada data Belanja Modal untuk diekspor!", "bg-amber-600");
-            let csv = "No,Nama Barang,Merek / Tipe,Jenis Belanja Modal,Volume / Jumlah,Harga Satuan (Rp),Jumlah Harga (Rp),Tahun Belanja,Tanggal Transaksi,Kondisi\n";
-            belanjaModal.forEach((b, i) => {
+            if (!belanjaModal || belanjaModal.length === 0) return notify("Tidak ada data Belanja Modal untuk diekspor!", "bg-amber-600");
+            
+            const filterText = (document.getElementById('filter-bm')?.value || "").toLowerCase();
+            const yearFilter = document.getElementById('filter-tahun-bm')?.value || "all";
+            const jenisFilter = document.getElementById('filter-jenis-bm')?.value || "all";
+
+            const filtered = belanjaModal.filter(b => {
+                const itemYear = String(b.tahun || new Date(b.tanggal || Date.now()).getFullYear());
+                const matchYear = yearFilter === "all" || itemYear === yearFilter;
+                const matchJenis = jenisFilter === "all" || b.jenis === jenisFilter;
+                const matchText = String(b.nama).toLowerCase().includes(filterText) ||
+                                  String(b.merek).toLowerCase().includes(filterText) ||
+                                  String(b.jenis).toLowerCase().includes(filterText) ||
+                                  String(b.volume || '').toLowerCase().includes(filterText);
+                return matchYear && matchJenis && matchText;
+            });
+
+            if (filtered.length === 0) return notify("Tidak ada data Belanja Modal yang sesuai filter untuk diekspor!", "bg-amber-600");
+
+            const exportData = filtered.map((b, i) => {
                 const hargaSat = Math.round(parseFloat(b.harga) || 0);
                 const displayVol = b.volume || "1 Unit";
                 const totalH = Math.round(parseFloat(b.totalHarga) || (hargaSat * (parseFloat(displayVol.match(/\d+(\.\d+)?/)?.[0]) || 1)));
                 const displayDate = b.tanggal ? new Date(b.tanggal).toLocaleDateString('id-ID') : '-';
-                csv += `"${i+1}","${b.nama}","${b.merek}","${b.jenis}","${displayVol}","${hargaSat}","${totalH}","${b.tahun || '-'}","${displayDate}","${b.kerusakan}"\n`;
+                return {
+                    "No": i + 1,
+                    "Nama Barang": b.nama,
+                    "Merek / Tipe": b.merek,
+                    "Jenis Belanja Modal": b.jenis,
+                    "Volume / Jumlah": displayVol,
+                    "Harga Satuan (Rp)": hargaSat,
+                    "Jumlah Harga (Rp)": totalH,
+                    "Tahun Belanja": b.tahun || '-',
+                    "Tanggal Transaksi": displayDate,
+                    "Kondisi": b.kerusakan
+                };
             });
-            const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
-            const link = document.createElement("a");
-            link.href = URL.createObjectURL(blob);
-            link.download = `Belanja_Modal_SDN22_${new Date().toISOString().slice(0,10)}.csv`;
-            link.click();
+
+            exportToExcelEngine(exportData, `Belanja_Modal_SDN22_${new Date().toISOString().slice(0,10)}`, "Belanja Modal");
         }
 
         function printCashFlow() {
@@ -1992,6 +2116,7 @@
                     <td style="border: 1px solid black; padding: 6px; text-align: center;">${i + 1}</td>
                     <td style="border: 1px solid black; padding: 6px; text-align: center;">${tgl}</td>
                     <td style="border: 1px solid black; padding: 6px;">${c.deskripsi}</td>
+                    <td style="border: 1px solid black; padding: 6px; text-align: center;">${c.jenisBosp || 'Bos Reguler'}</td>
                     <td style="border: 1px solid black; padding: 6px; text-align: right;">${masuk > 0 ? 'Rp ' + masuk.toLocaleString('id-ID') : '-'}</td>
                     <td style="border: 1px solid black; padding: 6px; text-align: right;">${keluar > 0 ? 'Rp ' + keluar.toLocaleString('id-ID') : '-'}</td>
                     <td style="border: 1px solid black; padding: 6px; text-align: right; font-weight: bold;">Rp ${runningSaldo.toLocaleString('id-ID')}</td>
@@ -2010,27 +2135,44 @@
                 <div style="width: 80px; text-align: center;">${kopConfig.logoR ? `<img src="${kopConfig.logoR}" style="max-width:80px;">` : ''}</div>
             </div>`;
 
-            const content = `<html><head><title>Buku Kas Dana Masuk & Keluar</title><style>@page { size: 210mm 330mm; margin: 15mm; } body { font-family: 'Times New Roman', serif; }</style></head><body onload="window.print(); window.close();">${kopHeader}<h2 style="text-align:center; text-decoration:underline; font-size:14pt; margin-bottom:20px;">BUKU KAS DANA MASUK & KELUAR</h2><table style="width:100%; border-collapse:collapse; font-size:10pt;"><thead><tr style="background:#eee;"><th style="border:1px solid black; padding:8px;">No</th><th style="border:1px solid black; padding:8px;">Tanggal</th><th style="border:1px solid black; padding:8px;">Deskripsi / Keperluan</th><th style="border:1px solid black; padding:8px;">Uang Masuk (Rp)</th><th style="border:1px solid black; padding:8px;">Uang Keluar (Rp)</th><th style="border:1px solid black; padding:8px;">Saldo Akhir (Rp)</th></tr></thead><tbody><tr><td style="border:1px solid black; padding:6px; text-align:center;">-</td><td style="border:1px solid black; padding:6px; text-align:center;">-</td><td style="border:1px solid black; padding:6px; font-weight:bold;">SALDO AWAL KAS BOSP</td><td style="border:1px solid black; padding:6px; text-align:right;">-</td><td style="border:1px solid black; padding:6px; text-align:right;">-</td><td style="border:1px solid black; padding:6px; text-align:right; font-weight:bold;">Rp ${saldoAwal.toLocaleString('id-ID')}</td></tr>${rowsHtml}<tr style="background:#f8fafc;"><td colspan="3" style="border:1px solid black; padding:8px; font-weight:bold; text-align:right;">TOTAL KAS:</td><td style="border:1px solid black; padding:8px; font-weight:bold; text-align:right;">Rp ${totalMasuk.toLocaleString('id-ID')}</td><td style="border:1px solid black; padding:8px; font-weight:bold; text-align:right;">Rp ${totalKeluar.toLocaleString('id-ID')}</td><td style="border:1px solid black; padding:8px; font-weight:bold; text-align:right;">Rp ${runningSaldo.toLocaleString('id-ID')}</td></tr></tbody></table></body></html>`;
+            const content = `<html><head><title>Buku Kas Dana Masuk & Keluar</title><style>@page { size: 210mm 330mm; margin: 15mm; } body { font-family: 'Times New Roman', serif; }</style></head><body onload="window.print(); window.close();">${kopHeader}<h2 style="text-align:center; text-decoration:underline; font-size:14pt; margin-bottom:20px;">BUKU KAS DANA MASUK & KELUAR</h2><table style="width:100%; border-collapse:collapse; font-size:10pt;"><thead><tr style="background:#eee;"><th style="border:1px solid black; padding:8px;">No</th><th style="border:1px solid black; padding:8px;">Tanggal</th><th style="border:1px solid black; padding:8px;">Deskripsi / Keperluan</th><th style="border:1px solid black; padding:8px;">Jenis BOSP</th><th style="border:1px solid black; padding:8px;">Uang Masuk (Rp)</th><th style="border:1px solid black; padding:8px;">Uang Keluar (Rp)</th><th style="border:1px solid black; padding:8px;">Saldo Akhir (Rp)</th></tr></thead><tbody><tr><td style="border:1px solid black; padding:6px; text-align:center;">-</td><td style="border:1px solid black; padding:6px; text-align:center;">-</td><td style="border:1px solid black; padding:6px; font-weight:bold;">SALDO AWAL KAS BOSP</td><td style="border:1px solid black; padding:6px; text-align:center;">-</td><td style="border:1px solid black; padding:6px; text-align:right;">-</td><td style="border:1px solid black; padding:6px; text-align:right;">-</td><td style="border:1px solid black; padding:6px; text-align:right; font-weight:bold;">Rp ${saldoAwal.toLocaleString('id-ID')}</td></tr>${rowsHtml}<tr style="background:#f8fafc;"><td colspan="4" style="border:1px solid black; padding:8px; font-weight:bold; text-align:right;">TOTAL KAS:</td><td style="border:1px solid black; padding:8px; font-weight:bold; text-align:right;">Rp ${totalMasuk.toLocaleString('id-ID')}</td><td style="border:1px solid black; padding:8px; font-weight:bold; text-align:right;">Rp ${totalKeluar.toLocaleString('id-ID')}</td><td style="border:1px solid black; padding:8px; font-weight:bold; text-align:right;">Rp ${runningSaldo.toLocaleString('id-ID')}</td></tr></tbody></table></body></html>`;
             printWin.document.open(); printWin.document.write(content); printWin.document.close();
         }
 
         function exportCashFlowExcel() {
-            if (cashFlow.length === 0) return notify("Tidak ada data Kas untuk diekspor!", "bg-amber-600");
-            let csv = "No,Tanggal,Deskripsi / Keperluan,Uang Masuk (Rp),Uang Keluar (Rp),Saldo Akhir (Rp)\n";
+            if (!cashFlow || cashFlow.length === 0) return notify("Tidak ada data Kas untuk diekspor!", "bg-amber-600");
+
+            const exportData = [];
             let runningSaldo = saldoAwal;
-            csv += `0,"-","SALDO AWAL KAS BOSP",0,0,${saldoAwal}\n`;
+
+            exportData.push({
+                "No": 0,
+                "Tanggal": "-",
+                "Deskripsi / Keperluan": "SALDO AWAL KAS BOSP",
+                "Jenis BOSP": "-",
+                "Uang Masuk (Rp)": 0,
+                "Uang Keluar (Rp)": 0,
+                "Saldo Akhir (Rp)": saldoAwal
+            });
+
             cashFlow.forEach((c, i) => {
                 const masuk = Math.round(parseFloat(c.masuk) || 0);
                 const keluar = Math.round(parseFloat(c.keluar) || 0);
                 runningSaldo += (masuk - keluar);
                 const tgl = new Date(c.tanggal).toLocaleDateString('id-ID');
-                csv += `"${i+1}","${tgl}","${c.deskripsi}","${masuk}","${keluar}","${runningSaldo}"\n`;
+                
+                exportData.push({
+                    "No": i + 1,
+                    "Tanggal": tgl,
+                    "Deskripsi / Keperluan": c.deskripsi,
+                    "Jenis BOSP": c.jenisBosp || 'Bos Reguler',
+                    "Uang Masuk (Rp)": masuk,
+                    "Uang Keluar (Rp)": keluar,
+                    "Saldo Akhir (Rp)": runningSaldo
+                });
             });
-            const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
-            const link = document.createElement("a");
-            link.href = URL.createObjectURL(blob);
-            link.download = `Kas_BOSP_SDN22_${new Date().toISOString().slice(0,10)}.csv`;
-            link.click();
+
+            exportToExcelEngine(exportData, `Kas_BOSP_SDN22_${new Date().toISOString().slice(0,10)}`, "Kas BOSP");
         }
 
         function printArsipCashFlow() {
@@ -2041,13 +2183,16 @@
 
             const filter = (document.getElementById('filter-arsip-cf')?.value || "").toLowerCase();
             const yearFilter = document.getElementById('filter-tahun-arsip-cf')?.value || "all";
+            const bospFilter = document.getElementById('filter-bosp-arsip-cf')?.value || "all";
 
             const filtered = archiveCashFlow.filter(c => {
                 const itemYear = String(c.tahun || new Date(c.tanggal || Date.now()).getFullYear());
+                const itemBosp = c.jenisBosp || "Bos Reguler";
                 const matchYear = yearFilter === "all" || itemYear === yearFilter;
+                const matchBosp = bospFilter === "all" || itemBosp === bospFilter;
                 const matchText = String(c.deskripsi).toLowerCase().includes(filter) ||
                                   String(c.tanggal).toLowerCase().includes(filter);
-                return matchYear && matchText;
+                return matchYear && matchBosp && matchText;
             });
 
             let rowsHtml = filtered.map((c, i) => {
@@ -2060,6 +2205,7 @@
                     <td style="border: 1px solid black; padding: 6px; text-align: center;">${i + 1}</td>
                     <td style="border: 1px solid black; padding: 6px; text-align: center;">${tgl}</td>
                     <td style="border: 1px solid black; padding: 6px;">${c.deskripsi}</td>
+                    <td style="border: 1px solid black; padding: 6px; text-align: center;">${c.jenisBosp || 'Bos Reguler'}</td>
                     <td style="border: 1px solid black; padding: 6px; text-align: right;">${masuk > 0 ? 'Rp ' + masuk.toLocaleString('id-ID') : '-'}</td>
                     <td style="border: 1px solid black; padding: 6px; text-align: right;">${keluar > 0 ? 'Rp ' + keluar.toLocaleString('id-ID') : '-'}</td>
                     <td style="border: 1px solid black; padding: 6px; text-align: center;">${yr}</td>
@@ -2078,25 +2224,47 @@
                 <div style="width: 80px; text-align: center;">${kopConfig.logoR ? `<img src="${kopConfig.logoR}" style="max-width:80px;">` : ''}</div>
             </div>`;
 
-            const content = `<html><head><title>Arsip Dana Masuk & Keluar</title><style>@page { size: 210mm 330mm; margin: 15mm; } body { font-family: 'Times New Roman', serif; }</style></head><body onload="window.print(); window.close();">${kopHeader}<h2 style="text-align:center; text-decoration:underline; font-size:14pt; margin-bottom:20px;">ARSIP DANA MASUK & KELUAR</h2><table style="width:100%; border-collapse:collapse; font-size:10pt;"><thead><tr style="background:#eee;"><th style="border:1px solid black; padding:8px;">No</th><th style="border:1px solid black; padding:8px;">Tanggal</th><th style="border:1px solid black; padding:8px;">Deskripsi</th><th style="border:1px solid black; padding:8px;">Uang Masuk (Rp)</th><th style="border:1px solid black; padding:8px;">Uang Keluar (Rp)</th><th style="border:1px solid black; padding:8px;">Tahun</th></tr></thead><tbody>${rowsHtml}</tbody></table></body></html>`;
+            const content = `<html><head><title>Arsip Dana Masuk & Keluar</title><style>@page { size: 210mm 330mm; margin: 15mm; } body { font-family: 'Times New Roman', serif; }</style></head><body onload="window.print(); window.close();">${kopHeader}<h2 style="text-align:center; text-decoration:underline; font-size:14pt; margin-bottom:20px;">ARSIP DANA MASUK & KELUAR</h2><table style="width:100%; border-collapse:collapse; font-size:10pt;"><thead><tr style="background:#eee;"><th style="border:1px solid black; padding:8px;">No</th><th style="border:1px solid black; padding:8px;">Tanggal</th><th style="border:1px solid black; padding:8px;">Deskripsi</th><th style="border:1px solid black; padding:8px;">Jenis BOSP</th><th style="border:1px solid black; padding:8px;">Uang Masuk (Rp)</th><th style="border:1px solid black; padding:8px;">Uang Keluar (Rp)</th><th style="border:1px solid black; padding:8px;">Tahun</th></tr></thead><tbody>${rowsHtml}</tbody></table></body></html>`;
             printWin.document.open(); printWin.document.write(content); printWin.document.close();
         }
 
         function exportArsipCashFlowExcel() {
-            if (archiveCashFlow.length === 0) return notify("Tidak ada data Arsip Kas untuk diekspor!", "bg-amber-600");
-            let csv = "No,Tanggal,Deskripsi,Uang Masuk (Rp),Uang Keluar (Rp),Tahun\n";
-            archiveCashFlow.forEach((c, i) => {
+            if (!archiveCashFlow || archiveCashFlow.length === 0) return notify("Tidak ada data Arsip Kas untuk diekspor!", "bg-amber-600");
+
+            const filterText = (document.getElementById('filter-arsip-cf')?.value || "").toLowerCase();
+            const yearFilter = document.getElementById('filter-tahun-arsip-cf')?.value || "all";
+            const bospFilter = document.getElementById('filter-bosp-arsip-cf')?.value || "all";
+
+            const filtered = archiveCashFlow.filter(c => {
+                const itemYear = String(c.tahun || new Date(c.tanggal || Date.now()).getFullYear());
+                const itemBosp = c.jenisBosp || "Bos Reguler";
+                const matchYear = yearFilter === "all" || itemYear === yearFilter;
+                const matchBosp = bospFilter === "all" || itemBosp === bospFilter;
+                const matchText = String(c.deskripsi).toLowerCase().includes(filterText) ||
+                                  String(c.tanggal).toLowerCase().includes(filterText);
+                return matchYear && matchBosp && matchText;
+            });
+
+            if (filtered.length === 0) return notify("Tidak ada data Arsip Kas yang sesuai filter!", "bg-amber-600");
+
+            const exportData = filtered.map((c, i) => {
                 const masuk = Math.round(parseFloat(c.masuk) || 0);
                 const keluar = Math.round(parseFloat(c.keluar) || 0);
                 const tgl = new Date(c.tanggal).toLocaleDateString('id-ID');
                 const yr = c.tahun || new Date(c.tanggal).getFullYear();
-                csv += `"${i+1}","${tgl}","${c.deskripsi}","${masuk}","${keluar}","${yr}"\n`;
+
+                return {
+                    "No": i + 1,
+                    "Tanggal Transaksi": tgl,
+                    "Deskripsi / Keperluan": c.deskripsi,
+                    "Jenis BOSP": c.jenisBosp || 'Bos Reguler',
+                    "Uang Masuk (Rp)": masuk,
+                    "Uang Keluar (Rp)": keluar,
+                    "Tahun": yr
+                };
             });
-            const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
-            const link = document.createElement("a");
-            link.href = URL.createObjectURL(blob);
-            link.download = `Arsip_Kas_SDN22_${new Date().toISOString().slice(0,10)}.csv`;
-            link.click();
+
+            exportToExcelEngine(exportData, `Arsip_Kas_SDN22_${new Date().toISOString().slice(0,10)}`, "Arsip Kas");
         }
 
         function showConfirm(msg, onYes) {
@@ -2143,7 +2311,7 @@
         }
 
         async function apiRequest(data, loadingText = "Memproses...") {
-            showLoader(loadingText, "Tunggu Sebentar...");
+            showLoader(loadingText, "Tunggu Sebentar");
             try {
                 const response = await fetch(scriptURL, { method: 'POST', body: JSON.stringify(data) });
                 return await response.json();
@@ -2156,7 +2324,7 @@
         }
 
         function startSyncProcess() {
-            showConfirm("Tarik Data?", () => {
+            showConfirm("Tarik Data", () => {
                 simulateProgress("Tarik Data Database", loadAllData).then(() => {
                     notify("Berhasil Tarik Data!", "bg-green-600");
                 });
@@ -2171,7 +2339,13 @@
 
         function printFromHistory(idx) { if(reports[idx]) openPrintWindow(reports[idx]); }
         function printFromArchive(idx) { if(archiveReports[idx]) openPrintWindow(archiveReports[idx]); }
-        function logout() { location.reload(); }
+        
+        function logout() { 
+            showConfirm("Apakah Anda yakin ingin keluar dari sistem?", () => {
+                location.reload(); 
+            });
+        }
+
         function resetForm() { ['k-bku', 'k-penerima', 'k-jumlah', 'k-untuk', 'k-tanggal', 'k-rekening'].forEach(id => { if(document.getElementById(id)) document.getElementById(id).value = ""; }); if(document.getElementById('k-pajak-select')) document.getElementById('k-pajak-select').value = "none"; updateCalculations(); }
 
         function openPrintWindow(d) {
