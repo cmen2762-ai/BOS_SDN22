@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>SDN 22 Tanah Keras</title>
+    <title>Kuitansi Digital - SDN 22 Tanah Keras</title>
     
     <!-- Meta Tags untuk Full Screen (PWA Mode) -->
     <meta name="apple-mobile-web-app-capable" content="yes">
@@ -218,6 +218,70 @@
         </div>
     </div>
 
+    <div id="bm-modal" class="loading-overlay hidden">
+        <div class="bg-white p-6 rounded-2xl shadow-2xl w-full max-w-2xl mx-4 overflow-y-auto max-h-[90vh]">
+            <div class="flex justify-between items-center mb-6 border-b pb-3">
+                <h3 id="bm-modal-title" class="text-xl font-bold text-blue-900 uppercase">Tambah Belanja Modal</h3>
+                <button onclick="closeBelanjaModal()" class="text-slate-400 hover:text-slate-600 font-bold text-xl">&times;</button>
+            </div>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+                <div>
+                    <label class="block text-xs font-bold text-slate-500 uppercase mb-1">Nama Barang</label>
+                    <input type="text" id="bm-nama" class="w-full p-3 border rounded-xl" placeholder="Contoh: Laptop Chromebook">
+                </div>
+                <div>
+                    <label class="block text-xs font-bold text-slate-500 uppercase mb-1">Merek / Tipe</label>
+                    <input type="text" id="bm-merek" class="w-full p-3 border rounded-xl" placeholder="Contoh: Asus / C214">
+                </div>
+                <div>
+                    <label class="block text-xs font-bold text-slate-500 uppercase mb-1">Jenis Belanja Modal</label>
+                    <select id="bm-jenis" class="w-full p-3 border rounded-xl outline-none bg-slate-50 font-semibold">
+                        <option value="Belanja Modal Peralatan dan Mesin">Belanja Modal Peralatan dan Mesin</option>
+                        <option value="Belanja Modal Aset Tetap Lainnya">Belanja Modal Aset Tetap Lainnya</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-xs font-bold text-slate-500 uppercase mb-1">Volume / Jumlah</label>
+                    <input type="text" id="bm-volume" oninput="calcBelanjaModalTotal()" class="w-full p-3 border rounded-xl" placeholder="Contoh: 3 Unit / 5 Buah">
+                </div>
+                <div>
+                    <label class="block text-xs font-bold text-slate-500 uppercase mb-1">Harga Satuan (Rp)</label>
+                    <input type="number" id="bm-harga" oninput="calcBelanjaModalTotal()" class="w-full p-3 border rounded-xl" placeholder="Contoh: 2000000">
+                </div>
+                <div>
+                    <label class="block text-xs font-bold text-slate-500 uppercase mb-1">Jumlah Harga (Rp)</label>
+                    <input type="number" id="bm-total-harga" class="w-full p-3 border rounded-xl bg-slate-100 font-bold text-blue-900" placeholder="0" readonly>
+                </div>
+                <div>
+                    <label class="block text-xs font-bold text-slate-500 uppercase mb-1">Tahun Belanja</label>
+                    <input type="number" id="bm-tahun" class="w-full p-3 border rounded-xl" placeholder="Contoh: 2026">
+                </div>
+                <div>
+                    <label class="block text-xs font-bold text-slate-500 uppercase mb-1">Tanggal Transaksi</label>
+                    <input type="date" id="bm-tanggal" class="w-full p-3 border rounded-xl outline-none focus:border-blue-500">
+                </div>
+                <div class="md:col-span-2">
+                    <label class="block text-xs font-bold text-slate-500 uppercase mb-1">Kondisi / Kerusakan</label>
+                    <select id="bm-kerusakan" class="w-full p-3 border rounded-xl outline-none bg-slate-50">
+                        <option value="Baik">Baik</option>
+                        <option value="Rusak Ringan">Rusak Ringan</option>
+                        <option value="Rusak Sedang">Rusak Sedang</option>
+                        <option value="Rusak Berat">Rusak Berat</option>
+                        <option value="Hilang">Hilang</option>
+                    </select>
+                </div>
+            </div>
+            <div class="mb-6 p-4 bg-blue-50 rounded-xl border border-blue-200 flex justify-between items-center">
+                <span class="text-xs font-bold text-blue-900 uppercase">Estimasi Total Harga:</span>
+                <span id="bm-total-display" class="text-xl font-black text-blue-900">Rp 0</span>
+            </div>
+            <div class="flex justify-end gap-3 border-t pt-4">
+                <button onclick="closeBelanjaModal()" class="px-5 py-2.5 rounded-xl border font-bold text-slate-500 hover:bg-slate-50">Batal</button>
+                <button id="btn-save-bm" onclick="saveBelanjaModal()" class="px-6 py-2.5 rounded-xl bg-blue-700 text-white font-bold hover:bg-blue-800 shadow-md">Simpan Data Belanja Modal</button>
+            </div>
+        </div>
+    </div>
+
     <div id="login-screen" class="login-split no-print">
         <div class="login-left">
             <div class="w-full max-w-md">
@@ -242,7 +306,7 @@
         <div class="login-right">
             <div class="relative z-10 max-w-xl text-center">
                 <h2 class="text-4xl font-serif leading-tight italic mb-6">"Pendidikan adalah tiket ke masa depan. Hari esok dimiliki oleh orang-orang yang mempersiapkan dirinya sejak hari ini."</h2>
-                <p class="text-xl text-blue-200">SDN 22 Tanah Keras</p>
+                <p class="text-xl text-blue-200">SDN 22 TANAH KERAS</p>
             </div>
         </div>
     </div>
@@ -274,7 +338,7 @@
                         <button onclick="showSection('kop')" class="nav-btn w-full text-left p-3 rounded-lg hover:bg-blue-800 transition" id="btn-kop">KOP Surat</button>
                         <button onclick="showSection('pajak')" class="nav-btn w-full text-left p-3 rounded-lg hover:bg-blue-800 transition" id="btn-pajak">Data Pajak</button>
                         <button onclick="showSection('ttd')" class="nav-btn w-full text-left p-3 rounded-lg hover:bg-blue-800 transition" id="btn-ttd">Penandatangan</button>
-                        <button onclick="showSection('pengguna')" class="nav-btn w-full text-left p-3 rounded-lg hover:bg-blue-800 transition" id="btn-pengguna">Pengguna</button>
+                        <button onclick="showSection('pengguna')" class="nav-btn w-full text-left p-3 rounded-lg hover:bg-blue-800 transition" id="btn-pengguna">Navigasi Pengguna</button>
                     </div>
                 </div>
 
@@ -309,7 +373,7 @@
                 <div class="border-t border-blue-800 my-4 pt-4">
                     <button onclick="startSyncProcess()" class="w-full flex items-center gap-3 p-3 rounded-lg bg-blue-800/50 hover:bg-blue-700 transition text-blue-100 font-bold text-sm uppercase">
                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357-2H15"></path></svg>
-                        Tarik Data
+                        TARIK DATA
                     </button>
                 </div>
                 <button onclick="logout()" class="w-full text-left p-3 rounded-lg bg-red-900/50 mt-2 text-red-100 hover:bg-red-800 transition font-bold">Keluar</button>
@@ -366,7 +430,7 @@
 
                 <div class="bg-white p-8 rounded-xl shadow-sm border border-slate-200">
                     <div class="flex justify-between items-center mb-6">
-                        <h2 class="text-2xl font-bold text-blue-900 uppercase">Statistik Aplikasi</h2>
+                        <h2 class="text-2xl font-bold text-blue-900 uppercase">Statistik Database</h2>
                         <a id="btn-cloud-db" target="_blank" class="bg-green-600 hover:bg-green-700 text-white px-6 py-3 rounded-xl font-bold shadow-lg transition transform active:scale-95 flex items-center gap-2">
                             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
                             Database
@@ -410,6 +474,35 @@
                         <div class="p-5 bg-indigo-950 text-white rounded-xl shadow-md">
                             <span class="block text-indigo-200 text-xs font-bold uppercase mb-1">Saldo Akhir Kas</span>
                             <h3 id="stat-saldo-akhir" class="text-2xl font-black">Rp 0</h3>
+                        </div>
+                    </div>
+
+                    <!-- Dynamic Belanja Modal Statistics & Breakdown Section -->
+                    <div class="mb-8 p-6 bg-slate-50 border border-slate-200 rounded-2xl">
+                        <div class="flex items-center justify-between mb-4 pb-2 border-b">
+                            <h3 class="text-lg font-bold text-blue-900 uppercase">Rincian & Statistik Belanja Modal</h3>
+                            <span class="text-xs text-slate-500 font-semibold italic">Analisis Otomatis per Jenis, Nama Barang & Merek/Tipe</span>
+                        </div>
+
+                        <!-- 1. Dynamic Breakdown by Jenis Belanja Modal -->
+                        <p class="text-xs font-bold text-slate-600 uppercase mb-2">1. Menurut Jenis Belanja Modal</p>
+                        <div id="stat-bm-jenis-container" class="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-6"></div>
+
+                        <!-- 2. Dynamic Table Breakdown by Nama Barang & Merek/Tipe -->
+                        <p class="text-xs font-bold text-slate-600 uppercase mb-2">2. Menurut Nama Barang & Merek / Tipe</p>
+                        <div class="overflow-x-auto rounded-xl border border-slate-200 shadow-sm bg-white">
+                            <table class="w-full text-left border-collapse">
+                                <thead>
+                                    <tr class="bg-blue-900 text-white text-xs uppercase">
+                                        <th class="p-3 border text-center w-12">No</th>
+                                        <th class="p-3 border">Nama Barang</th>
+                                        <th class="p-3 border">Merek / Tipe</th>
+                                        <th class="p-3 border">Jenis Belanja Modal</th>
+                                        <th class="p-3 border text-right">Total Nilai (Rp)</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="stat-bm-item-table-body"></tbody>
+                            </table>
                         </div>
                     </div>
 
@@ -516,65 +609,6 @@
             </section>
 
             <section id="sec-belanja_modal" class="section-view hidden">
-                <div class="bg-white p-8 rounded-xl shadow-sm border border-slate-200 mb-6">
-                    <h2 class="text-2xl font-bold text-blue-900 mb-6 uppercase">Input Belanja Modal</h2>
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
-                        <div>
-                            <label class="block text-xs font-bold text-slate-500 uppercase mb-1">Nama Barang</label>
-                            <input type="text" id="bm-nama" class="w-full p-3 border rounded-xl" placeholder="Contoh: Laptop Chromebook">
-                        </div>
-                        <div>
-                            <label class="block text-xs font-bold text-slate-500 uppercase mb-1">Merek / Tipe</label>
-                            <input type="text" id="bm-merek" class="w-full p-3 border rounded-xl" placeholder="Contoh: Asus / C214">
-                        </div>
-                        <div>
-                            <label class="block text-xs font-bold text-slate-500 uppercase mb-1">Jenis Belanja Modal</label>
-                            <select id="bm-jenis" class="w-full p-3 border rounded-xl outline-none bg-slate-50 font-semibold">
-                                <option value="Belanja Modal Peralatan dan Mesin">Belanja Modal Peralatan dan Mesin</option>
-                                <option value="Belanja Modal Aset Tetap Lainnya">Belanja Modal Aset Tetap Lainnya</option>
-                            </select>
-                        </div>
-                        <div>
-                            <label class="block text-xs font-bold text-slate-500 uppercase mb-1">Volume / Jumlah</label>
-                            <input type="text" id="bm-volume" oninput="calcBelanjaModalTotal()" class="w-full p-3 border rounded-xl" placeholder="Contoh: 3 Unit / 5 Buah">
-                        </div>
-                        <div>
-                            <label class="block text-xs font-bold text-slate-500 uppercase mb-1">Harga Satuan (Rp)</label>
-                            <input type="number" id="bm-harga" oninput="calcBelanjaModalTotal()" class="w-full p-3 border rounded-xl" placeholder="Contoh: 2000000">
-                        </div>
-                        <div>
-                            <label class="block text-xs font-bold text-slate-500 uppercase mb-1">Jumlah Harga (Rp)</label>
-                            <input type="number" id="bm-total-harga" class="w-full p-3 border rounded-xl bg-slate-100 font-bold text-blue-900" placeholder="0" readonly>
-                        </div>
-                        <div>
-                            <label class="block text-xs font-bold text-slate-500 uppercase mb-1">Tahun Belanja</label>
-                            <input type="number" id="bm-tahun" class="w-full p-3 border rounded-xl" placeholder="Contoh: 2026">
-                        </div>
-                        <div>
-                            <label class="block text-xs font-bold text-slate-500 uppercase mb-1">Tanggal Transaksi</label>
-                            <input type="date" id="bm-tanggal" class="w-full p-3 border rounded-xl outline-none focus:border-blue-500">
-                        </div>
-                        <div class="md:col-span-2">
-                            <label class="block text-xs font-bold text-slate-500 uppercase mb-1">Kondisi / Kerusakan</label>
-                            <select id="bm-kerusakan" class="w-full p-3 border rounded-xl outline-none bg-slate-50">
-                                <option value="Baik">Baik</option>
-                                <option value="Rusak Ringan">Rusak Ringan</option>
-                                <option value="Rusak Sedang">Rusak Sedang</option>
-                                <option value="Rusak Berat">Rusak Berat</option>
-                                <option value="Hilang">Hilang</option>
-                            </select>
-                        </div>
-                    </div>
-                    <div class="mb-4 p-4 bg-blue-50 rounded-xl border border-blue-200 flex justify-between items-center">
-                        <span class="text-xs font-bold text-blue-900 uppercase">Estimasi Total Harga:</span>
-                        <span id="bm-total-display" class="text-xl font-black text-blue-900">Rp 0</span>
-                    </div>
-                    <div class="flex gap-3">
-                        <button id="btn-save-bm" onclick="saveBelanjaModal()" class="bg-blue-700 text-white px-8 py-3 rounded-xl font-bold shadow-lg hover:bg-blue-800 transition">SIMPAN DATA BELANJA MODAL</button>
-                        <button id="btn-cancel-bm" onclick="cancelEditBelanjaModal()" class="bg-slate-500 text-white px-6 py-3 rounded-xl font-bold shadow-lg hover:bg-slate-600 transition hidden">Batal Edit</button>
-                    </div>
-                </div>
-
                 <div class="bg-white p-8 rounded-xl shadow-sm border border-slate-200">
                     <div class="flex flex-wrap justify-between items-center mb-6 gap-4">
                         <h2 class="text-2xl font-bold text-blue-900 uppercase">Daftar Belanja Modal</h2>
@@ -588,6 +622,10 @@
                             <select id="filter-tahun-bm" onchange="renderBelanjaModal()" class="p-3 border rounded-xl w-44 shadow-sm outline-none">
                                 <option value="all">Semua Tahun</option>
                             </select>
+                            <button onclick="openBelanjaModal()" class="bg-blue-700 hover:bg-blue-800 text-white px-5 py-3 rounded-xl font-bold shadow-md transition flex items-center gap-2">
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
+                                Tambah Data
+                            </button>
                             <button onclick="printBelanjaModal()" class="bg-blue-800 hover:bg-blue-900 text-white px-5 py-3 rounded-xl font-bold shadow-md transition flex items-center gap-2">
                                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"></path></svg>
                                 Cetak
@@ -1138,7 +1176,7 @@
                 populateArchiveYears();
                 populateArsipCfYears();
 
-                notify("Data Berhasil Dimuat!", "bg-green-600");
+                notify("Data Cloud Berhasil Dimuat!", "bg-green-600");
             } catch (err) {
                 console.error("Error loading cloud data:", err);
                 notify("Gagal Memuat Data Cloud. Periksa Koneksi!", "bg-red-600");
@@ -1176,7 +1214,7 @@
 
                 updateActiveUserBadge(matchedUser);
 
-                simulateProgress("Sedang Login", loadAllData).then(() => {
+                simulateProgress("SEDANG LOGIN", loadAllData).then(() => {
                     showSection('beranda');
                     notify(`Berhasil Masuk sebagai: ${matchedUser.name} (${matchedUser.role})`, "bg-green-600");
                 });
@@ -1411,6 +1449,18 @@
             });
         }
 
+        function openBelanjaModal() {
+            resetFormBelanjaModal();
+            const modalTitle = document.getElementById('bm-modal-title');
+            if (modalTitle) modalTitle.innerText = "Tambah Belanja Modal";
+            document.getElementById('bm-modal').classList.remove('hidden');
+        }
+
+        function closeBelanjaModal() {
+            document.getElementById('bm-modal').classList.add('hidden');
+            resetFormBelanjaModal();
+        }
+
         function calcBelanjaModalTotal() {
             const volStr = document.getElementById('bm-volume')?.value || "";
             const rawHarga = parseFloat(document.getElementById('bm-harga')?.value) || 0;
@@ -1450,7 +1500,7 @@
                 if(res?.status === "success" || res?.status !== "error") {
                     belanjaModal[editingBmIndex] = item;
                     renderBelanjaModal();
-                    resetFormBelanjaModal();
+                    closeBelanjaModal();
                     updateHomeStats();
                     notify("Berhasil Memperbarui Belanja Modal!", "bg-green-600");
                 }
@@ -1460,7 +1510,7 @@
                 if(res?.status === "success" || res?.status !== "error") {
                     belanjaModal.push(item);
                     renderBelanjaModal();
-                    resetFormBelanjaModal();
+                    closeBelanjaModal();
                     updateHomeStats();
                     notify("Berhasil Menyimpan Belanja Modal!", "bg-green-600");
                 }
@@ -1486,19 +1536,20 @@
 
             calcBelanjaModalTotal();
 
+            const modalTitle = document.getElementById('bm-modal-title');
+            if (modalTitle) modalTitle.innerText = "Edit Belanja Modal";
+
             const saveBtn = document.getElementById('btn-save-bm');
             if (saveBtn) {
                 saveBtn.innerText = "UPDATE DATA BELANJA MODAL";
-                saveBtn.className = "bg-amber-600 text-white px-8 py-3 rounded-xl font-bold shadow-lg hover:bg-amber-700 transition";
+                saveBtn.className = "px-6 py-2.5 rounded-xl bg-amber-600 text-white font-bold hover:bg-amber-700 shadow-md";
             }
-            const cancelBtn = document.getElementById('btn-cancel-bm');
-            if (cancelBtn) cancelBtn.classList.remove('hidden');
-
-            document.getElementById('sec-belanja_modal').scrollIntoView({ behavior: 'smooth' });
+            
+            document.getElementById('bm-modal').classList.remove('hidden');
         }
 
         function cancelEditBelanjaModal() {
-            resetFormBelanjaModal();
+            closeBelanjaModal();
         }
 
         function resetFormBelanjaModal() {
@@ -1514,13 +1565,14 @@
             if (document.getElementById('bm-tanggal')) document.getElementById('bm-tanggal').value = new Date().toISOString().slice(0, 10);
             document.getElementById('bm-kerusakan').value = "Baik";
 
+            const modalTitle = document.getElementById('bm-modal-title');
+            if (modalTitle) modalTitle.innerText = "Tambah Belanja Modal";
+
             const saveBtn = document.getElementById('btn-save-bm');
             if (saveBtn) {
                 saveBtn.innerText = "SIMPAN DATA BELANJA MODAL";
-                saveBtn.className = "bg-blue-700 text-white px-8 py-3 rounded-xl font-bold shadow-lg hover:bg-blue-800 transition";
+                saveBtn.className = "px-6 py-2.5 rounded-xl bg-blue-700 text-white font-bold hover:bg-blue-800 shadow-md";
             }
-            const cancelBtn = document.getElementById('btn-cancel-bm');
-            if (cancelBtn) cancelBtn.classList.add('hidden');
         }
 
         function populateBelanjaModalYears() {
@@ -1817,6 +1869,77 @@
             if (document.getElementById('stat-total-masuk')) document.getElementById('stat-total-masuk').innerText = formatIDR(totalMasuk);
             if (document.getElementById('stat-total-keluar')) document.getElementById('stat-total-keluar').innerText = formatIDR(totalKeluar);
             if (document.getElementById('stat-saldo-akhir')) document.getElementById('stat-saldo-akhir').innerText = formatIDR(saldoAkhir);
+
+            // Dynamic Breakdown for Belanja Modal: Jenis, Nama Barang, and Merek/Tipe
+            renderBmDashboardStats();
+        }
+
+        function renderBmDashboardStats() {
+            const jenisContainer = document.getElementById('stat-bm-jenis-container');
+            const itemTableBody = document.getElementById('stat-bm-item-table-body');
+            if (!jenisContainer || !itemTableBody) return;
+
+            const jenisMap = {};
+            const itemMap = {};
+
+            belanjaModal.forEach(b => {
+                const jenis = b.jenis || "Lainnya";
+                const nama = b.nama || "Tanpa Nama";
+                const merek = b.merek || "-";
+                const hSatuan = Math.round(parseFloat(b.harga) || 0);
+                const matchVol = String(b.volume || '').match(/\d+(\.\d+)?/);
+                const qty = matchVol ? parseFloat(matchVol[0]) : 1;
+                const totalH = Math.round(parseFloat(b.totalHarga) || (hSatuan * qty));
+
+                // Group by Jenis Belanja Modal
+                if (!jenisMap[jenis]) {
+                    jenisMap[jenis] = { count: 0, totalVal: 0 };
+                }
+                jenisMap[jenis].count += 1;
+                jenisMap[jenis].totalVal += totalH;
+
+                // Group by Nama Barang & Merek/Tipe
+                const itemKey = `${nama.trim()}___${merek.trim()}___${jenis.trim()}`;
+                if (!itemMap[itemKey]) {
+                    itemMap[itemKey] = { nama, merek, jenis, totalVal: 0, count: 0 };
+                }
+                itemMap[itemKey].totalVal += totalH;
+                itemMap[itemKey].count += 1;
+            });
+
+            // 1. Render Jenis Belanja Modal Summary Cards
+            const jenisKeys = Object.keys(jenisMap);
+            if (jenisKeys.length === 0) {
+                jenisContainer.innerHTML = `<div class="p-4 bg-slate-100 rounded-xl text-center text-slate-500 text-xs italic col-span-full">Belum ada data Belanja Modal</div>`;
+            } else {
+                jenisContainer.innerHTML = jenisKeys.map(jKey => {
+                    const data = jenisMap[jKey];
+                    return `<div class="p-4 bg-blue-50 border border-blue-200 rounded-xl">
+                        <span class="block text-[11px] font-bold text-blue-700 uppercase mb-1">${jKey}</span>
+                        <div class="flex justify-between items-baseline mt-2">
+                            <span class="text-xs text-slate-500 font-semibold">${data.count} Transaksi</span>
+                            <span class="text-base font-black text-blue-900">${formatIDR(data.totalVal)}</span>
+                        </div>
+                    </div>`;
+                }).join('');
+            }
+
+            // 2. Render Nama Barang & Merek/Tipe Table Rows
+            const itemKeys = Object.keys(itemMap);
+            if (itemKeys.length === 0) {
+                itemTableBody.innerHTML = `<tr><td colspan="5" class="p-4 text-center text-slate-400 italic">Belum ada data Belanja Modal recorded</td></tr>`;
+            } else {
+                itemTableBody.innerHTML = itemKeys.map((iKey, idx) => {
+                    const item = itemMap[iKey];
+                    return `<tr class="border-b hover:bg-slate-50 transition text-xs">
+                        <td class="p-3 text-center font-bold text-slate-500">${idx + 1}</td>
+                        <td class="p-3 font-bold text-slate-800">${item.nama}</td>
+                        <td class="p-3 font-semibold text-slate-600">${item.merek}</td>
+                        <td class="p-3 text-slate-600">${item.jenis}</td>
+                        <td class="p-3 text-right font-bold text-blue-900">${formatIDR(item.totalVal)}</td>
+                    </tr>`;
+                }).join('');
+            }
         }
 
         function populateArchiveYears() {
@@ -2311,7 +2434,7 @@
         }
 
         async function apiRequest(data, loadingText = "Memproses...") {
-            showLoader(loadingText, "Tunggu Sebentar");
+            showLoader(loadingText, "Menghubungkan ke server Google Apps Script...");
             try {
                 const response = await fetch(scriptURL, { method: 'POST', body: JSON.stringify(data) });
                 return await response.json();
@@ -2324,9 +2447,9 @@
         }
 
         function startSyncProcess() {
-            showConfirm("Tarik Data", () => {
-                simulateProgress("Tarik Data Database", loadAllData).then(() => {
-                    notify("Berhasil Tarik Data!", "bg-green-600");
+            showConfirm("Tarik data", () => {
+                simulateProgress("Tarik Data Aplikasi", loadAllData).then(() => {
+                    notify("Sukses!", "bg-green-600");
                 });
             });
         }
