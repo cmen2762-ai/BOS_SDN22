@@ -1186,7 +1186,7 @@
         }
 
         async function loadAllData() {
-            showLoader("SEDANG LOGIN", "Jangan Tutup Aplikasi");
+            showLoader("Memuat Data Aplikasi", "Jangan Tutup Aplikasi");
             try {
                 const cacheBuster = "?cb=" + Date.now();
                 const response = await fetch(scriptURL + cacheBuster);
