@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>MANAJEMEN BOSP - SDN 22 TANAH KERAS</title>
+    <title>Kuitansi Digital - SDN 22 Tanah Keras</title>
     
     <!-- Meta Tags untuk Full Screen (PWA Mode) -->
     <meta name="apple-mobile-web-app-capable" content="yes">
@@ -15,6 +15,7 @@
     <link rel="icon" type="image/png" href="https://iili.io/BLmT2LJ.md.png">
     <script src="https://cdn.tailwindcss.com"></script>
     
+    <!-- SheetJS Engine untuk Ekspor Excel (.xlsx) Native -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 
     <style>
@@ -98,8 +99,8 @@
                 <div class="absolute inset-2 border-2 border-indigo-400 border-b-transparent rounded-full animate-spin" style="animation-duration: 1.5s; animation-direction: reverse;"></div>
                 <img src="https://iili.io/BLlwHwQ.png" class="w-14 h-14 object-contain animate-pulse z-10" alt="Logo SDN 22">
             </div>
-            <h3 id="loader-text" class="mt-5 font-black text-blue-900 tracking-wide text-sm uppercase">Memuat Data Aplikasi</h3>
-            <p id="loader-subtext" class="text-[11px] text-slate-500 font-semibold mt-1 italic">Tunggu Sebentar</p>
+            <h3 id="loader-text" class="mt-5 font-black text-blue-900 tracking-wide text-sm uppercase">Memuat Data Cloud..</h3>
+            <p id="loader-subtext" class="text-[11px] text-slate-500 font-semibold mt-1 italic">Mengambil data dari Google Sheet</p>
         </div>
     </div>
 
@@ -161,7 +162,7 @@
             </div>
             <div class="mt-6 flex justify-end gap-3 border-t pt-4">
                 <button onclick="closeCashFlowModal()" class="px-5 py-2.5 rounded-xl border font-bold text-slate-500 hover:bg-slate-50">Batal</button>
-                <button onclick="saveCashFlow()" class="px-6 py-2.5 rounded-xl bg-blue-700 text-white font-bold hover:bg-blue-800 shadow-md">Simpan Transaksi</button>
+                <button id="btn-save-cf" onclick="saveCashFlow()" class="px-6 py-2.5 rounded-xl bg-blue-700 text-white font-bold hover:bg-blue-800 shadow-md disabled:opacity-50 disabled:cursor-not-allowed">Simpan Transaksi</button>
             </div>
         </div>
     </div>
@@ -207,13 +208,13 @@
                     </div>
                 </div>
                 <div class="p-3 bg-blue-50 border border-blue-200 rounded-xl text-xs text-blue-900 flex items-start gap-2">
-                    <svg class="w-5 h-5 text-blue-700 shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 002-2H5a2 2 0 0-2 2v10a2 2 0 002 2z"></path></svg>
+                    <svg class="w-5 h-5 text-blue-700 shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 002-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path></svg>
                     <span>Username/Email akan <strong>diverifikasi secara otomatis</strong>. Jika email aktif, kredensial akun dikirimkan langsung ke Email Pengguna.</span>
                 </div>
             </div>
             <div class="mt-6 flex justify-end gap-3 border-t pt-4">
                 <button onclick="closeUserModal()" class="px-5 py-2.5 rounded-xl border font-bold text-slate-500 hover:bg-slate-50">Batal</button>
-                <button onclick="saveUser()" class="px-6 py-2.5 rounded-xl bg-blue-700 text-white font-bold hover:bg-blue-800 shadow-md">Simpan & Kirim Email</button>
+                <button id="btn-save-user" onclick="saveUser()" class="px-6 py-2.5 rounded-xl bg-blue-700 text-white font-bold hover:bg-blue-800 shadow-md disabled:opacity-50 disabled:cursor-not-allowed">Simpan & Kirim Email</button>
             </div>
         </div>
     </div>
@@ -277,7 +278,7 @@
             </div>
             <div class="flex justify-end gap-3 border-t pt-4">
                 <button onclick="closeBelanjaModal()" class="px-5 py-2.5 rounded-xl border font-bold text-slate-500 hover:bg-slate-50">Batal</button>
-                <button id="btn-save-bm" onclick="saveBelanjaModal()" class="px-6 py-2.5 rounded-xl bg-blue-700 text-white font-bold hover:bg-blue-800 shadow-md">Simpan Data Belanja Modal</button>
+                <button id="btn-save-bm" onclick="saveBelanjaModal()" class="px-6 py-2.5 rounded-xl bg-blue-700 text-white font-bold hover:bg-blue-800 shadow-md disabled:opacity-50 disabled:cursor-not-allowed">Simpan Data Belanja Modal</button>
             </div>
         </div>
     </div>
@@ -286,7 +287,7 @@
         <div class="login-left">
             <div class="w-full max-w-md">
                 <div class="text-center mb-8">
-                    <h1 class="text-3xl font-bold text-blue-900">SDN 22 TANAH KERAS</h1>
+                    <h1 class="text-3xl font-bold text-blue-900">SDN 22 Tanah Keras</h1>
                     <p class="text-slate-500 mt-2">Sistem Informasi Pengelolaan Kuitansi</p>
                 </div>
                 <div class="bg-white border border-slate-200 p-8 rounded-2xl shadow-xl">
@@ -304,22 +305,19 @@
             </div>
         </div>
         <div class="login-right">
-            <div class="relative z-10 max-w-xl text-center flex flex-col items-center justify-center">
-                <!-- 3 Logos displayed horizontally -->
+            <div class="relative z-10 max-w-xl text-center">
                 <div class="flex flex-row items-center justify-center gap-6 md:gap-8 mb-6">
-                    <img src="https://iili.io/3LIjucb.png" alt="Logo 1" class="w-24 h-24 md:w-28 md:h-28 object-contain drop-shadow-xl hover:scale-105 transition duration-300">
-                    <img src="https://iili.io/3QUsMEx.png" alt="Logo 2" class="w-24 h-24 md:w-28 md:h-28 object-contain drop-shadow-xl hover:scale-105 transition duration-300">
-                    <img src="https://iili.io/C6xKCf1.png" onerror="this.src='https://iili.io/C6xKCf1.th.png'" alt="Logo 3" class="w-24 h-24 md:w-28 md:h-28 object-contain drop-shadow-xl hover:scale-105 transition duration-300">
+                    <img src="https://iili.io/3LIjucb.png" class="h-20 md:h-24 object-contain drop-shadow-lg" alt="Logo 1">
+                    <img src="https://iili.io/3QUsMEx.png" class="h-20 md:h-24 object-contain drop-shadow-lg" alt="Logo 2">
+                    <img src="https://iili.io/C6xKCf1.png" class="h-20 md:h-24 object-contain drop-shadow-lg" alt="Logo 3">
                 </div>
-                <p class="text-2xl font-bold tracking-wide text-white drop-shadow-md">SDN 22 TANAH KERAS</p>
-                <p class="text-sm text-blue-200 mt-1 uppercase tracking-widest font-semibold">Sistem Manajemen BOSP & Kuitansi Digital</p>
+                <p class="text-xl text-blue-200 font-black tracking-wide uppercase">SDN 22 Tanah Keras</p>
             </div>
         </div>
     </div>
 
     <div id="main-app" class="hidden">
         <aside class="fixed inset-y-0 left-0 w-64 bg-blue-900 text-white no-print flex flex-col z-30 shadow-2xl">
-            <!-- Sidebar Header Locked -->
             <div class="p-5 border-b border-blue-800/80 shrink-0 bg-blue-950/40">
                 <div class="flex justify-center mb-3">
                     <img src="https://iili.io/BLlwHwQ.png" class="w-28 h-auto drop-shadow-md" alt="Logo Sekolah">
@@ -334,10 +332,8 @@
             </div>
 
             <nav class="flex-1 p-4 space-y-2 overflow-y-auto">
-                <!-- Top Navigation: Beranda -->
                 <button onclick="showSection('beranda')" class="nav-btn w-full text-left p-3 rounded-lg hover:bg-blue-800 transition font-bold" id="btn-beranda">Beranda</button>
 
-                <!-- Categorized Group 1: PENGATURAN -->
                 <div id="cat-pengaturan" class="pt-3 pb-1">
                     <p class="px-3 text-[10px] font-black tracking-wider text-blue-300 uppercase border-b border-blue-800/60 pb-1 mb-2">PENGATURAN</p>
                     <div class="space-y-1">
@@ -348,7 +344,6 @@
                     </div>
                 </div>
 
-                <!-- Categorized Group 2: KUITANSI BOS -->
                 <div id="cat-kuitansi" class="pt-3 pb-1">
                     <p class="px-3 text-[10px] font-black tracking-wider text-blue-300 uppercase border-b border-blue-800/60 pb-1 mb-2">KUITANSI BOS</p>
                     <div class="space-y-1">
@@ -358,7 +353,6 @@
                     </div>
                 </div>
 
-                <!-- Categorized Group 3: BELANJA MODAL -->
                 <div id="cat-belanja_modal" class="pt-3 pb-1">
                     <p class="px-3 text-[10px] font-black tracking-wider text-blue-300 uppercase border-b border-blue-800/60 pb-1 mb-2">BELANJA MODAL</p>
                     <div class="space-y-1">
@@ -366,7 +360,6 @@
                     </div>
                 </div>
 
-                <!-- Categorized Group 4: DANA MASUK & KELUAR -->
                 <div id="cat-cash_flow" class="pt-3 pb-1">
                     <p class="px-3 text-[10px] font-black tracking-wider text-blue-300 uppercase border-b border-blue-800/60 pb-1 mb-2">DANA MASUK & KELUAR</p>
                     <div class="space-y-1">
@@ -375,11 +368,10 @@
                     </div>
                 </div>
 
-                <!-- Divider & Utility Buttons -->
                 <div class="border-t border-blue-800 my-4 pt-4">
                     <button onclick="startSyncProcess()" class="w-full flex items-center gap-3 p-3 rounded-lg bg-blue-800/50 hover:bg-blue-700 transition text-blue-100 font-bold text-sm uppercase">
                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357-2H15"></path></svg>
-                        Tarik Data
+                        TARIK DATA
                     </button>
                 </div>
                 <button onclick="logout()" class="w-full text-left p-3 rounded-lg bg-red-900/50 mt-2 text-red-100 hover:bg-red-800 transition font-bold">Keluar</button>
@@ -387,7 +379,6 @@
         </aside>
 
         <main class="ml-64 p-8 no-print">
-            <!-- Active User Banner Header -->
             <div id="active-user-banner" class="mb-6 p-4 bg-white border border-slate-200 rounded-2xl shadow-sm flex flex-wrap items-center justify-between gap-4">
                 <div class="flex items-center gap-3">
                     <div class="relative">
@@ -413,7 +404,6 @@
             </div>
 
             <section id="sec-beranda" class="section-view">
-                <!-- Banner Informasi Hapus Data (Atas Beranda) -->
                 <div class="mb-6 p-5 bg-blue-50 border-2 border-blue-600 rounded-2xl shadow-md flex items-center gap-4 text-blue-900">
                     <svg class="w-8 h-8 text-blue-700 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
@@ -421,7 +411,6 @@
                     <span class="text-base md:text-lg font-black tracking-wide uppercase">Informasi : Untuk Menghapus Data Hubungi Admin</span>
                 </div>
 
-                <!-- Welcome User Card -->
                 <div class="mb-8 bg-gradient-to-r from-blue-900 via-blue-800 to-indigo-900 rounded-2xl p-6 text-white shadow-lg flex flex-wrap items-center justify-between gap-6 relative overflow-hidden">
                     <div class="flex items-center gap-5 relative z-10">
                         <img id="welcome-user-photo" src="https://placehold.co/100x100/1e3a8a/ffffff?text=User" class="w-20 h-20 rounded-full object-cover border-4 border-white/20 shadow-md">
@@ -443,7 +432,6 @@
                         </a>
                     </div>
                     
-                    <!-- Statistics Grid 1 -->
                     <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-4">
                         <div class="p-5 bg-blue-900 text-white rounded-xl shadow-md">
                             <span class="block text-blue-200 text-xs font-bold uppercase mb-1">Total Kuitansi Aktif</span>
@@ -463,7 +451,6 @@
                         </div>
                     </div>
 
-                    <!-- Statistics Grid 2 -->
                     <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
                         <div class="p-5 bg-slate-800 text-white rounded-xl shadow-md">
                             <span class="block text-slate-300 text-xs font-bold uppercase mb-1">Saldo Awal Kas</span>
@@ -483,18 +470,15 @@
                         </div>
                     </div>
 
-                    <!-- Dynamic Belanja Modal Statistics & Breakdown Section -->
                     <div class="mb-8 p-6 bg-slate-50 border border-slate-200 rounded-2xl">
                         <div class="flex items-center justify-between mb-4 pb-2 border-b">
                             <h3 class="text-lg font-bold text-blue-900 uppercase">Rincian & Statistik Belanja Modal</h3>
                             <span class="text-xs text-slate-500 font-semibold italic">Analisis Otomatis per Jenis, Nama Barang & Merek/Tipe</span>
                         </div>
 
-                        <!-- 1. Dynamic Breakdown by Jenis Belanja Modal -->
                         <p class="text-xs font-bold text-slate-600 uppercase mb-2">1. Menurut Jenis Belanja Modal</p>
                         <div id="stat-bm-jenis-container" class="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-6"></div>
 
-                        <!-- 2. Dynamic Table Breakdown by Nama Barang & Merek/Tipe -->
                         <p class="text-xs font-bold text-slate-600 uppercase mb-2">2. Menurut Nama Barang & Merek / Tipe</p>
                         <div class="overflow-x-auto rounded-xl border border-slate-200 shadow-sm bg-white">
                             <table class="w-full text-left border-collapse">
@@ -564,7 +548,7 @@
                         <input type="text" id="kop-email" class="p-3 border rounded-xl" placeholder="Email">
                         <input type="text" id="kop-web" class="p-3 border rounded-xl" placeholder="Website">
                     </div>
-                    <button onclick="saveKopConfig()" class="mt-8 bg-blue-700 text-white px-8 py-3 rounded-xl font-bold shadow-lg transition transform active:scale-95">Simpan Data KOP</button>
+                    <button id="btn-save-kop" onclick="saveKopConfig()" class="mt-8 bg-blue-700 text-white px-8 py-3 rounded-xl font-bold shadow-lg transition transform active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed">Simpan Data KOP</button>
                 </div>
             </section>
 
@@ -580,7 +564,7 @@
                             <option value="Pajak Daerah">Pajak Daerah</option>
                         </select>
                         <input type="number" id="tax-rate-input" class="p-3 border rounded-xl w-32" placeholder="%">
-                        <button onclick="addTax()" class="bg-blue-700 text-white px-6 py-3 rounded-xl font-bold hover:bg-blue-800 transition">Tambah</button>
+                        <button id="btn-add-tax" onclick="addTax()" class="bg-blue-700 text-white px-6 py-3 rounded-xl font-bold hover:bg-blue-800 transition disabled:opacity-50 disabled:cursor-not-allowed">Tambah</button>
                     </div>
                     <div id="tax-list" class="grid grid-cols-1 md:grid-cols-3 gap-3"></div>
                 </div>
@@ -608,8 +592,8 @@
                         </div>
                     </div>
                     <div class="mt-8 flex gap-4">
-                        <button onclick="saveReceipt()" class="bg-green-600 text-white px-10 py-4 rounded-xl font-black shadow-lg hover:bg-green-700 transition">SIMPAN DATA</button>
-                        <button onclick="printDirectly()" class="bg-blue-600 text-white px-10 py-4 rounded-xl font-black shadow-lg hover:bg-green-700 transition">CETAK SAJA</button>
+                        <button id="btn-save-kuitansi" onclick="saveReceipt()" class="bg-green-600 text-white px-10 py-4 rounded-xl font-black shadow-lg hover:bg-green-700 transition disabled:opacity-50 disabled:cursor-not-allowed">SIMPAN DATA</button>
+                        <button onclick="printDirectly()" class="bg-blue-600 text-white px-10 py-4 rounded-xl font-black shadow-lg hover:bg-blue-700 transition">CETAK SAJA</button>
                     </div>
                 </div>
             </section>
@@ -619,25 +603,32 @@
                     <div class="flex flex-wrap justify-between items-center mb-6 gap-4">
                         <h2 class="text-2xl font-bold text-blue-900 uppercase">Daftar Belanja Modal</h2>
                         <div class="flex flex-wrap gap-2 items-center">
-                            <input type="text" id="filter-bm" oninput="renderBelanjaModal()" class="p-3 border rounded-xl w-64 shadow-sm" placeholder="Cari Barang...">
-                            <select id="filter-jenis-bm" onchange="renderBelanjaModal()" class="p-3 border rounded-xl w-56 shadow-sm outline-none">
+                            <input type="text" id="filter-bm" oninput="renderBelanjaModal()" class="p-3 border rounded-xl w-48 shadow-sm" placeholder="Cari Barang...">
+                            <select id="filter-jenis-bm" onchange="renderBelanjaModal()" class="p-3 border rounded-xl w-52 shadow-sm outline-none">
                                 <option value="all">Semua Jenis Belanja</option>
                                 <option value="Belanja Modal Peralatan dan Mesin">Belanja Modal Peralatan dan Mesin</option>
                                 <option value="Belanja Modal Aset Tetap Lainnya">Belanja Modal Aset Tetap Lainnya</option>
                             </select>
-                            <select id="filter-tahun-bm" onchange="renderBelanjaModal()" class="p-3 border rounded-xl w-44 shadow-sm outline-none">
+                            <select id="filter-tahun-bm" onchange="renderBelanjaModal()" class="p-3 border rounded-xl w-36 shadow-sm outline-none">
                                 <option value="all">Semua Tahun</option>
                             </select>
-                            <button onclick="openBelanjaModal()" class="bg-blue-700 hover:bg-blue-800 text-white px-5 py-3 rounded-xl font-bold shadow-md transition flex items-center gap-2">
-                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
+                            <div class="flex items-center gap-1 bg-slate-50 p-1.5 border rounded-xl shadow-sm">
+                                <span class="text-[11px] font-bold text-slate-500 uppercase px-1">Dari:</span>
+                                <input type="date" id="filter-start-date-bm" onchange="renderBelanjaModal()" class="p-1.5 border rounded-lg outline-none text-xs bg-white">
+                                <span class="text-[11px] font-bold text-slate-500 uppercase px-1">Ke:</span>
+                                <input type="date" id="filter-end-date-bm" onchange="renderBelanjaModal()" class="p-1.5 border rounded-lg outline-none text-xs bg-white">
+                                <button onclick="resetDateFilterBelanjaModal()" class="ml-1 px-2 py-1 bg-slate-200 hover:bg-slate-300 text-slate-700 font-bold rounded-lg text-xs transition">Reset</button>
+                            </div>
+                            <button onclick="openBelanjaModal()" class="bg-blue-700 hover:bg-blue-800 text-white px-4 py-3 rounded-xl font-bold shadow-md transition flex items-center gap-2 text-xs">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
                                 Tambah Data
                             </button>
-                            <button onclick="printBelanjaModal()" class="bg-blue-800 hover:bg-blue-900 text-white px-5 py-3 rounded-xl font-bold shadow-md transition flex items-center gap-2">
-                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"></path></svg>
-                                Cetak
+                            <button onclick="printBelanjaModal()" class="bg-blue-800 hover:bg-blue-900 text-white px-4 py-3 rounded-xl font-bold shadow-md transition flex items-center gap-2 text-xs">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"></path></svg>
+                                Cetak KOP
                             </button>
-                            <button onclick="exportBelanjaModalExcel()" class="bg-emerald-600 hover:bg-emerald-700 text-white px-5 py-3 rounded-xl font-bold shadow-md transition flex items-center gap-2">
-                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
+                            <button onclick="exportBelanjaModalExcel()" class="bg-emerald-600 hover:bg-emerald-700 text-white px-4 py-3 rounded-xl font-bold shadow-md transition flex items-center gap-2 text-xs">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
                                 Ekspor Excel
                             </button>
                         </div>
@@ -674,7 +665,7 @@
                         <div class="flex flex-wrap items-center gap-3">
                             <span class="font-black text-slate-700 text-sm">Rp</span>
                             <input type="number" id="cf-saldo-awal" oninput="renderCashFlow()" class="p-3 border-2 border-blue-400 rounded-xl font-black text-lg text-blue-900 w-52 outline-none focus:border-blue-600" placeholder="0">
-                            <button onclick="saveSaldoAwal()" class="bg-blue-700 hover:bg-blue-800 text-white px-5 py-3 rounded-xl font-bold shadow-md transition flex items-center gap-2">
+                            <button id="btn-save-saldo" onclick="saveSaldoAwal()" class="bg-blue-700 hover:bg-blue-800 text-white px-5 py-3 rounded-xl font-bold shadow-md transition flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed">
                                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-3m-1 4l-3 3m0 0l-3-3m3 3V4"></path></svg>
                                 Simpan Saldo Awal
                             </button>
@@ -705,26 +696,33 @@
                     <div class="flex flex-wrap justify-between items-center mb-6 gap-4">
                         <h2 class="text-2xl font-bold text-blue-900 uppercase">Buku Kas Dana Masuk & Keluar</h2>
                         <div class="flex flex-wrap gap-2 items-center">
-                            <input type="text" id="filter-cash_flow" oninput="renderCashFlow()" class="p-3 border rounded-xl w-64 shadow-sm" placeholder="Cari Transaksi...">
-                            <select id="filter-bosp-cash_flow" onchange="renderCashFlow()" class="p-3 border rounded-xl w-44 shadow-sm outline-none">
+                            <input type="text" id="filter-cash_flow" oninput="renderCashFlow()" class="p-3 border rounded-xl w-48 shadow-sm" placeholder="Cari Transaksi...">
+                            <select id="filter-bosp-cash_flow" onchange="renderCashFlow()" class="p-3 border rounded-xl w-40 shadow-sm outline-none">
                                 <option value="all">Semua Jenis BOSP</option>
                                 <option value="Bos Reguler">Bos Reguler</option>
                                 <option value="Bos Kinerja">Bos Kinerja</option>
                             </select>
-                            <button onclick="openCashFlowModal()" class="bg-blue-700 hover:bg-blue-800 text-white px-5 py-3 rounded-xl font-bold shadow-md transition flex items-center gap-2">
-                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
-                                Tambah Transaksi
+                            <div class="flex items-center gap-1 bg-slate-50 p-1.5 border rounded-xl shadow-sm">
+                                <span class="text-[11px] font-bold text-slate-500 uppercase px-1">Dari:</span>
+                                <input type="date" id="filter-start-date-cf" onchange="renderCashFlow()" class="p-1.5 border rounded-lg outline-none text-xs bg-white">
+                                <span class="text-[11px] font-bold text-slate-500 uppercase px-1">Ke:</span>
+                                <input type="date" id="filter-end-date-cf" onchange="renderCashFlow()" class="p-1.5 border rounded-lg outline-none text-xs bg-white">
+                                <button onclick="resetDateFilterCashFlow()" class="ml-1 px-2 py-1 bg-slate-200 hover:bg-slate-300 text-slate-700 font-bold rounded-lg text-xs transition">Reset</button>
+                            </div>
+                            <button onclick="openCashFlowModal()" class="bg-blue-700 hover:bg-blue-800 text-white px-4 py-3 rounded-xl font-bold shadow-md transition flex items-center gap-2 text-xs">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
+                                Tambah
                             </button>
-                            <button onclick="archiveCashFlowData()" class="bg-amber-600 hover:bg-amber-700 text-white px-5 py-3 rounded-xl font-bold shadow-md transition flex items-center gap-2">
-                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 8h14M5 8a2 2 0 110-4h14a2 2 0 110 4M5 8v10a2 2 0 002 2h10a2 2 0 002-2V8m-9 4h4"></path></svg>
-                                Arsipkan Data Kas
+                            <button onclick="archiveCashFlowData()" class="bg-amber-600 hover:bg-amber-700 text-white px-4 py-3 rounded-xl font-bold shadow-md transition flex items-center gap-2 text-xs">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 8h14M5 8a2 2 0 110-4h14a2 2 0 110 4M5 8v10a2 2 0 002 2h10a2 2 0 002-2V8m-9 4h4"></path></svg>
+                                Arsipkan
                             </button>
-                            <button onclick="printCashFlow()" class="bg-blue-800 hover:bg-blue-900 text-white px-5 py-3 rounded-xl font-bold shadow-md transition flex items-center gap-2">
-                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"></path></svg>
-                                Cetak 
+                            <button onclick="printCashFlow()" class="bg-blue-800 hover:bg-blue-900 text-white px-4 py-3 rounded-xl font-bold shadow-md transition flex items-center gap-2 text-xs">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"></path></svg>
+                                Cetak KOP
                             </button>
-                            <button onclick="exportCashFlowExcel()" class="bg-emerald-600 hover:bg-emerald-700 text-white px-5 py-3 rounded-xl font-bold shadow-md transition flex items-center gap-2">
-                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
+                            <button onclick="exportCashFlowExcel()" class="bg-emerald-600 hover:bg-emerald-700 text-white px-4 py-3 rounded-xl font-bold shadow-md transition flex items-center gap-2 text-xs">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
                                 Ekspor Excel
                             </button>
                         </div>
@@ -824,7 +822,7 @@
                         <div class="flex flex-wrap gap-2 items-center">
                             <button onclick="printArsipCashFlow()" class="bg-blue-800 hover:bg-blue-900 text-white px-5 py-3 rounded-xl font-bold shadow-md transition flex items-center gap-2">
                                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"></path></svg>
-                                Cetak Arsip
+                                Cetak KOP Arsip
                             </button>
                             <button onclick="exportArsipCashFlowExcel()" class="bg-emerald-600 hover:bg-emerald-700 text-white px-5 py-3 rounded-xl font-bold shadow-md transition flex items-center gap-2">
                                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
@@ -886,7 +884,7 @@
                             <input type="text" id="ttd-nip-bendahara" class="w-full p-3 border rounded-lg" placeholder="NIP">
                         </div>
                     </div>
-                    <button onclick="saveSignatories()" class="mt-6 bg-blue-700 text-white px-8 py-3 rounded-xl font-bold shadow-md">Simpan TTD</button>
+                    <button id="btn-save-ttd" onclick="saveSignatories()" class="mt-6 bg-blue-700 text-white px-8 py-3 rounded-xl font-bold shadow-md disabled:opacity-50 disabled:cursor-not-allowed">Simpan</button>
                 </div>
             </section>
 
@@ -1020,6 +1018,53 @@
         const rowsPerPage = 7;
         let editingBmIndex = -1;
 
+        // Flags to prevent double submission
+        let isSavingBM = false;
+        let isSavingCF = false;
+        let isSavingReceipt = false;
+        let isSavingUser = false;
+        let isSavingSaldo = false;
+
+        // --- Timezone-Safe Date Parsing & Formatting Helpers ---
+        function formatDisplayDate(dateStr) {
+            if (!dateStr) return "-";
+            const str = String(dateStr).split('T')[0].trim();
+            const parts = str.split('-');
+            if (parts.length === 3 && parts[0].length === 4) {
+                const day = parts[2].padStart(2, '0');
+                const month = parts[1].padStart(2, '0');
+                const year = parts[0];
+                return `${day}/${month}/${year}`;
+            }
+            return dateStr;
+        }
+
+        function formatIndonesianLongDate(dateStr) {
+            if (!dateStr) return "";
+            const str = String(dateStr).split('T')[0].trim();
+            const parts = str.split('-');
+            if (parts.length === 3 && parts[0].length === 4) {
+                const months = ['Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni', 'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'];
+                const day = parseInt(parts[2], 10);
+                const monthIdx = parseInt(parts[1], 10) - 1;
+                const year = parts[0];
+                if (monthIdx >= 0 && monthIdx < 12) {
+                    return `${day} ${months[monthIdx]} ${year}`;
+                }
+            }
+            return dateStr;
+        }
+
+        function getYearFromDateStr(dateStr) {
+            if (!dateStr) return new Date().getFullYear();
+            const str = String(dateStr).split('T')[0].trim();
+            const parts = str.split('-');
+            if (parts.length === 3 && parts[0].length === 4) {
+                return parseInt(parts[0], 10);
+            }
+            return new Date().getFullYear();
+        }
+
         // Validation & Helper Utilities
         function isValidEmail(email) {
             const re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -1084,7 +1129,6 @@
                 document.getElementById('welcome-login-time').innerText = "Waktu Masuk: " + now.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' }) + " WIB";
             }
 
-            // Apply Role Permissions on Sidebar Buttons & Category Headers
             applyRolePermissions(displayRole);
         }
 
@@ -1103,32 +1147,26 @@
             const isBendahara = (r === "Bendahara");
             const isPengurus = (r === "Pengurus Barang");
 
-            // Top Item
             toggleBtn('btn-beranda', true);
 
-            // Group 1: PENGATURAN
             toggleBtn('cat-pengaturan', isAdminOrKepsek || isBendahara);
             toggleBtn('btn-kop', isAdminOrKepsek);
             toggleBtn('btn-pajak', isAdminOrKepsek || isBendahara);
             toggleBtn('btn-ttd', isAdminOrKepsek);
             toggleBtn('btn-pengguna', isAdminOrKepsek);
 
-            // Group 2: KUITANSI BOS
             toggleBtn('cat-kuitansi', isAdminOrKepsek || isBendahara);
             toggleBtn('btn-kuitansi', isAdminOrKepsek || isBendahara);
             toggleBtn('btn-laporan', isAdminOrKepsek || isBendahara);
             toggleBtn('btn-arsip', isAdminOrKepsek);
 
-            // Group 3: BELANJA MODAL
             toggleBtn('cat-belanja_modal', isAdminOrKepsek || isPengurus);
             toggleBtn('btn-belanja_modal', isAdminOrKepsek || isPengurus);
 
-            // Group 4: DANA MASUK & KELUAR
             toggleBtn('cat-cash_flow', isAdminOrKepsek || isBendahara);
             toggleBtn('btn-cash_flow', isAdminOrKepsek || isBendahara);
             toggleBtn('btn-arsip_cash_flow', isAdminOrKepsek);
 
-            // Database Button on Dashboard (Restricted exclusively to Admin & Kepsek)
             toggleBtn('btn-cloud-db', isAdminOrKepsek);
         }
 
@@ -1148,7 +1186,7 @@
         }
 
         async function loadAllData() {
-            showLoader("Memuat Data Aplikasi", "Tunggu Sebentar");
+            showLoader("Tunggu Sebentar", "Mengambil data kuitansi");
             try {
                 const cacheBuster = "?cb=" + Date.now();
                 const response = await fetch(scriptURL + cacheBuster);
@@ -1182,7 +1220,7 @@
                 populateArchiveYears();
                 populateArsipCfYears();
 
-                notify("Sukses!", "bg-green-600");
+                notify("DBerhasil Keluar!", "bg-green-600");
             } catch (err) {
                 console.error("Error loading cloud data:", err);
                 notify("Gagal Memuat Data Cloud. Periksa Koneksi!", "bg-red-600");
@@ -1220,7 +1258,7 @@
 
                 updateActiveUserBadge(matchedUser);
 
-                simulateProgress("SEDANG LOGIN", loadAllData).then(() => {
+                simulateProgress("Sedang Login", loadAllData).then(() => {
                     showSection('beranda');
                     notify(`Berhasil Masuk sebagai: ${matchedUser.name} (${matchedUser.role})`, "bg-green-600");
                 });
@@ -1333,6 +1371,9 @@
         }
 
         async function saveUser() {
+            if (isSavingUser) return;
+            const saveBtn = document.getElementById('btn-save-user');
+
             const name = document.getElementById('user-fullname').value.trim();
             const email = document.getElementById('user-email').value.trim();
             const password = document.getElementById('user-password').value;
@@ -1356,21 +1397,37 @@
                 createdAt: new Date().toISOString()
             };
 
-            notify("Sedang Menyimpan & Verifikasi Email...", "bg-blue-600");
+            try {
+                isSavingUser = true;
+                if (saveBtn) {
+                    saveBtn.disabled = true;
+                    saveBtn.innerHTML = `<span class="inline-block animate-spin mr-1">⏳</span> Sedang Menyimpan...`;
+                }
 
-            const res = await apiRequest({ action: "saveUser", ...newUser }, "Menyimpan & Mengirim Email...");
+                notify("Sedang Menyimpan & Verifikasi Email...", "bg-blue-600");
 
-            if (res?.status === "email_failed") {
-                notify("Peringatan: User tersimpan, namun Email tidak aktif / gagal dikirim!", "bg-amber-600");
-            } else if (res?.status === "error") {
-                return notify("Gagal Menyimpan Pengguna!", "bg-red-600");
-            } else {
-                notify(`Pengguna Berhasil Ditambahkan! Kredensial dikirim ke ${email}`, "bg-green-600");
+                const res = await apiRequest({ action: "saveUser", ...newUser }, "Menyimpan & Mengirim Email...");
+
+                if (res?.status === "email_failed") {
+                    notify("Peringatan: User tersimpan, namun Email tidak aktif / gagal dikirim!", "bg-amber-600");
+                } else if (res?.status === "error") {
+                    return notify("Gagal Menyimpan Pengguna!", "bg-red-600");
+                } else {
+                    notify(`Pengguna Berhasil Ditambahkan! Kredensial dikirim ke ${email}`, "bg-green-600");
+                }
+
+                users.push(newUser);
+                renderUsers();
+                closeUserModal();
+            } catch (err) {
+                notify("Gagal Menyimpan: " + err.message, "bg-red-600");
+            } finally {
+                isSavingUser = false;
+                if (saveBtn) {
+                    saveBtn.disabled = false;
+                    saveBtn.innerText = "Simpan & Kirim Email";
+                }
             }
-
-            users.push(newUser);
-            renderUsers();
-            closeUserModal();
         }
 
         function renderUsers() {
@@ -1479,6 +1536,9 @@
         }
 
         async function saveBelanjaModal() {
+            if (isSavingBM) return;
+            const saveBtn = document.getElementById('btn-save-bm');
+
             const nama = document.getElementById('bm-nama').value;
             const merek = document.getElementById('bm-merek').value;
             const jenis = document.getElementById('bm-jenis').value;
@@ -1499,26 +1559,46 @@
             const item = { 
                 nama, merek, jenis, volume, harga, totalHarga, tahun, kerusakan, tanggal
             };
-            
-            if (editingBmIndex >= 0) {
-                notify("Sedang Memperbarui Belanja Modal...", "bg-amber-600");
-                const res = await apiRequest({ action: "saveBelanjaModal", ...item }, "Memperbarui Belanja Modal...");
-                if(res?.status === "success" || res?.status !== "error") {
-                    belanjaModal[editingBmIndex] = item;
-                    renderBelanjaModal();
-                    closeBelanjaModal();
-                    updateHomeStats();
-                    notify("Berhasil Memperbarui Belanja Modal!", "bg-green-600");
+
+            try {
+                isSavingBM = true;
+                if (saveBtn) {
+                    saveBtn.disabled = true;
+                    saveBtn.innerHTML = `<span class="inline-block animate-spin mr-1">⏳</span> Sedang Menyimpan...`;
                 }
-            } else {
-                notify("Sedang Menyimpan Belanja Modal...", "bg-blue-600");
-                const res = await apiRequest({ action: "saveBelanjaModal", ...item }, "Menyimpan Belanja Modal...");
-                if(res?.status === "success" || res?.status !== "error") {
-                    belanjaModal.push(item);
-                    renderBelanjaModal();
-                    closeBelanjaModal();
-                    updateHomeStats();
-                    notify("Berhasil Menyimpan Belanja Modal!", "bg-green-600");
+
+                if (editingBmIndex >= 0) {
+                    notify("Sedang Memperbarui Belanja Modal...", "bg-amber-600");
+                    const res = await apiRequest({ action: "saveBelanjaModal", ...item }, "Memperbarui Belanja Modal...");
+                    if(res?.status === "success" || res?.status !== "error") {
+                        belanjaModal[editingBmIndex] = item;
+                        renderBelanjaModal();
+                        closeBelanjaModal();
+                        updateHomeStats();
+                        notify("Berhasil Memperbarui Belanja Modal!", "bg-green-600");
+                    } else {
+                        notify("Gagal Memperbarui Belanja Modal!", "bg-red-600");
+                    }
+                } else {
+                    notify("Sedang Menyimpan Belanja Modal...", "bg-blue-600");
+                    const res = await apiRequest({ action: "saveBelanjaModal", ...item }, "Menyimpan Belanja Modal...");
+                    if(res?.status === "success" || res?.status !== "error") {
+                        belanjaModal.push(item);
+                        renderBelanjaModal();
+                        closeBelanjaModal();
+                        updateHomeStats();
+                        notify("Berhasil Menyimpan Belanja Modal!", "bg-green-600");
+                    } else {
+                        notify("Gagal Menyimpan Belanja Modal!", "bg-red-600");
+                    }
+                }
+            } catch (err) {
+                notify("Gagal Menyimpan: " + err.message, "bg-red-600");
+            } finally {
+                isSavingBM = false;
+                if (saveBtn) {
+                    saveBtn.disabled = false;
+                    saveBtn.innerText = editingBmIndex >= 0 ? "UPDATE DATA BELANJA MODAL" : "Simpan Data Belanja Modal";
                 }
             }
         }
@@ -1535,7 +1615,7 @@
             if (document.getElementById('bm-total-harga')) document.getElementById('bm-total-harga').value = Math.round(parseFloat(b.totalHarga) || 0);
             document.getElementById('bm-tahun').value = b.tahun || new Date().getFullYear();
             if (document.getElementById('bm-tanggal')) {
-                const dStr = b.tanggal ? new Date(b.tanggal).toISOString().slice(0, 10) : new Date().toISOString().slice(0, 10);
+                const dStr = b.tanggal ? String(b.tanggal).split('T')[0] : new Date().toISOString().slice(0, 10);
                 document.getElementById('bm-tanggal').value = dStr;
             }
             document.getElementById('bm-kerusakan').value = b.kerusakan || "Baik";
@@ -1548,14 +1628,10 @@
             const saveBtn = document.getElementById('btn-save-bm');
             if (saveBtn) {
                 saveBtn.innerText = "UPDATE DATA BELANJA MODAL";
-                saveBtn.className = "px-6 py-2.5 rounded-xl bg-amber-600 text-white font-bold hover:bg-amber-700 shadow-md";
+                saveBtn.className = "px-6 py-2.5 rounded-xl bg-amber-600 text-white font-bold hover:bg-amber-700 shadow-md disabled:opacity-50 disabled:cursor-not-allowed";
             }
             
             document.getElementById('bm-modal').classList.remove('hidden');
-        }
-
-        function cancelEditBelanjaModal() {
-            closeBelanjaModal();
         }
 
         function resetFormBelanjaModal() {
@@ -1576,8 +1652,8 @@
 
             const saveBtn = document.getElementById('btn-save-bm');
             if (saveBtn) {
-                saveBtn.innerText = "SIMPAN DATA BELANJA MODAL";
-                saveBtn.className = "px-6 py-2.5 rounded-xl bg-blue-700 text-white font-bold hover:bg-blue-800 shadow-md";
+                saveBtn.innerText = "Simpan Data Belanja Modal";
+                saveBtn.className = "px-6 py-2.5 rounded-xl bg-blue-700 text-white font-bold hover:bg-blue-800 shadow-md disabled:opacity-50 disabled:cursor-not-allowed";
             }
         }
 
@@ -1586,7 +1662,7 @@
             if (!select) return;
             const currentSelected = select.value || "all";
             const years = [...new Set(belanjaModal.map(b => {
-                const yr = b.tahun || new Date(b.tanggal || Date.now()).getFullYear();
+                const yr = b.tahun || getYearFromDateStr(b.tanggal);
                 return isNaN(yr) ? null : parseInt(yr);
             }).filter(y => y !== null))].sort((a,b) => b - a);
 
@@ -1594,6 +1670,12 @@
             years.forEach(y => html += `<option value="${y}">${y}</option>`);
             select.innerHTML = html;
             select.value = currentSelected;
+        }
+
+        function resetDateFilterBelanjaModal() {
+            if (document.getElementById('filter-start-date-bm')) document.getElementById('filter-start-date-bm').value = "";
+            if (document.getElementById('filter-end-date-bm')) document.getElementById('filter-end-date-bm').value = "";
+            renderBelanjaModal();
         }
 
         function renderBelanjaModal() {
@@ -1604,16 +1686,24 @@
             const filter = (document.getElementById('filter-bm')?.value || "").toLowerCase();
             const yearFilter = document.getElementById('filter-tahun-bm')?.value || "all";
             const jenisFilter = document.getElementById('filter-jenis-bm')?.value || "all";
+            const startDate = document.getElementById('filter-start-date-bm')?.value || "";
+            const endDate = document.getElementById('filter-end-date-bm')?.value || "";
 
             const filtered = belanjaModal.filter(b => {
-                const itemYear = String(b.tahun || new Date(b.tanggal || Date.now()).getFullYear());
+                const itemYear = String(b.tahun || getYearFromDateStr(b.tanggal));
                 const matchYear = yearFilter === "all" || itemYear === yearFilter;
                 const matchJenis = jenisFilter === "all" || b.jenis === jenisFilter;
                 const matchText = String(b.nama).toLowerCase().includes(filter) ||
                                   String(b.merek).toLowerCase().includes(filter) ||
                                   String(b.jenis).toLowerCase().includes(filter) ||
                                   String(b.volume || '').toLowerCase().includes(filter);
-                return matchYear && matchJenis && matchText;
+                
+                let matchDate = true;
+                const itemDateStr = String(b.tanggal || '').split('T')[0];
+                if (startDate && itemDateStr < startDate) matchDate = false;
+                if (endDate && itemDateStr > endDate) matchDate = false;
+
+                return matchYear && matchJenis && matchText && matchDate;
             });
 
             tbody.innerHTML = filtered.map((b) => {
@@ -1623,8 +1713,8 @@
                 if(b.kerusakan === "Rusak Sedang") badgeClass = "bg-orange-100 text-orange-800";
                 if(b.kerusakan === "Rusak Berat") badgeClass = "bg-red-100 text-red-800";
                 if(b.kerusakan === "Hilang") badgeClass = "bg-purple-100 text-purple-800";
-                const displayYear = b.tahun || (b.tanggal ? new Date(b.tanggal).getFullYear() : '-');
-                const displayDate = b.tanggal ? new Date(b.tanggal).toLocaleDateString('id-ID') : '-';
+                const displayYear = b.tahun || (b.tanggal ? getYearFromDateStr(b.tanggal) : '-');
+                const displayDate = b.tanggal ? formatDisplayDate(b.tanggal) : '-';
                 const displayVolume = b.volume || '1 Unit';
                 const hargaSatuan = Math.round(parseFloat(b.harga) || 0);
                 const totalHarga = Math.round(parseFloat(b.totalHarga) || (hargaSatuan * (parseFloat(displayVolume.match(/\d+(\.\d+)?/)?.[0]) || 1)));
@@ -1649,14 +1739,37 @@
         }
 
         async function saveSaldoAwal() {
+            if (isSavingSaldo) return;
+            const saveBtn = document.getElementById('btn-save-saldo');
+
             const inputVal = Math.round(parseFloat(document.getElementById('cf-saldo-awal')?.value) || 0);
             saldoAwal = inputVal;
-            renderCashFlow();
-            updateHomeStats();
-            notify("Sedang Menyimpan Saldo Awal...", "bg-blue-600");
-            const res = await apiRequest({ action: "saveSaldoAwal", saldoAwal: saldoAwal }, "Menyimpan Saldo Awal...");
-            if (res?.status === "success" || res?.status !== "error") {
-                notify("Berhasil Menyimpan Saldo Awal Kas!", "bg-green-600");
+
+            try {
+                isSavingSaldo = true;
+                if (saveBtn) {
+                    saveBtn.disabled = true;
+                    saveBtn.innerHTML = `<span class="inline-block animate-spin mr-1">⏳</span> Sedang Menyimpan...`;
+                }
+
+                renderCashFlow();
+                updateHomeStats();
+                notify("Sedang Menyimpan Saldo Awal...", "bg-blue-600");
+
+                const res = await apiRequest({ action: "saveSaldoAwal", saldoAwal: saldoAwal }, "Menyimpan Saldo Awal...");
+                if (res?.status === "success" || res?.status !== "error") {
+                    notify("Berhasil Menyimpan Saldo Awal Kas!", "bg-green-600");
+                } else {
+                    notify("Gagal Menyimpan Saldo Awal Kas!", "bg-red-600");
+                }
+            } catch (err) {
+                notify("Gagal Menyimpan: " + err.message, "bg-red-600");
+            } finally {
+                isSavingSaldo = false;
+                if (saveBtn) {
+                    saveBtn.disabled = false;
+                    saveBtn.innerHTML = `<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7H5a2 2 0 002-2v9a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-3m-1 4l-3 3m0 0l-3-3m3 3V4"></path></svg> Simpan Saldo Awal`;
+                }
             }
         }
 
@@ -1674,6 +1787,9 @@
         }
 
         async function saveCashFlow() {
+            if (isSavingCF) return;
+            const saveBtn = document.getElementById('btn-save-cf');
+
             const tanggal = document.getElementById('cf-tanggal').value;
             const deskripsi = document.getElementById('cf-deskripsi').value;
             const jenisBosp = document.getElementById('cf-jenis-bosp')?.value || "Bos Reguler";
@@ -1686,18 +1802,42 @@
 
             const masuk = jenis === 'masuk' ? nominal : 0;
             const keluar = jenis === 'keluar' ? nominal : 0;
-
             const item = { tanggal, deskripsi, jenisBosp, masuk, keluar };
 
-            notify("Sedang Menyimpan Transaksi Dana...", "bg-blue-600");
-            const res = await apiRequest({ action: "saveCashFlow", ...item }, "Menyimpan Transaksi...");
-            if(res?.status === "success" || res?.status !== "error") {
-                cashFlow.push(item);
-                renderCashFlow();
-                closeCashFlowModal();
-                updateHomeStats();
-                notify("Berhasil Menyimpan Transaksi Dana!", "bg-green-600");
+            try {
+                isSavingCF = true;
+                if (saveBtn) {
+                    saveBtn.disabled = true;
+                    saveBtn.innerHTML = `<span class="inline-block animate-spin mr-1">⏳</span> Sedang Menyimpan...`;
+                }
+
+                notify("Sedang Menyimpan Transaksi Dana...", "bg-blue-600");
+                const res = await apiRequest({ action: "saveCashFlow", ...item }, "Menyimpan Transaksi...");
+                
+                if(res?.status === "success" || res?.status !== "error") {
+                    cashFlow.push(item);
+                    renderCashFlow();
+                    closeCashFlowModal();
+                    updateHomeStats();
+                    notify("Berhasil Menyimpan Transaksi Dana!", "bg-green-600");
+                } else {
+                    notify("Gagal Menyimpan Transaksi Dana!", "bg-red-600");
+                }
+            } catch (err) {
+                notify("Gagal Menyimpan: " + err.message, "bg-red-600");
+            } finally {
+                isSavingCF = false;
+                if (saveBtn) {
+                    saveBtn.disabled = false;
+                    saveBtn.innerText = "Simpan Transaksi";
+                }
             }
+        }
+
+        function resetDateFilterCashFlow() {
+            if (document.getElementById('filter-start-date-cf')) document.getElementById('filter-start-date-cf').value = "";
+            if (document.getElementById('filter-end-date-cf')) document.getElementById('filter-end-date-cf').value = "";
+            renderCashFlow();
         }
 
         function renderCashFlow() {
@@ -1709,38 +1849,49 @@
 
             document.getElementById('cf-stat-awal').innerText = formatIDR(saldoAwal);
 
-            cashFlow.sort((a,b) => new Date(a.tanggal) - new Date(b.tanggal));
+            cashFlow.sort((a,b) => String(a.tanggal).localeCompare(String(b.tanggal)));
 
             let runningSaldo = saldoAwal;
-            let totalMasuk = 0;
-            let totalKeluar = 0;
 
             const calculatedFlow = cashFlow.map((item) => {
                 const masuk = Math.round(parseFloat(item.masuk) || 0);
                 const keluar = Math.round(parseFloat(item.keluar) || 0);
-                totalMasuk += masuk;
-                totalKeluar += keluar;
                 runningSaldo += (masuk - keluar);
                 return { ...item, saldo: runningSaldo };
             });
 
-            document.getElementById('cf-stat-masuk').innerText = formatIDR(totalMasuk);
-            document.getElementById('cf-stat-keluar').innerText = formatIDR(totalKeluar);
-            document.getElementById('cf-stat-saldo').innerText = formatIDR(runningSaldo);
-
             const filterText = (document.getElementById('filter-cash_flow')?.value || "").toLowerCase();
             const filterBosp = document.getElementById('filter-bosp-cash_flow')?.value || "all";
+            const startDate = document.getElementById('filter-start-date-cf')?.value || "";
+            const endDate = document.getElementById('filter-end-date-cf')?.value || "";
 
             const filtered = calculatedFlow.filter(c => {
                 const matchText = String(c.deskripsi).toLowerCase().includes(filterText) ||
                                   String(c.jenisBosp || "").toLowerCase().includes(filterText) ||
                                   String(c.tanggal).toLowerCase().includes(filterText);
                 const matchBosp = filterBosp === "all" || (c.jenisBosp || "Bos Reguler") === filterBosp;
-                return matchText && matchBosp;
+                
+                let matchDate = true;
+                const itemDateStr = String(c.tanggal).split('T')[0];
+                if (startDate && itemDateStr < startDate) matchDate = false;
+                if (endDate && itemDateStr > endDate) matchDate = false;
+
+                return matchText && matchBosp && matchDate;
             });
 
+            let filteredMasuk = 0;
+            let filteredKeluar = 0;
+            filtered.forEach(c => {
+                filteredMasuk += c.masuk;
+                filteredKeluar += c.keluar;
+            });
+
+            document.getElementById('cf-stat-masuk').innerText = formatIDR(filteredMasuk);
+            document.getElementById('cf-stat-keluar').innerText = formatIDR(filteredKeluar);
+            document.getElementById('cf-stat-saldo').innerText = formatIDR(runningSaldo);
+
             tbody.innerHTML = filtered.map((c, idx) => {
-                const tgl = new Date(c.tanggal).toLocaleDateString('id-ID');
+                const tgl = formatDisplayDate(c.tanggal);
                 const bospVal = c.jenisBosp || "Bos Reguler";
                 const bospBadge = bospVal === "Bos Kinerja" ? "bg-purple-100 text-purple-800" : "bg-blue-100 text-blue-800";
 
@@ -1768,7 +1919,7 @@
 
                 const archivedItems = cashFlow.map(item => ({
                     ...item,
-                    tahun: new Date(item.tanggal).getFullYear() || new Date().getFullYear(),
+                    tahun: getYearFromDateStr(item.tanggal),
                     archivedAt: new Date().toISOString()
                 }));
 
@@ -1790,7 +1941,7 @@
             if (!select) return;
             const currentSelected = select.value || "all";
             const years = [...new Set(archiveCashFlow.map(c => {
-                const yr = c.tahun || new Date(c.tanggal || Date.now()).getFullYear();
+                const yr = c.tahun || getYearFromDateStr(c.tanggal);
                 return isNaN(yr) ? null : parseInt(yr);
             }).filter(y => y !== null))].sort((a,b) => b - a);
 
@@ -1810,7 +1961,7 @@
             const bospFilter = document.getElementById('filter-bosp-arsip-cf')?.value || "all";
 
             const filtered = archiveCashFlow.filter(c => {
-                const itemYear = String(c.tahun || new Date(c.tanggal || Date.now()).getFullYear());
+                const itemYear = String(c.tahun || getYearFromDateStr(c.tanggal));
                 const itemBosp = c.jenisBosp || "Bos Reguler";
                 const matchYear = yearFilter === "all" || itemYear === yearFilter;
                 const matchBosp = bospFilter === "all" || itemBosp === bospFilter;
@@ -1820,11 +1971,11 @@
                 return matchYear && matchBosp && matchText;
             });
 
-            filtered.sort((a,b) => new Date(a.tanggal) - new Date(b.tanggal));
+            filtered.sort((a,b) => String(a.tanggal).localeCompare(String(b.tanggal)));
 
             tbody.innerHTML = filtered.map((c, idx) => {
-                const tgl = new Date(c.tanggal).toLocaleDateString('id-ID');
-                const yr = c.tahun || new Date(c.tanggal).getFullYear();
+                const tgl = formatDisplayDate(c.tanggal);
+                const yr = c.tahun || getYearFromDateStr(c.tanggal);
                 const bospVal = c.jenisBosp || "Bos Reguler";
                 const bospBadge = bospVal === "Bos Kinerja" ? "bg-purple-100 text-purple-800" : "bg-blue-100 text-blue-800";
 
@@ -1843,14 +1994,12 @@
         }
 
         function updateHomeStats() {
-            // Kuitansi Stats
             document.getElementById('stat-total-kuitansi').innerText = reports.length;
             const total = reports.reduce((a, b) => a + (Math.round(parseFloat(b.jumlah)) || 0), 0);
             const totalTax = reports.reduce((a, b) => a + (Math.round(parseFloat(b.taxVal)) || 0), 0);
             document.getElementById('stat-total-pengeluaran').innerText = formatIDR(total);
             document.getElementById('stat-total-pajak').innerText = formatIDR(totalTax);
 
-            // Belanja Modal Stats (Warna Merah)
             const totalBm = belanjaModal.reduce((a, b) => {
                 const hSatuan = Math.round(parseFloat(b.harga) || 0);
                 const matchVol = String(b.volume || '').match(/\d+(\.\d+)?/);
@@ -1862,7 +2011,6 @@
                 document.getElementById('stat-total-bm').innerText = formatIDR(totalBm);
             }
 
-            // Dana Kas Stats (Saldo Awal, Masuk, Keluar, Saldo Akhir)
             let totalMasuk = 0;
             let totalKeluar = 0;
             cashFlow.forEach(c => {
@@ -1876,7 +2024,6 @@
             if (document.getElementById('stat-total-keluar')) document.getElementById('stat-total-keluar').innerText = formatIDR(totalKeluar);
             if (document.getElementById('stat-saldo-akhir')) document.getElementById('stat-saldo-akhir').innerText = formatIDR(saldoAkhir);
 
-            // Dynamic Breakdown for Belanja Modal: Jenis, Nama Barang, and Merek/Tipe
             renderBmDashboardStats();
         }
 
@@ -1897,14 +2044,12 @@
                 const qty = matchVol ? parseFloat(matchVol[0]) : 1;
                 const totalH = Math.round(parseFloat(b.totalHarga) || (hSatuan * qty));
 
-                // Group by Jenis Belanja Modal
                 if (!jenisMap[jenis]) {
                     jenisMap[jenis] = { count: 0, totalVal: 0 };
                 }
                 jenisMap[jenis].count += 1;
                 jenisMap[jenis].totalVal += totalH;
 
-                // Group by Nama Barang & Merek/Tipe
                 const itemKey = `${nama.trim()}___${merek.trim()}___${jenis.trim()}`;
                 if (!itemMap[itemKey]) {
                     itemMap[itemKey] = { nama, merek, jenis, totalVal: 0, count: 0 };
@@ -1913,7 +2058,6 @@
                 itemMap[itemKey].count += 1;
             });
 
-            // 1. Render Jenis Belanja Modal Summary Cards
             const jenisKeys = Object.keys(jenisMap);
             if (jenisKeys.length === 0) {
                 jenisContainer.innerHTML = `<div class="p-4 bg-slate-100 rounded-xl text-center text-slate-500 text-xs italic col-span-full">Belum ada data Belanja Modal</div>`;
@@ -1930,7 +2074,6 @@
                 }).join('');
             }
 
-            // 2. Render Nama Barang & Merek/Tipe Table Rows
             const itemKeys = Object.keys(itemMap);
             if (itemKeys.length === 0) {
                 itemTableBody.innerHTML = `<tr><td colspan="5" class="p-4 text-center text-slate-400 italic">Belum ada data Belanja Modal recorded</td></tr>`;
@@ -1951,10 +2094,7 @@
         function populateArchiveYears() {
             const select = document.getElementById('filter-tahun-arsip');
             if(!select) return;
-            const years = [...new Set(archiveReports.map(r => {
-                const date = new Date(r.tanggal);
-                return isNaN(date.getFullYear()) ? null : date.getFullYear();
-            }).filter(y => y !== null))].sort((a,b) => b - a);
+            const years = [...new Set(archiveReports.map(r => getYearFromDateStr(r.tanggal)).filter(y => !isNaN(y)))].sort((a,b) => b - a);
             
             let html = '<option value="all">Semua Tahun</option>';
             years.forEach(y => html += `<option value="${y}">${y}</option>`);
@@ -1971,7 +2111,7 @@
             
             let filtered = archiveReports.filter(r => {
                 const bkuMatch = String(r.bku).toLowerCase().includes(bkuFilter);
-                const yearMatch = yearFilter === "all" || String(new Date(r.tanggal).getFullYear()) === yearFilter;
+                const yearMatch = yearFilter === "all" || String(getYearFromDateStr(r.tanggal)) === yearFilter;
                 return bkuMatch && yearMatch;
             });
 
@@ -1990,7 +2130,7 @@
 
             tbody.innerHTML = paginatedItems.map((r) => {
                 const actualIdx = archiveReports.indexOf(r);
-                const tgl = new Date(r.tanggal).toLocaleDateString('id-ID');
+                const tgl = formatDisplayDate(r.tanggal);
                 return `<tr class="border-b hover:bg-slate-50 transition"><td class="p-4 font-bold text-slate-700">${r.bku}</td><td class="p-4">${tgl}</td><td class="p-4 italic">${r.penerima}</td><td class="p-4 text-right font-bold">Rp ${Number(r.jumlah).toLocaleString('id-ID')}</td><td class="p-4 text-center"><button onclick="printFromArchive(${actualIdx})" class="text-slate-600 font-bold hover:underline">Cetak</button></td></tr>`;
             }).join('');
 
@@ -2047,9 +2187,12 @@
         }
 
         async function saveReceipt() {
+            if (isSavingReceipt) return;
+            const saveBtn = document.getElementById('btn-save-kuitansi');
+
             const calc = updateCalculations();
             if(!document.getElementById('k-bku').value) return notify("No BKU wajib!", "bg-red-600");
-            notify("Sedang Menyimpan Kuitansi...", "bg-blue-600");
+
             const data = {
                 action: "saveReceipt", bku: document.getElementById('k-bku').value,
                 rekening: document.getElementById('k-rekening').value, dari: document.getElementById('k-dari').value,
@@ -2057,13 +2200,33 @@
                 untuk: document.getElementById('k-untuk').value, taxName: calc.taxName, taxVal: calc.taxVal,
                 taxRate: calc.taxRate, dpp: calc.dpp, terbilang: document.getElementById('res-terbilang').innerText, jumlah: calc.total
             };
-            const res = await apiRequest(data, "Menyimpan...");
-            if(res?.status === "success" || res?.status !== "error") { 
-                reports.push(data); 
-                notify("Berhasil Menyimpan Kuitansi!", "bg-green-600"); 
-                updateHomeStats();
-                resetForm();
-                renderReports();
+
+            try {
+                isSavingReceipt = true;
+                if (saveBtn) {
+                    saveBtn.disabled = true;
+                    saveBtn.innerHTML = `<span class="inline-block animate-spin mr-1">⏳</span> SEDANG MENYIMPAN...`;
+                }
+
+                notify("Sedang Menyimpan Kuitansi...", "bg-blue-600");
+                const res = await apiRequest(data, "Menyimpan...");
+                if(res?.status === "success" || res?.status !== "error") { 
+                    reports.push(data); 
+                    notify("Berhasil Menyimpan Kuitansi!", "bg-green-600"); 
+                    updateHomeStats();
+                    resetForm();
+                    renderReports();
+                } else {
+                    notify("Gagal Menyimpan Kuitansi!", "bg-red-600");
+                }
+            } catch (err) {
+                notify("Gagal Menyimpan: " + err.message, "bg-red-600");
+            } finally {
+                isSavingReceipt = false;
+                if (saveBtn) {
+                    saveBtn.disabled = false;
+                    saveBtn.innerText = "SIMPAN DATA";
+                }
             }
         }
 
@@ -2085,15 +2248,23 @@
             const filter = (document.getElementById('filter-bm')?.value || "").toLowerCase();
             const yearFilter = document.getElementById('filter-tahun-bm')?.value || "all";
             const jenisFilter = document.getElementById('filter-jenis-bm')?.value || "all";
+            const startDate = document.getElementById('filter-start-date-bm')?.value || "";
+            const endDate = document.getElementById('filter-end-date-bm')?.value || "";
 
             const filtered = belanjaModal.filter(b => {
-                const itemYear = String(b.tahun || new Date(b.tanggal || Date.now()).getFullYear());
+                const itemYear = String(b.tahun || getYearFromDateStr(b.tanggal));
                 const matchYear = yearFilter === "all" || itemYear === yearFilter;
                 const matchJenis = jenisFilter === "all" || b.jenis === jenisFilter;
                 const matchText = String(b.nama).toLowerCase().includes(filter) ||
                                   String(b.merek).toLowerCase().includes(filter) ||
                                   String(b.jenis).toLowerCase().includes(filter);
-                return matchYear && matchJenis && matchText;
+
+                let matchDate = true;
+                const itemDateStr = String(b.tanggal || '').split('T')[0];
+                if (startDate && itemDateStr < startDate) matchDate = false;
+                if (endDate && itemDateStr > endDate) matchDate = false;
+
+                return matchYear && matchJenis && matchText && matchDate;
             });
 
             if (filtered.length === 0) return notify("Tidak ada data Belanja Modal untuk dicetak!", "bg-amber-600");
@@ -2105,7 +2276,7 @@
                 const hargaSat = Math.round(parseFloat(b.harga) || 0);
                 const displayVol = b.volume || "1 Unit";
                 const totalH = Math.round(parseFloat(b.totalHarga) || (hargaSat * (parseFloat(displayVol.match(/\d+(\.\d+)?/)?.[0]) || 1)));
-                const displayDate = b.tanggal ? new Date(b.tanggal).toLocaleDateString('id-ID') : '-';
+                const displayDate = b.tanggal ? formatDisplayDate(b.tanggal) : '-';
                 return `<tr>
                     <td style="border: 1px solid black; padding: 6px; text-align: center;">${i + 1}</td>
                     <td style="border: 1px solid black; padding: 6px;">${b.nama}</td>
@@ -2122,6 +2293,15 @@
 
             const grandTotal = filtered.reduce((a, b) => a + (Math.round(parseFloat(b.totalHarga)) || ((Math.round(parseFloat(b.harga)) || 0) * (parseFloat(String(b.volume || '').match(/\d+(\.\d+)?/)?.[0]) || 1))), 0);
 
+            let periodText = "";
+            if (startDate && endDate) {
+                periodText = `<p style="text-align:center; font-weight:bold; font-size:10pt; margin-bottom:15px;">PERIODE: ${formatDisplayDate(startDate)} s/d ${formatDisplayDate(endDate)}</p>`;
+            } else if (startDate) {
+                periodText = `<p style="text-align:center; font-weight:bold; font-size:10pt; margin-bottom:15px;">PERIODE: MULAI ${formatDisplayDate(startDate)}</p>`;
+            } else if (endDate) {
+                periodText = `<p style="text-align:center; font-weight:bold; font-size:10pt; margin-bottom:15px;">PERIODE: SAMPAI ${formatDisplayDate(endDate)}</p>`;
+            }
+
             const kopHeader = `<div style="display: flex; align-items: center; border-bottom: 3px double black; padding-bottom: 10px; margin-bottom: 20px;">
                 <div style="width: 80px; text-align: center;">${kopConfig.logoL ? `<img src="${kopConfig.logoL}" style="max-width:80px;">` : ''}</div>
                 <div style="text-align: center; flex: 1;">
@@ -2134,7 +2314,7 @@
                 <div style="width: 80px; text-align: center;">${kopConfig.logoR ? `<img src="${kopConfig.logoR}" style="max-width:80px;">` : ''}</div>
             </div>`;
 
-            const content = `<html><head><title>Laporan Belanja Modal</title><style>@page { size: 210mm 330mm; margin: 15mm; } body { font-family: 'Times New Roman', serif; }</style></head><body onload="window.print(); window.close();">${kopHeader}<h2 style="text-align:center; text-decoration:underline; font-size:14pt; margin-bottom:20px;">LAPORAN DATA BELANJA MODAL</h2><table style="width:100%; border-collapse:collapse; font-size:10pt;"><thead><tr style="background:#eee;"><th style="border:1px solid black; padding:8px;">No</th><th style="border:1px solid black; padding:8px;">Nama Barang</th><th style="border:1px solid black; padding:8px;">Merek / Tipe</th><th style="border:1px solid black; padding:8px;">Jenis Belanja</th><th style="border:1px solid black; padding:8px;">Volume</th><th style="border:1px solid black; padding:8px;">Harga Satuan</th><th style="border:1px solid black; padding:8px;">Jumlah Harga</th><th style="border:1px solid black; padding:8px;">Tahun</th><th style="border:1px solid black; padding:8px;">Tanggal</th><th style="border:1px solid black; padding:8px;">Kondisi</th></tr></thead><tbody>${rowsHtml}<tr><td colspan="6" style="border:1px solid black; padding:8px; font-weight:bold; text-align:right;">TOTAL SELURUH BELANJA MODAL:</td><td style="border:1px solid black; padding:8px; font-weight:black; text-align:right;">Rp ${grandTotal.toLocaleString('id-ID')}</td><td colspan="3" style="border:1px solid black;"></td></tr></tbody></table></body></html>`;
+            const content = `<html><head><title>Laporan Belanja Modal</title><style>@page { size: 210mm 330mm; margin: 15mm; } body { font-family: 'Times New Roman', serif; }</style></head><body onload="window.print(); window.close();">${kopHeader}<h2 style="text-align:center; text-decoration:underline; font-size:14pt; margin-bottom:5px;">LAPORAN DATA BELANJA MODAL</h2>${periodText}<table style="width:100%; border-collapse:collapse; font-size:10pt;"><thead><tr style="background:#eee;"><th style="border:1px solid black; padding:8px;">No</th><th style="border:1px solid black; padding:8px;">Nama Barang</th><th style="border:1px solid black; padding:8px;">Merek / Tipe</th><th style="border:1px solid black; padding:8px;">Jenis Belanja</th><th style="border:1px solid black; padding:8px;">Volume</th><th style="border:1px solid black; padding:8px;">Harga Satuan</th><th style="border:1px solid black; padding:8px;">Jumlah Harga</th><th style="border:1px solid black; padding:8px;">Tahun</th><th style="border:1px solid black; padding:8px;">Tanggal</th><th style="border:1px solid black; padding:8px;">Kondisi</th></tr></thead><tbody>${rowsHtml}<tr><td colspan="6" style="border:1px solid black; padding:8px; font-weight:bold; text-align:right;">TOTAL SELURUH BELANJA MODAL:</td><td style="border:1px solid black; padding:8px; font-weight:black; text-align:right;">Rp ${grandTotal.toLocaleString('id-ID')}</td><td colspan="3" style="border:1px solid black;"></td></tr></tbody></table></body></html>`;
             printWin.document.open(); printWin.document.write(content); printWin.document.close();
         }
 
@@ -2144,7 +2324,6 @@
                 const wb = XLSX.utils.book_new();
                 XLSX.utils.book_append_sheet(wb, ws, sheetName || "Data");
                 
-                // Set auto column widths
                 if (dataArray.length > 0) {
                     const colWidths = Object.keys(dataArray[0]).map(key => {
                         const maxLen = Math.max(
@@ -2187,25 +2366,36 @@
             const filterText = (document.getElementById('filter-bm')?.value || "").toLowerCase();
             const yearFilter = document.getElementById('filter-tahun-bm')?.value || "all";
             const jenisFilter = document.getElementById('filter-jenis-bm')?.value || "all";
+            const startDate = document.getElementById('filter-start-date-bm')?.value || "";
+            const endDate = document.getElementById('filter-end-date-bm')?.value || "";
 
             const filtered = belanjaModal.filter(b => {
-                const itemYear = String(b.tahun || new Date(b.tanggal || Date.now()).getFullYear());
+                const itemYear = String(b.tahun || getYearFromDateStr(b.tanggal));
                 const matchYear = yearFilter === "all" || itemYear === yearFilter;
                 const matchJenis = jenisFilter === "all" || b.jenis === jenisFilter;
                 const matchText = String(b.nama).toLowerCase().includes(filterText) ||
                                   String(b.merek).toLowerCase().includes(filterText) ||
                                   String(b.jenis).toLowerCase().includes(filterText) ||
                                   String(b.volume || '').toLowerCase().includes(filterText);
-                return matchYear && matchJenis && matchText;
+
+                let matchDate = true;
+                const itemDateStr = String(b.tanggal || '').split('T')[0];
+                if (startDate && itemDateStr < startDate) matchDate = false;
+                if (endDate && itemDateStr > endDate) matchDate = false;
+
+                return matchYear && matchJenis && matchText && matchDate;
             });
 
             if (filtered.length === 0) return notify("Tidak ada data Belanja Modal yang sesuai filter untuk diekspor!", "bg-amber-600");
+
+            let grandTotal = 0;
 
             const exportData = filtered.map((b, i) => {
                 const hargaSat = Math.round(parseFloat(b.harga) || 0);
                 const displayVol = b.volume || "1 Unit";
                 const totalH = Math.round(parseFloat(b.totalHarga) || (hargaSat * (parseFloat(displayVol.match(/\d+(\.\d+)?/)?.[0]) || 1)));
-                const displayDate = b.tanggal ? new Date(b.tanggal).toLocaleDateString('id-ID') : '-';
+                grandTotal += totalH;
+                const displayDate = b.tanggal ? formatDisplayDate(b.tanggal) : '-';
                 return {
                     "No": i + 1,
                     "Nama Barang": b.nama,
@@ -2220,26 +2410,72 @@
                 };
             });
 
-            exportToExcelEngine(exportData, `Belanja_Modal_SDN22_${new Date().toISOString().slice(0,10)}`, "Belanja Modal");
+            exportData.push({
+                "No": "TOTAL PERIODE",
+                "Nama Barang": "",
+                "Merek / Tipe": "",
+                "Jenis Belanja Modal": "",
+                "Volume / Jumlah": "",
+                "Harga Satuan (Rp)": "",
+                "Jumlah Harga (Rp)": grandTotal,
+                "Tahun Belanja": "",
+                "Tanggal Transaksi": "",
+                "Kondisi": ""
+            });
+
+            let filePeriodSuffix = new Date().toISOString().slice(0,10);
+            if (startDate && endDate) filePeriodSuffix = `${startDate}_sd_${endDate}`;
+
+            exportToExcelEngine(exportData, `Belanja_Modal_SDN22_${filePeriodSuffix}`, "Belanja Modal");
         }
 
         function printCashFlow() {
             if (cashFlow.length === 0) return notify("Tidak ada data Dana Masuk & Keluar untuk dicetak!", "bg-amber-600");
 
+            const filterText = (document.getElementById('filter-cash_flow')?.value || "").toLowerCase();
+            const filterBosp = document.getElementById('filter-bosp-cash_flow')?.value || "all";
+            const startDate = document.getElementById('filter-start-date-cf')?.value || "";
+            const endDate = document.getElementById('filter-end-date-cf')?.value || "";
+
+            cashFlow.sort((a,b) => String(a.tanggal).localeCompare(String(b.tanggal)));
+
+            let runningSaldo = saldoAwal;
+
+            const calculatedFlow = cashFlow.map((item) => {
+                const masuk = Math.round(parseFloat(item.masuk) || 0);
+                const keluar = Math.round(parseFloat(item.keluar) || 0);
+                runningSaldo += (masuk - keluar);
+                return { ...item, saldo: runningSaldo };
+            });
+
+            const filtered = calculatedFlow.filter(c => {
+                const matchText = String(c.deskripsi).toLowerCase().includes(filterText) ||
+                                  String(c.jenisBosp || "").toLowerCase().includes(filterText) ||
+                                  String(c.tanggal).toLowerCase().includes(filterText);
+                const matchBosp = filterBosp === "all" || (c.jenisBosp || "Bos Reguler") === filterBosp;
+                
+                let matchDate = true;
+                const itemDateStr = String(c.tanggal).split('T')[0];
+                if (startDate && itemDateStr < startDate) matchDate = false;
+                if (endDate && itemDateStr > endDate) matchDate = false;
+
+                return matchText && matchBosp && matchDate;
+            });
+
+            if (filtered.length === 0) return notify("Tidak ada data Dana Masuk & Keluar yang sesuai filter!", "bg-amber-600");
+
             const printWin = window.open('', '_blank');
             if (!printWin) return;
 
-            let runningSaldo = saldoAwal;
             let totalMasuk = 0;
             let totalKeluar = 0;
 
-            let rowsHtml = cashFlow.map((c, i) => {
+            let rowsHtml = filtered.map((c, i) => {
                 const masuk = Math.round(parseFloat(c.masuk) || 0);
                 const keluar = Math.round(parseFloat(c.keluar) || 0);
                 totalMasuk += masuk;
                 totalKeluar += keluar;
-                runningSaldo += (masuk - keluar);
-                const tgl = new Date(c.tanggal).toLocaleDateString('id-ID');
+                const tgl = formatDisplayDate(c.tanggal);
 
                 return `<tr>
                     <td style="border: 1px solid black; padding: 6px; text-align: center;">${i + 1}</td>
@@ -2248,9 +2484,18 @@
                     <td style="border: 1px solid black; padding: 6px; text-align: center;">${c.jenisBosp || 'Bos Reguler'}</td>
                     <td style="border: 1px solid black; padding: 6px; text-align: right;">${masuk > 0 ? 'Rp ' + masuk.toLocaleString('id-ID') : '-'}</td>
                     <td style="border: 1px solid black; padding: 6px; text-align: right;">${keluar > 0 ? 'Rp ' + keluar.toLocaleString('id-ID') : '-'}</td>
-                    <td style="border: 1px solid black; padding: 6px; text-align: right; font-weight: bold;">Rp ${runningSaldo.toLocaleString('id-ID')}</td>
+                    <td style="border: 1px solid black; padding: 6px; text-align: right; font-weight: bold;">Rp ${c.saldo.toLocaleString('id-ID')}</td>
                 </tr>`;
             }).join('');
+
+            let periodText = "";
+            if (startDate && endDate) {
+                periodText = `<p style="text-align:center; font-weight:bold; font-size:10pt; margin-bottom:15px;">PERIODE: ${formatDisplayDate(startDate)} s/d ${formatDisplayDate(endDate)}</p>`;
+            } else if (startDate) {
+                periodText = `<p style="text-align:center; font-weight:bold; font-size:10pt; margin-bottom:15px;">PERIODE: MULAI ${formatDisplayDate(startDate)}</p>`;
+            } else if (endDate) {
+                periodText = `<p style="text-align:center; font-weight:bold; font-size:10pt; margin-bottom:15px;">PERIODE: SAMPAI ${formatDisplayDate(endDate)}</p>`;
+            }
 
             const kopHeader = `<div style="display: flex; align-items: center; border-bottom: 3px double black; padding-bottom: 10px; margin-bottom: 20px;">
                 <div style="width: 80px; text-align: center;">${kopConfig.logoL ? `<img src="${kopConfig.logoL}" style="max-width:80px;">` : ''}</div>
@@ -2264,31 +2509,55 @@
                 <div style="width: 80px; text-align: center;">${kopConfig.logoR ? `<img src="${kopConfig.logoR}" style="max-width:80px;">` : ''}</div>
             </div>`;
 
-            const content = `<html><head><title>Buku Kas Dana Masuk & Keluar</title><style>@page { size: 210mm 330mm; margin: 15mm; } body { font-family: 'Times New Roman', serif; }</style></head><body onload="window.print(); window.close();">${kopHeader}<h2 style="text-align:center; text-decoration:underline; font-size:14pt; margin-bottom:20px;">BUKU KAS DANA MASUK & KELUAR</h2><table style="width:100%; border-collapse:collapse; font-size:10pt;"><thead><tr style="background:#eee;"><th style="border:1px solid black; padding:8px;">No</th><th style="border:1px solid black; padding:8px;">Tanggal</th><th style="border:1px solid black; padding:8px;">Deskripsi / Keperluan</th><th style="border:1px solid black; padding:8px;">Jenis BOSP</th><th style="border:1px solid black; padding:8px;">Uang Masuk (Rp)</th><th style="border:1px solid black; padding:8px;">Uang Keluar (Rp)</th><th style="border:1px solid black; padding:8px;">Saldo Akhir (Rp)</th></tr></thead><tbody><tr><td style="border:1px solid black; padding:6px; text-align:center;">-</td><td style="border:1px solid black; padding:6px; text-align:center;">-</td><td style="border:1px solid black; padding:6px; font-weight:bold;">SALDO AWAL KAS BOSP</td><td style="border:1px solid black; padding:6px; text-align:center;">-</td><td style="border:1px solid black; padding:6px; text-align:right;">-</td><td style="border:1px solid black; padding:6px; text-align:right;">-</td><td style="border:1px solid black; padding:6px; text-align:right; font-weight:bold;">Rp ${saldoAwal.toLocaleString('id-ID')}</td></tr>${rowsHtml}<tr style="background:#f8fafc;"><td colspan="4" style="border:1px solid black; padding:8px; font-weight:bold; text-align:right;">TOTAL KAS:</td><td style="border:1px solid black; padding:8px; font-weight:bold; text-align:right;">Rp ${totalMasuk.toLocaleString('id-ID')}</td><td style="border:1px solid black; padding:8px; font-weight:bold; text-align:right;">Rp ${totalKeluar.toLocaleString('id-ID')}</td><td style="border:1px solid black; padding:8px; font-weight:bold; text-align:right;">Rp ${runningSaldo.toLocaleString('id-ID')}</td></tr></tbody></table></body></html>`;
+            const content = `<html><head><title>Buku Kas Dana Masuk & Keluar</title><style>@page { size: 210mm 330mm; margin: 15mm; } body { font-family: 'Times New Roman', serif; }</style></head><body onload="window.print(); window.close();">${kopHeader}<h2 style="text-align:center; text-decoration:underline; font-size:14pt; margin-bottom:5px;">BUKU KAS DANA MASUK & KELUAR</h2>${periodText}<table style="width:100%; border-collapse:collapse; font-size:10pt;"><thead><tr style="background:#eee;"><th style="border:1px solid black; padding:8px;">No</th><th style="border:1px solid black; padding:8px;">Tanggal</th><th style="border:1px solid black; padding:8px;">Deskripsi / Keperluan</th><th style="border:1px solid black; padding:8px;">Jenis BOSP</th><th style="border:1px solid black; padding:8px;">Uang Masuk (Rp)</th><th style="border:1px solid black; padding:8px;">Uang Keluar (Rp)</th><th style="border:1px solid black; padding:8px;">Saldo Akhir (Rp)</th></tr></thead><tbody>${rowsHtml}<tr style="background:#f8fafc;"><td colspan="4" style="border:1px solid black; padding:8px; font-weight:bold; text-align:right;">TOTAL PERIODE:</td><td style="border:1px solid black; padding:8px; font-weight:bold; text-align:right;">Rp ${totalMasuk.toLocaleString('id-ID')}</td><td style="border:1px solid black; padding:8px; font-weight:bold; text-align:right;">Rp ${totalKeluar.toLocaleString('id-ID')}</td><td style="border:1px solid black; padding:8px; font-weight:bold; text-align:right;">-</td></tr></tbody></table></body></html>`;
             printWin.document.open(); printWin.document.write(content); printWin.document.close();
         }
 
         function exportCashFlowExcel() {
             if (!cashFlow || cashFlow.length === 0) return notify("Tidak ada data Kas untuk diekspor!", "bg-amber-600");
 
-            const exportData = [];
+            const filterText = (document.getElementById('filter-cash_flow')?.value || "").toLowerCase();
+            const filterBosp = document.getElementById('filter-bosp-cash_flow')?.value || "all";
+            const startDate = document.getElementById('filter-start-date-cf')?.value || "";
+            const endDate = document.getElementById('filter-end-date-cf')?.value || "";
+
+            cashFlow.sort((a,b) => String(a.tanggal).localeCompare(String(b.tanggal)));
+
             let runningSaldo = saldoAwal;
 
-            exportData.push({
-                "No": 0,
-                "Tanggal": "-",
-                "Deskripsi / Keperluan": "SALDO AWAL KAS BOSP",
-                "Jenis BOSP": "-",
-                "Uang Masuk (Rp)": 0,
-                "Uang Keluar (Rp)": 0,
-                "Saldo Akhir (Rp)": saldoAwal
+            const calculatedFlow = cashFlow.map((item) => {
+                const masuk = Math.round(parseFloat(item.masuk) || 0);
+                const keluar = Math.round(parseFloat(item.keluar) || 0);
+                runningSaldo += (masuk - keluar);
+                return { ...item, saldo: runningSaldo };
             });
 
-            cashFlow.forEach((c, i) => {
+            const filtered = calculatedFlow.filter(c => {
+                const matchText = String(c.deskripsi).toLowerCase().includes(filterText) ||
+                                  String(c.jenisBosp || "").toLowerCase().includes(filterText) ||
+                                  String(c.tanggal).toLowerCase().includes(filterText);
+                const matchBosp = filterBosp === "all" || (c.jenisBosp || "Bos Reguler") === filterBosp;
+                
+                let matchDate = true;
+                const itemDateStr = String(c.tanggal).split('T')[0];
+                if (startDate && itemDateStr < startDate) matchDate = false;
+                if (endDate && itemDateStr > endDate) matchDate = false;
+
+                return matchText && matchBosp && matchDate;
+            });
+
+            if (filtered.length === 0) return notify("Tidak ada data Kas yang sesuai filter untuk diekspor!", "bg-amber-600");
+
+            const exportData = [];
+            let totalMasuk = 0;
+            let totalKeluar = 0;
+
+            filtered.forEach((c, i) => {
                 const masuk = Math.round(parseFloat(c.masuk) || 0);
                 const keluar = Math.round(parseFloat(c.keluar) || 0);
-                runningSaldo += (masuk - keluar);
-                const tgl = new Date(c.tanggal).toLocaleDateString('id-ID');
+                totalMasuk += masuk;
+                totalKeluar += keluar;
+                const tgl = formatDisplayDate(c.tanggal);
                 
                 exportData.push({
                     "No": i + 1,
@@ -2297,11 +2566,24 @@
                     "Jenis BOSP": c.jenisBosp || 'Bos Reguler',
                     "Uang Masuk (Rp)": masuk,
                     "Uang Keluar (Rp)": keluar,
-                    "Saldo Akhir (Rp)": runningSaldo
+                    "Saldo Akhir (Rp)": c.saldo
                 });
             });
 
-            exportToExcelEngine(exportData, `Kas_BOSP_SDN22_${new Date().toISOString().slice(0,10)}`, "Kas BOSP");
+            exportData.push({
+                "No": "TOTAL PERIODE",
+                "Tanggal": "",
+                "Deskripsi / Keperluan": "",
+                "Jenis BOSP": "",
+                "Uang Masuk (Rp)": totalMasuk,
+                "Uang Keluar (Rp)": totalKeluar,
+                "Saldo Akhir (Rp)": ""
+            });
+
+            let filePeriodSuffix = new Date().toISOString().slice(0,10);
+            if (startDate && endDate) filePeriodSuffix = `${startDate}_sd_${endDate}`;
+
+            exportToExcelEngine(exportData, `Kas_BOSP_SDN22_${filePeriodSuffix}`, "Kas BOSP");
         }
 
         function printArsipCashFlow() {
@@ -2315,7 +2597,7 @@
             const bospFilter = document.getElementById('filter-bosp-arsip-cf')?.value || "all";
 
             const filtered = archiveCashFlow.filter(c => {
-                const itemYear = String(c.tahun || new Date(c.tanggal || Date.now()).getFullYear());
+                const itemYear = String(c.tahun || getYearFromDateStr(c.tanggal));
                 const itemBosp = c.jenisBosp || "Bos Reguler";
                 const matchYear = yearFilter === "all" || itemYear === yearFilter;
                 const matchBosp = bospFilter === "all" || itemBosp === bospFilter;
@@ -2327,8 +2609,8 @@
             let rowsHtml = filtered.map((c, i) => {
                 const masuk = Math.round(parseFloat(c.masuk) || 0);
                 const keluar = Math.round(parseFloat(c.keluar) || 0);
-                const tgl = new Date(c.tanggal).toLocaleDateString('id-ID');
-                const yr = c.tahun || new Date(c.tanggal).getFullYear();
+                const tgl = formatDisplayDate(c.tanggal);
+                const yr = c.tahun || getYearFromDateStr(c.tanggal);
 
                 return `<tr>
                     <td style="border: 1px solid black; padding: 6px; text-align: center;">${i + 1}</td>
@@ -2365,7 +2647,7 @@
             const bospFilter = document.getElementById('filter-bosp-arsip-cf')?.value || "all";
 
             const filtered = archiveCashFlow.filter(c => {
-                const itemYear = String(c.tahun || new Date(c.tanggal || Date.now()).getFullYear());
+                const itemYear = String(c.tahun || getYearFromDateStr(c.tanggal));
                 const itemBosp = c.jenisBosp || "Bos Reguler";
                 const matchYear = yearFilter === "all" || itemYear === yearFilter;
                 const matchBosp = bospFilter === "all" || itemBosp === bospFilter;
@@ -2376,11 +2658,16 @@
 
             if (filtered.length === 0) return notify("Tidak ada data Arsip Kas yang sesuai filter!", "bg-amber-600");
 
+            let totalMasuk = 0;
+            let totalKeluar = 0;
+
             const exportData = filtered.map((c, i) => {
                 const masuk = Math.round(parseFloat(c.masuk) || 0);
                 const keluar = Math.round(parseFloat(c.keluar) || 0);
-                const tgl = new Date(c.tanggal).toLocaleDateString('id-ID');
-                const yr = c.tahun || new Date(c.tanggal).getFullYear();
+                totalMasuk += masuk;
+                totalKeluar += keluar;
+                const tgl = formatDisplayDate(c.tanggal);
+                const yr = c.tahun || getYearFromDateStr(c.tanggal);
 
                 return {
                     "No": i + 1,
@@ -2391,6 +2678,16 @@
                     "Uang Keluar (Rp)": keluar,
                     "Tahun": yr
                 };
+            });
+
+            exportData.push({
+                "No": "TOTAL PERIODE",
+                "Tanggal Transaksi": "",
+                "Deskripsi / Keperluan": "",
+                "Jenis BOSP": "",
+                "Uang Masuk (Rp)": totalMasuk,
+                "Uang Keluar (Rp)": totalKeluar,
+                "Tahun": ""
             });
 
             exportToExcelEngine(exportData, `Arsip_Kas_SDN22_${new Date().toISOString().slice(0,10)}`, "Arsip Kas");
@@ -2446,15 +2743,15 @@
                 return await response.json();
             } catch (err) {
                 notify("Gagal Terhubung: " + err.message, "bg-red-600");
-                return { status: "error" };
+                return { status: "error", message: err.message };
             } finally { 
                 hideLoader(); 
             }
         }
 
         function startSyncProcess() {
-            showConfirm("Apa Anda Yakin Tarik Data?", () => {
-                simulateProgress("TARIK DATA APLIKASI", loadAllData).then(() => {
+            showConfirm("Tarik Data database?", () => {
+                simulateProgress("TARIK DATA", loadAllData).then(() => {
                     notify("Berhasil Tarik Data!", "bg-green-600");
                 });
             });
@@ -2481,7 +2778,6 @@
             const printWin = window.open('', '_blank');
             if(!printWin) return;
             const template = document.getElementById('print-template').innerHTML;
-            const formatDate = (ds) => ds ? new Date(ds).toLocaleDateString('id-ID', { year: 'numeric', month: 'long', day: 'numeric' }) : "";
             const escapeStr = (s) => String(s || "").replace(/"/g, '\\"').replace(/\n/g, ' ');
             const finalDppDisplay = (parseFloat(d.taxRate || 0) > 0) ? Math.round(parseFloat(d.dpp || 0)) : 0;
             const finalTaxValDisplay = (parseFloat(d.taxRate || 0) > 0) ? Math.round(parseFloat(d.taxVal || 0)) : 0;
@@ -2490,7 +2786,7 @@
             const days = ['Minggu', 'Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu'];
             const months = ['Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni', 'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'];
             const printTime = days[now.getDay()] + ', ' + now.getDate() + ' ' + months[now.getMonth()] + ' ' + now.getFullYear() + ' ' + now.getHours().toString().padStart(2, '0') + '.' + now.getMinutes().toString().padStart(2, '0') + '.' + now.getSeconds().toString().padStart(2, '0');
-            const htmlContent = `<html><head><title>Kuitansi ${d.bku}</title><style>@page { size: 210mm 330mm; margin: 0; } body { font-family: 'Times New Roman', serif; padding: 0; margin: 0; background: white; color: black; } table { width: 100%; border-collapse: collapse; background: transparent; } td, th { vertical-align: top; padding: 2px 0; background: transparent; } .receipt-watermark { position: absolute; top: 55%; left: 50%; transform: translate(-50%, -50%); width: 120mm; opacity: 0.1; z-index: 0; pointer-events: none; } </style></head><body onload="window.print(); window.close();">${template}<script>function fill() { document.getElementById('p-kop-pemda').innerText = "${escapeStr(kopConfig.pemda)}"; document.getElementById('p-kop-dinas').innerText = "${escapeStr(kopConfig.dinas)}"; document.getElementById('p-kop-sekolah').innerText = "${escapeStr(kopConfig.sekolah)}"; document.getElementById('p-kop-kec').innerText = "${escapeStr(kopConfig.kecamatan)}".toUpperCase() ? "KECAMATAN " + "${escapeStr(kopConfig.kecamatan)}".toUpperCase() : ""; document.getElementById('p-kop-alamat').innerText = "${escapeStr(kopConfig.alamat)}"; let kontak = "${escapeStr(kopConfig.email)}" ? "Email: " + "${escapeStr(kopConfig.email)}" : ""; if("${escapeStr(kopConfig.web)}") kontak += (kontak ? " | " : "") + "Website: " + "${escapeStr(kopConfig.web)}"; document.getElementById('p-kop-kontak').innerText = kontak; if("${kopConfig.logoL}") { document.getElementById('p-logo-l').src = "${kopConfig.logoL}"; document.getElementById('p-logo-l').style.display='block'; } if("${kopConfig.logoR}") { document.getElementById('p-logo-r').src = "${kopConfig.logoR}"; document.getElementById('p-logo-r').style.display='block'; } document.getElementById('p-bku').innerText = "${escapeStr(d.bku)}"; document.getElementById('p-rekening').innerText = "${escapeStr(d.rekening)}"; document.getElementById('p-dari').innerText = "${escapeStr(d.dari)}"; document.getElementById('p-jumlah-total').innerText = "${Math.round(parseFloat(d.jumlah)).toLocaleString('id-ID')}"; document.getElementById('p-terbilang').innerText = "${escapeStr(d.terbilang)}"; document.getElementById('p-untuk').innerText = "${escapeStr(d.untuk)}"; document.getElementById('p-penerima').innerText = "${escapeStr(d.penerima)}"; document.getElementById('p-tgl-label').innerText = "Tanah Keras, " + "${formatDate(d.tanggal)}"; document.getElementById('p-row-dpp').innerText = "${finalDppDisplay.toLocaleString('id-ID')}"; document.getElementById('p-label-pajak').innerText = "Pajak (${displayTaxName})"; document.getElementById('p-row-pajak').innerText = "${finalTaxValDisplay.toLocaleString('id-ID')}"; document.getElementById('p-ttd-kepsek').innerText = "${escapeStr(signatories.kepsek || '..................')}"; document.getElementById('p-ttd-nip-kepsek').innerText = "${escapeStr(signatories.nipKepsek || '..................')}"; document.getElementById('p-ttd-bendahara').innerText = "${escapeStr(signatories.bendahara || '..................')}"; document.getElementById('p-ttd-nip-bendahara').innerText = "${escapeStr(signatories.nipBendahara || '..................')}"; document.getElementById('p-footer-bku').innerText = "${escapeStr(d.bku)}"; document.getElementById('p-footer-time').innerText = "${printTime}"; } fill(); <\/script></body></html>`;
+            const htmlContent = `<html><head><title>Kuitansi ${d.bku}</title><style>@page { size: 210mm 330mm; margin: 0; } body { font-family: 'Times New Roman', serif; padding: 0; margin: 0; background: white; color: black; } table { width: 100%; border-collapse: collapse; background: transparent; } td, th { vertical-align: top; padding: 2px 0; background: transparent; } .receipt-watermark { position: absolute; top: 55%; left: 50%; transform: translate(-50%, -50%); width: 120mm; opacity: 0.1; z-index: 0; pointer-events: none; } </style></head><body onload="window.print(); window.close();">${template}<script>function fill() { document.getElementById('p-kop-pemda').innerText = "${escapeStr(kopConfig.pemda)}"; document.getElementById('p-kop-dinas').innerText = "${escapeStr(kopConfig.dinas)}"; document.getElementById('p-kop-sekolah').innerText = "${escapeStr(kopConfig.sekolah)}"; document.getElementById('p-kop-kec').innerText = "${escapeStr(kopConfig.kecamatan)}".toUpperCase() ? "KECAMATAN " + "${escapeStr(kopConfig.kecamatan)}".toUpperCase() : ""; document.getElementById('p-kop-alamat').innerText = "${escapeStr(kopConfig.alamat)}"; let kontak = "${escapeStr(kopConfig.email)}" ? "Email: " + "${escapeStr(kopConfig.email)}" : ""; if("${escapeStr(kopConfig.web)}") kontak += (kontak ? " | " : "") + "Website: " + "${escapeStr(kopConfig.web)}"; document.getElementById('p-kop-kontak').innerText = kontak; if("${kopConfig.logoL}") { document.getElementById('p-logo-l').src = "${kopConfig.logoL}"; document.getElementById('p-logo-l').style.display='block'; } if("${kopConfig.logoR}") { document.getElementById('p-logo-r').src = "${kopConfig.logoR}"; document.getElementById('p-logo-r').style.display='block'; } document.getElementById('p-bku').innerText = "${escapeStr(d.bku)}"; document.getElementById('p-rekening').innerText = "${escapeStr(d.rekening)}"; document.getElementById('p-dari').innerText = "${escapeStr(d.dari)}"; document.getElementById('p-jumlah-total').innerText = "${Math.round(parseFloat(d.jumlah)).toLocaleString('id-ID')}"; document.getElementById('p-terbilang').innerText = "${escapeStr(d.terbilang)}"; document.getElementById('p-untuk').innerText = "${escapeStr(d.untuk)}"; document.getElementById('p-penerima').innerText = "${escapeStr(d.penerima)}"; document.getElementById('p-tgl-label').innerText = "Tanah Keras, " + "${formatIndonesianLongDate(d.tanggal)}"; document.getElementById('p-row-dpp').innerText = "${finalDppDisplay.toLocaleString('id-ID')}"; document.getElementById('p-label-pajak').innerText = "Pajak (${displayTaxName})"; document.getElementById('p-row-pajak').innerText = "${finalTaxValDisplay.toLocaleString('id-ID')}"; document.getElementById('p-ttd-kepsek').innerText = "${escapeStr(signatories.kepsek || '..................')}"; document.getElementById('p-ttd-nip-kepsek').innerText = "${escapeStr(signatories.nipKepsek || '..................')}"; document.getElementById('p-ttd-bendahara').innerText = "${escapeStr(signatories.bendahara || '..................')}"; document.getElementById('p-ttd-nip-bendahara').innerText = "${escapeStr(signatories.nipBendahara || '..................')}"; document.getElementById('p-footer-bku').innerText = "${escapeStr(d.bku)}"; document.getElementById('p-footer-time').innerText = "${printTime}"; } fill(); <\/script></body></html>`;
             printWin.document.open(); printWin.document.write(htmlContent); printWin.document.close();
         }
 
@@ -2545,7 +2841,6 @@
                 document.getElementById('bm-tanggal').value = new Date().toISOString().slice(0, 10);
             }
 
-            // Load data on app startup
             loadAllData().then(() => {
                 console.log("Auto-fetch completed on launch.");
             });
