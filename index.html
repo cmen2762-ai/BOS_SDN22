@@ -2737,7 +2737,7 @@
         }
 
         async function apiRequest(data, loadingText = "Memproses...") {
-            showLoader(loadingText, "Menghubungkan ke server Google Apps Script...");
+            showLoader(loadingText, "Menghubungkan ke server");
             try {
                 const response = await fetch(scriptURL, { method: 'POST', body: JSON.stringify(data) });
                 return await response.json();
