@@ -99,7 +99,7 @@
                 <div class="absolute inset-2 border-2 border-indigo-400 border-b-transparent rounded-full animate-spin" style="animation-duration: 1.5s; animation-direction: reverse;"></div>
                 <img src="https://iili.io/BLlwHwQ.png" class="w-14 h-14 object-contain animate-pulse z-10" alt="Logo SDN 22">
             </div>
-            <h3 id="loader-text" class="mt-5 font-black text-blue-900 tracking-wide text-sm uppercase">Memuat Data</h3>
+            <h3 id="loader-text" class="mt-5 font-black text-blue-900 tracking-wide text-sm uppercase">Memuat Data Aplikasi</h3>
             <p id="loader-subtext" class="text-[11px] text-slate-500 font-semibold mt-1 italic">Tunggu Sebentar</p>
         </div>
     </div>
@@ -111,7 +111,7 @@
                 <div id="progress-bar" class="bg-blue-600 h-full transition-all duration-300" style="width: 0%"></div>
             </div>
             <p id="progress-percent" class="text-2xl font-black text-blue-900">0%</p>
-            <p id="progress-status" class="text-xs text-slate-500 italic mt-2">Tunggu Sebentar</p>
+            <p id="progress-status" class="text-xs text-slate-500 italic mt-2">Jangan Tutup Aplikasi</p>
         </div>
     </div>
 
@@ -350,6 +350,7 @@
                         <button onclick="showSection('kuitansi')" class="nav-btn w-full text-left p-3 rounded-lg hover:bg-blue-800 transition" id="btn-kuitansi">Kuitansi</button>
                         <button onclick="showSection('laporan')" class="nav-btn w-full text-left p-3 rounded-lg hover:bg-blue-800 transition" id="btn-laporan">Laporan Kuitansi</button>
                         <button onclick="showSection('arsip')" class="nav-btn w-full text-left p-3 rounded-lg hover:bg-blue-800 transition" id="btn-arsip">Arsip Kuitansi</button>
+                        <button onclick="showSection('arsip_pajak')" class="nav-btn w-full text-left p-3 rounded-lg hover:bg-blue-800 transition" id="btn-arsip_pajak">Arsip Pajak</button>
                     </div>
                 </div>
 
@@ -625,7 +626,7 @@
                             </button>
                             <button onclick="printBelanjaModal()" class="bg-blue-800 hover:bg-blue-900 text-white px-4 py-3 rounded-xl font-bold shadow-md transition flex items-center gap-2 text-xs">
                                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"></path></svg>
-                                Cetak
+                                Cetak KOP
                             </button>
                             <button onclick="exportBelanjaModalExcel()" class="bg-emerald-600 hover:bg-emerald-700 text-white px-4 py-3 rounded-xl font-bold shadow-md transition flex items-center gap-2 text-xs">
                                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
@@ -719,7 +720,7 @@
                             </button>
                             <button onclick="printCashFlow()" class="bg-blue-800 hover:bg-blue-900 text-white px-4 py-3 rounded-xl font-bold shadow-md transition flex items-center gap-2 text-xs">
                                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"></path></svg>
-                                Cetak
+                                Cetak KOP
                             </button>
                             <button onclick="exportCashFlowExcel()" class="bg-emerald-600 hover:bg-emerald-700 text-white px-4 py-3 rounded-xl font-bold shadow-md transition flex items-center gap-2 text-xs">
                                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
@@ -815,6 +816,84 @@
                 </div>
             </section>
 
+            <section id="sec-arsip_pajak" class="section-view hidden">
+                <div class="bg-white p-8 rounded-xl shadow-sm border border-slate-200 mb-6">
+                    <div class="flex flex-wrap justify-between items-center mb-6 gap-4">
+                        <div>
+                            <h2 class="text-2xl font-bold text-blue-900 uppercase">Arsip Pajak Kuitansi</h2>
+                            <p class="text-xs text-slate-500 font-semibold mt-1">Daftar rekapitulasi data pajak otomatis yang bersumber dari Kuitansi aktif dan Arsip Kuitansi.</p>
+                        </div>
+                        <div class="flex flex-wrap gap-2 items-center">
+                            <button onclick="printArsipPajak()" class="bg-blue-800 hover:bg-blue-900 text-white px-4 py-3 rounded-xl font-bold shadow-md transition flex items-center gap-2 text-xs">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"></path></svg>
+                                Cetak KOP
+                            </button>
+                            <button onclick="exportArsipPajakExcel()" class="bg-emerald-600 hover:bg-emerald-700 text-white px-4 py-3 rounded-xl font-bold shadow-md transition flex items-center gap-2 text-xs">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
+                                Ekspor Excel
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6">
+                        <div class="p-5 bg-blue-900 text-white rounded-xl shadow-md">
+                            <span class="block text-blue-200 text-xs font-bold uppercase mb-1">Total Transaksi Pajak</span>
+                            <h3 id="stat-tax-count" class="text-2xl font-black">0</h3>
+                        </div>
+                        <div class="p-5 bg-slate-800 text-white rounded-xl shadow-md">
+                            <span class="block text-slate-300 text-xs font-bold uppercase mb-1">Total DPP (Dasar Pengenaan)</span>
+                            <h3 id="stat-tax-dpp" class="text-2xl font-black">Rp 0</h3>
+                        </div>
+                        <div class="p-5 bg-amber-500 text-white rounded-xl shadow-md">
+                            <span class="block text-amber-100 text-xs font-bold uppercase mb-1">Total Nominal Pajak</span>
+                            <h3 id="stat-tax-total-val" class="text-2xl font-black">Rp 0</h3>
+                        </div>
+                    </div>
+
+                    <div class="flex flex-wrap items-center mb-6 gap-4">
+                        <div class="flex-1 min-w-[200px]">
+                            <label class="block text-xs font-bold text-slate-500 uppercase mb-1">Cari Pajak</label>
+                            <input type="text" id="filter-text-tax" oninput="renderArsipPajak()" class="p-3 border rounded-xl w-full shadow-sm outline-none text-xs" placeholder="Cari No. BKU / Keterangan...">
+                        </div>
+                        <div class="w-full md:w-52">
+                            <label class="block text-xs font-bold text-slate-500 uppercase mb-1">Jenis Pajak</label>
+                            <select id="filter-type-tax" onchange="renderArsipPajak()" class="p-3 border rounded-xl w-full shadow-sm outline-none text-xs bg-white font-semibold">
+                                <option value="all">Semua Jenis Pajak</option>
+                                <option value="PPN">PPN</option>
+                                <option value="PPH 21">PPH 21</option>
+                                <option value="PPH 23">PPH 23</option>
+                                <option value="Pajak Daerah">Pajak Daerah</option>
+                            </select>
+                        </div>
+                        <div class="flex items-center gap-1 bg-slate-50 p-1.5 border rounded-xl shadow-sm self-end">
+                            <span class="text-[11px] font-bold text-slate-500 uppercase px-1">Dari:</span>
+                            <input type="date" id="filter-start-date-tax" onchange="renderArsipPajak()" class="p-1.5 border rounded-lg outline-none text-xs bg-white">
+                            <span class="text-[11px] font-bold text-slate-500 uppercase px-1">Ke:</span>
+                            <input type="date" id="filter-end-date-tax" onchange="renderArsipPajak()" class="p-1.5 border rounded-lg outline-none text-xs bg-white">
+                            <button onclick="resetDateFilterArsipPajak()" class="ml-1 px-2 py-1 bg-slate-200 hover:bg-slate-300 text-slate-700 font-bold rounded-lg text-xs transition">Reset</button>
+                        </div>
+                    </div>
+
+                    <div class="overflow-x-auto rounded-xl border shadow-sm">
+                        <table class="w-full text-left border-collapse">
+                            <thead>
+                                <tr class="bg-blue-900 text-white text-xs uppercase">
+                                    <th class="p-4 border text-center w-12">No</th>
+                                    <th class="p-4 border text-center w-28">Nomor BKU</th>
+                                    <th class="p-4 border text-center w-32">Kode Rekening</th>
+                                    <th class="p-4 border">Untuk Pembayaran</th>
+                                    <th class="p-4 border text-right">DPP (Rp)</th>
+                                    <th class="p-4 border text-center w-32">Jenis Pajak</th>
+                                    <th class="p-4 border text-right text-amber-200">Nominal Pajak (Rp)</th>
+                                    <th class="p-4 border text-center w-28">Tanggal</th>
+                                </tr>
+                            </thead>
+                            <tbody id="tax-archive-table-body" class="text-xs"></tbody>
+                        </table>
+                    </div>
+                </div>
+            </section>
+
             <section id="sec-arsip_cash_flow" class="section-view hidden">
                 <div class="bg-white p-8 rounded-xl shadow-sm border border-slate-200 mb-6">
                     <div class="flex flex-wrap justify-between items-center mb-6 gap-4">
@@ -822,7 +901,7 @@
                         <div class="flex flex-wrap gap-2 items-center">
                             <button onclick="printArsipCashFlow()" class="bg-blue-800 hover:bg-blue-900 text-white px-5 py-3 rounded-xl font-bold shadow-md transition flex items-center gap-2">
                                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"></path></svg>
-                                Cetak Arsip
+                                Cetak KOP Arsip
                             </button>
                             <button onclick="exportArsipCashFlowExcel()" class="bg-emerald-600 hover:bg-emerald-700 text-white px-5 py-3 rounded-xl font-bold shadow-md transition flex items-center gap-2">
                                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
@@ -884,7 +963,7 @@
                             <input type="text" id="ttd-nip-bendahara" class="w-full p-3 border rounded-lg" placeholder="NIP">
                         </div>
                     </div>
-                    <button id="btn-save-ttd" onclick="saveSignatories()" class="mt-6 bg-blue-700 text-white px-8 py-3 rounded-xl font-bold shadow-md disabled:opacity-50 disabled:cursor-not-allowed">Simpan</button>
+                    <button id="btn-save-ttd" onclick="saveSignatories()" class="mt-6 bg-blue-700 text-white px-8 py-3 rounded-xl font-bold shadow-md disabled:opacity-50 disabled:cursor-not-allowed">Simpan Cloud TTD</button>
                 </div>
             </section>
 
@@ -1087,7 +1166,7 @@
             }
         }
 
-        function showLoader(title = "Memuat Data Aplikasi", subtext = "Tunggu Sebentar") {
+        function showLoader(title = "Memuat Data Cloud...", subtext = "Mengambil data dari Google Sheet") {
             const loader = document.getElementById('loader');
             if(loader) {
                 document.getElementById('loader-text').innerText = title;
@@ -1159,6 +1238,7 @@
             toggleBtn('btn-kuitansi', isAdminOrKepsek || isBendahara);
             toggleBtn('btn-laporan', isAdminOrKepsek || isBendahara);
             toggleBtn('btn-arsip', isAdminOrKepsek);
+            toggleBtn('btn-arsip_pajak', isAdminOrKepsek || isBendahara);
 
             toggleBtn('cat-belanja_modal', isAdminOrKepsek || isPengurus);
             toggleBtn('btn-belanja_modal', isAdminOrKepsek || isPengurus);
@@ -1175,7 +1255,7 @@
             if (r === "Admin" || r === "Kepala Sekolah") return true;
             
             if (r === "Bendahara") {
-                return ['beranda', 'pajak', 'kuitansi', 'cash_flow', 'laporan'].includes(id);
+                return ['beranda', 'pajak', 'kuitansi', 'cash_flow', 'laporan', 'arsip_pajak'].includes(id);
             }
             
             if (r === "Pengurus Barang") {
@@ -1186,7 +1266,7 @@
         }
 
         async function loadAllData() {
-            showLoader("Memuat Data Aplikasi", "Jangan Tutup Aplikasi");
+            showLoader("Memuat Data Cloud...", "Mengambil data kuitansi dari Google Sheet");
             try {
                 const cacheBuster = "?cb=" + Date.now();
                 const response = await fetch(scriptURL + cacheBuster);
@@ -1212,6 +1292,7 @@
                 updateTaxSelect();
                 renderReports();
                 renderArchive();
+                renderArsipPajak();
                 renderBelanjaModal();
                 renderCashFlow();
                 renderArsipCashFlow();
@@ -1220,7 +1301,7 @@
                 populateArchiveYears();
                 populateArsipCfYears();
 
-                notify("Berhasil!", "bg-green-600");
+                notify("Data Cloud Berhasil Dimuat!", "bg-green-600");
             } catch (err) {
                 console.error("Error loading cloud data:", err);
                 notify("Gagal Memuat Data Cloud. Periksa Koneksi!", "bg-red-600");
@@ -1280,6 +1361,7 @@
 
             if(id === 'laporan') resetPageAndRender();
             if(id === 'arsip') resetPageArsipAndRender();
+            if(id === 'arsip_pajak') renderArsipPajak();
             if(id === 'belanja_modal') renderBelanjaModal();
             if(id === 'cash_flow') renderCashFlow();
             if(id === 'arsip_cash_flow') renderArsipCashFlow();
@@ -1334,6 +1416,240 @@
         function nextPage() { currentPage++; renderReports(); }
         function prevPage() { currentPage--; renderReports(); }
 
+        // --- STREAMING_CHUNK:ARSIP PAJAK RENDERING AND EXPORT LOGIC ---
+        function resetDateFilterArsipPajak() {
+            if (document.getElementById('filter-start-date-tax')) document.getElementById('filter-start-date-tax').value = "";
+            if (document.getElementById('filter-end-date-tax')) document.getElementById('filter-end-date-tax').value = "";
+            renderArsipPajak();
+        }
+
+        function renderArsipPajak() {
+            const tbody = document.getElementById('tax-archive-table-body');
+            if(!tbody) return;
+
+            // Combine active reports and archived reports
+            const allReceipts = [...reports, ...archiveReports];
+
+            // Filter for items that have a tax value > 0 or a tax name other than "Tanpa Pajak"
+            const taxReceipts = allReceipts.filter(r => {
+                const tVal = Math.round(parseFloat(r.taxVal) || 0);
+                const tName = String(r.taxName || "").trim().toLowerCase();
+                return tVal > 0 || (tName !== "" && tName !== "tanpa pajak" && tName !== "none");
+            });
+
+            const textFilter = (document.getElementById('filter-text-tax')?.value || "").toLowerCase();
+            const typeFilter = document.getElementById('filter-type-tax')?.value || "all";
+            const startDate = document.getElementById('filter-start-date-tax')?.value || "";
+            const endDate = document.getElementById('filter-end-date-tax')?.value || "";
+
+            const filtered = taxReceipts.filter(r => {
+                const matchText = String(r.bku || "").toLowerCase().includes(textFilter) ||
+                                  String(r.penerima || "").toLowerCase().includes(textFilter) ||
+                                  String(r.untuk || "").toLowerCase().includes(textFilter) ||
+                                  String(r.taxName || "").toLowerCase().includes(textFilter);
+
+                const matchType = typeFilter === "all" || String(r.taxName || "").toUpperCase().includes(typeFilter.toUpperCase());
+
+                let matchDate = true;
+                const itemDateStr = String(r.tanggal || "").split('T')[0];
+                if (startDate && itemDateStr < startDate) matchDate = false;
+                if (endDate && itemDateStr > endDate) matchDate = false;
+
+                return matchText && matchType && matchDate;
+            });
+
+            filtered.sort((a,b) => {
+                const numA = parseInt(String(a.bku).match(/\d+/)) || 0;
+                const numB = parseInt(String(b.bku).match(/\d+/)) || 0;
+                return numA - numB;
+            });
+
+            let totalDpp = 0;
+            let totalTaxVal = 0;
+
+            tbody.innerHTML = filtered.map((r, idx) => {
+                const dpp = Math.round(parseFloat(r.dpp) || parseFloat(r.jumlah) || 0);
+                const taxVal = Math.round(parseFloat(r.taxVal) || 0);
+                totalDpp += dpp;
+                totalTaxVal += taxVal;
+
+                const taxRateText = r.taxRate ? ` (${r.taxRate}%)` : '';
+                const displayTaxName = (r.taxName && r.taxName !== 'none') ? `${r.taxName}${taxRateText}` : 'Pajak';
+                const tgl = formatDisplayDate(r.tanggal);
+
+                return `<tr class="border-b hover:bg-slate-50 transition">
+                    <td class="p-4 text-center font-bold text-slate-500">${idx + 1}</td>
+                    <td class="p-4 text-center font-bold text-blue-900">${r.bku || '-'}</td>
+                    <td class="p-4 text-center font-semibold text-slate-700">${r.rekening || '-'}</td>
+                    <td class="p-4 font-semibold text-slate-800">${r.untuk || '-'}</td>
+                    <td class="p-4 text-right font-bold text-slate-700">Rp ${dpp.toLocaleString('id-ID')}</td>
+                    <td class="p-4 text-center font-bold text-amber-800">
+                        <span class="px-2.5 py-1 bg-amber-100 rounded-full text-[11px]">${displayTaxName}</span>
+                    </td>
+                    <td class="p-4 text-right font-black text-amber-900">Rp ${taxVal.toLocaleString('id-ID')}</td>
+                    <td class="p-4 text-center font-semibold text-slate-600">${tgl}</td>
+                </tr>`;
+            }).join('');
+
+            if (filtered.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="8" class="p-6 text-center text-slate-400 italic">Tidak ada data arsip pajak yang sesuai filter.</td></tr>`;
+            }
+
+            if (document.getElementById('stat-tax-count')) document.getElementById('stat-tax-count').innerText = filtered.length;
+            if (document.getElementById('stat-tax-dpp')) document.getElementById('stat-tax-dpp').innerText = formatIDR(totalDpp);
+            if (document.getElementById('stat-tax-total-val')) document.getElementById('stat-tax-total-val').innerText = formatIDR(totalTaxVal);
+        }
+
+        function printArsipPajak() {
+            const allReceipts = [...reports, ...archiveReports];
+            const taxReceipts = allReceipts.filter(r => {
+                const tVal = Math.round(parseFloat(r.taxVal) || 0);
+                const tName = String(r.taxName || "").trim().toLowerCase();
+                return tVal > 0 || (tName !== "" && tName !== "tanpa pajak" && tName !== "none");
+            });
+
+            const textFilter = (document.getElementById('filter-text-tax')?.value || "").toLowerCase();
+            const typeFilter = document.getElementById('filter-type-tax')?.value || "all";
+            const startDate = document.getElementById('filter-start-date-tax')?.value || "";
+            const endDate = document.getElementById('filter-end-date-tax')?.value || "";
+
+            const filtered = taxReceipts.filter(r => {
+                const matchText = String(r.bku || "").toLowerCase().includes(textFilter) ||
+                                  String(r.penerima || "").toLowerCase().includes(textFilter) ||
+                                  String(r.untuk || "").toLowerCase().includes(textFilter) ||
+                                  String(r.taxName || "").toLowerCase().includes(textFilter);
+                const matchType = typeFilter === "all" || String(r.taxName || "").toUpperCase().includes(typeFilter.toUpperCase());
+                let matchDate = true;
+                const itemDateStr = String(r.tanggal || "").split('T')[0];
+                if (startDate && itemDateStr < startDate) matchDate = false;
+                if (endDate && itemDateStr > endDate) matchDate = false;
+                return matchText && matchType && matchDate;
+            });
+
+            if (filtered.length === 0) return notify("Tidak ada data Arsip Pajak untuk dicetak!", "bg-amber-600");
+
+            const printWin = window.open('', '_blank');
+            if (!printWin) return;
+
+            let totalDpp = 0;
+            let totalTaxVal = 0;
+
+            let rowsHtml = filtered.map((r, i) => {
+                const dpp = Math.round(parseFloat(r.dpp) || parseFloat(r.jumlah) || 0);
+                const taxVal = Math.round(parseFloat(r.taxVal) || 0);
+                totalDpp += dpp;
+                totalTaxVal += taxVal;
+                const taxRateText = r.taxRate ? ` (${r.taxRate}%)` : '';
+                const displayTaxName = (r.taxName && r.taxName !== 'none') ? `${r.taxName}${taxRateText}` : 'Pajak';
+                const tgl = formatDisplayDate(r.tanggal);
+
+                return `<tr>
+                    <td style="border: 1px solid black; padding: 6px; text-align: center;">${i + 1}</td>
+                    <td style="border: 1px solid black; padding: 6px; text-align: center; font-weight: bold;">${r.bku || '-'}</td>
+                    <td style="border: 1px solid black; padding: 6px; text-align: center;">${r.rekening || '-'}</td>
+                    <td style="border: 1px solid black; padding: 6px;">${r.untuk || '-'}</td>
+                    <td style="border: 1px solid black; padding: 6px; text-align: right;">Rp ${dpp.toLocaleString('id-ID')}</td>
+                    <td style="border: 1px solid black; padding: 6px; text-align: center;">${displayTaxName}</td>
+                    <td style="border: 1px solid black; padding: 6px; text-align: right; font-weight: bold;">Rp ${taxVal.toLocaleString('id-ID')}</td>
+                    <td style="border: 1px solid black; padding: 6px; text-align: center;">${tgl}</td>
+                </tr>`;
+            }).join('');
+
+            let periodText = "";
+            if (startDate && endDate) {
+                periodText = `<p style="text-align:center; font-weight:bold; font-size:10pt; margin-bottom:15px;">PERIODE: ${formatDisplayDate(startDate)} s/d ${formatDisplayDate(endDate)}</p>`;
+            } else if (startDate) {
+                periodText = `<p style="text-align:center; font-weight:bold; font-size:10pt; margin-bottom:15px;">PERIODE: MULAI ${formatDisplayDate(startDate)}</p>`;
+            } else if (endDate) {
+                periodText = `<p style="text-align:center; font-weight:bold; font-size:10pt; margin-bottom:15px;">PERIODE: SAMPAI ${formatDisplayDate(endDate)}</p>`;
+            }
+
+            const kopHeader = `<div style="display: flex; align-items: center; border-bottom: 3px double black; padding-bottom: 10px; margin-bottom: 20px;">
+                <div style="width: 80px; text-align: center;">${kopConfig.logoL ? `<img src="${kopConfig.logoL}" style="max-width:80px;">` : ''}</div>
+                <div style="text-align: center; flex: 1;">
+                    <h3 style="margin:0; font-size:14pt; text-transform:uppercase;">${kopConfig.pemda || ''}</h3>
+                    <h3 style="margin:0; font-size:14pt; text-transform:uppercase;">${kopConfig.dinas || ''}</h3>
+                    <h2 style="margin:0; font-size:18pt; text-transform:uppercase; font-weight:bold;">${kopConfig.sekolah || ''}</h2>
+                    <p style="margin:0; font-size:10pt; font-weight:bold;">${kopConfig.kecamatan ? 'KECAMATAN ' + kopConfig.kecamatan.toUpperCase() : ''}</p>
+                    <p style="margin:0; font-size:9pt;">${kopConfig.alamat || ''}</p>
+                </div>
+                <div style="width: 80px; text-align: center;">${kopConfig.logoR ? `<img src="${kopConfig.logoR}" style="max-width:80px;">` : ''}</div>
+            </div>`;
+
+            const content = `<html><head><title>Arsip Pajak Kuitansi</title><style>@page { size: 210mm 330mm; margin: 15mm; } body { font-family: 'Times New Roman', serif; }</style></head><body onload="window.print(); window.close();">${kopHeader}<h2 style="text-align:center; text-decoration:underline; font-size:14pt; margin-bottom:5px;">REKAPITULASI ARSIP PAJAK KUITANSI</h2>${periodText}<table style="width:100%; border-collapse:collapse; font-size:10pt;"><thead><tr style="background:#eee;"><th style="border:1px solid black; padding:8px;">No</th><th style="border:1px solid black; padding:8px;">Nomor BKU</th><th style="border:1px solid black; padding:8px;">Kode Rekening</th><th style="border:1px solid black; padding:8px;">Untuk Pembayaran</th><th style="border:1px solid black; padding:8px;">DPP (Rp)</th><th style="border:1px solid black; padding:8px;">Jenis Pajak</th><th style="border:1px solid black; padding:8px;">Nominal Pajak (Rp)</th><th style="border:1px solid black; padding:8px;">Tanggal</th></tr></thead><tbody>${rowsHtml}<tr style="background:#f8fafc;"><td colspan="4" style="border:1px solid black; padding:8px; font-weight:bold; text-align:right;">TOTAL PERIODE:</td><td style="border:1px solid black; padding:8px; font-weight:bold; text-align:right;">Rp ${totalDpp.toLocaleString('id-ID')}</td><td style="border:1px solid black;"></td><td style="border:1px solid black; padding:8px; font-weight:bold; text-align:right;">Rp ${totalTaxVal.toLocaleString('id-ID')}</td><td style="border:1px solid black;"></td></tr></tbody></table></body></html>`;
+            printWin.document.open(); printWin.document.write(content); printWin.document.close();
+        }
+
+        function exportArsipPajakExcel() {
+            const allReceipts = [...reports, ...archiveReports];
+            const taxReceipts = allReceipts.filter(r => {
+                const tVal = Math.round(parseFloat(r.taxVal) || 0);
+                const tName = String(r.taxName || "").trim().toLowerCase();
+                return tVal > 0 || (tName !== "" && tName !== "tanpa pajak" && tName !== "none");
+            });
+
+            const textFilter = (document.getElementById('filter-text-tax')?.value || "").toLowerCase();
+            const typeFilter = document.getElementById('filter-type-tax')?.value || "all";
+            const startDate = document.getElementById('filter-start-date-tax')?.value || "";
+            const endDate = document.getElementById('filter-end-date-tax')?.value || "";
+
+            const filtered = taxReceipts.filter(r => {
+                const matchText = String(r.bku || "").toLowerCase().includes(textFilter) ||
+                                  String(r.penerima || "").toLowerCase().includes(textFilter) ||
+                                  String(r.untuk || "").toLowerCase().includes(textFilter) ||
+                                  String(r.taxName || "").toLowerCase().includes(textFilter);
+                const matchType = typeFilter === "all" || String(r.taxName || "").toUpperCase().includes(typeFilter.toUpperCase());
+                let matchDate = true;
+                const itemDateStr = String(r.tanggal || "").split('T')[0];
+                if (startDate && itemDateStr < startDate) matchDate = false;
+                if (endDate && itemDateStr > endDate) matchDate = false;
+                return matchText && matchType && matchDate;
+            });
+
+            if (filtered.length === 0) return notify("Tidak ada data Arsip Pajak yang sesuai filter untuk diekspor!", "bg-amber-600");
+
+            let totalDpp = 0;
+            let totalTaxVal = 0;
+
+            const exportData = filtered.map((r, i) => {
+                const dpp = Math.round(parseFloat(r.dpp) || parseFloat(r.jumlah) || 0);
+                const taxVal = Math.round(parseFloat(r.taxVal) || 0);
+                totalDpp += dpp;
+                totalTaxVal += taxVal;
+                const taxRateText = r.taxRate ? ` (${r.taxRate}%)` : '';
+                const displayTaxName = (r.taxName && r.taxName !== 'none') ? `${r.taxName}${taxRateText}` : 'Pajak';
+                const tgl = formatDisplayDate(r.tanggal);
+
+                return {
+                    "No": i + 1,
+                    "Nomor BKU": r.bku || '-',
+                    "Kode Rekening": r.rekening || '-',
+                    "Untuk Pembayaran": r.untuk || '-',
+                    "DPP (Rp)": dpp,
+                    "Jenis Pajak": displayTaxName,
+                    "Nominal Pajak (Rp)": taxVal,
+                    "Tanggal": tgl
+                };
+            });
+
+            exportData.push({
+                "No": "TOTAL PERIODE",
+                "Nomor BKU": "",
+                "Kode Rekening": "",
+                "Untuk Pembayaran": "",
+                "DPP (Rp)": totalDpp,
+                "Jenis Pajak": "",
+                "Nominal Pajak (Rp)": totalTaxVal,
+                "Tanggal": ""
+            });
+
+            let filePeriodSuffix = new Date().toISOString().slice(0,10);
+            if (startDate && endDate) filePeriodSuffix = `${startDate}_sd_${endDate}`;
+
+            exportToExcelEngine(exportData, `Arsip_Pajak_SDN22_${filePeriodSuffix}`, "Arsip Pajak");
+        }
+
+        // --- STREAMING_CHUNK:USER MANAGEMENT AND REGISTRATION LOGIC ---
         function openUserModal() {
             document.getElementById('user-modal').classList.remove('hidden');
             document.getElementById('user-fullname').value = "";
@@ -1512,6 +1828,7 @@
             });
         }
 
+        // --- STREAMING_CHUNK:BELANJA MODAL LOGIC AND CALCULATIONS ---
         function openBelanjaModal() {
             resetFormBelanjaModal();
             const modalTitle = document.getElementById('bm-modal-title');
@@ -1738,6 +2055,7 @@
             }).join('');
         }
 
+        // --- STREAMING_CHUNK:CASH FLOW AND LEDGER LOGIC ---
         async function saveSaldoAwal() {
             if (isSavingSaldo) return;
             const saveBtn = document.getElementById('btn-save-saldo');
@@ -1993,6 +2311,7 @@
             }).join('');
         }
 
+        // --- STREAMING_CHUNK:STATISTICS AND DASHBOARD AGGREGATION ---
         function updateHomeStats() {
             document.getElementById('stat-total-kuitansi').innerText = reports.length;
             const total = reports.reduce((a, b) => a + (Math.round(parseFloat(b.jumlah)) || 0), 0);
@@ -2216,6 +2535,7 @@
                     updateHomeStats();
                     resetForm();
                     renderReports();
+                    renderArsipPajak();
                 } else {
                     notify("Gagal Menyimpan Kuitansi!", "bg-red-600");
                 }
@@ -2238,12 +2558,14 @@
                 if(res?.status === "success" || res?.status !== "error") { 
                     reports.splice(idx, 1); 
                     renderReports(); 
+                    renderArsipPajak();
                     updateHomeStats(); 
                     notify("Berhasil Menghapus Kuitansi!", "bg-slate-700");
                 }
             });
         }
 
+        // --- STREAMING_CHUNK:PRINTING AND EXCEL ENGINE UTILITIES ---
         function printBelanjaModal() {
             const filter = (document.getElementById('filter-bm')?.value || "").toLowerCase();
             const yearFilter = document.getElementById('filter-tahun-bm')?.value || "all";
@@ -2737,7 +3059,7 @@
         }
 
         async function apiRequest(data, loadingText = "Memproses...") {
-            showLoader(loadingText, "Menghubungkan ke server");
+            showLoader(loadingText, "Menghubungkan ke server Google Apps Script...");
             try {
                 const response = await fetch(scriptURL, { method: 'POST', body: JSON.stringify(data) });
                 return await response.json();
@@ -2750,8 +3072,8 @@
         }
 
         function startSyncProcess() {
-            showConfirm("Tarik Data database?", () => {
-                simulateProgress("TARIK DATA", loadAllData).then(() => {
+            showConfirm("Tarik Data", () => {
+                simulateProgress("Tarik Data", loadAllData).then(() => {
                     notify("Berhasil Tarik Data!", "bg-green-600");
                 });
             });
