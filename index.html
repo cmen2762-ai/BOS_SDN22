@@ -1166,7 +1166,7 @@
             }
         }
 
-        function showLoader(title = "Memuat Data Cloud...", subtext = "Mengambil data dari Google Sheet") {
+        function showLoader(title = "Memuat Data Aplikasi", subtext = "Mengambil data dari Google Sheet") {
             const loader = document.getElementById('loader');
             if(loader) {
                 document.getElementById('loader-text').innerText = title;
@@ -1266,7 +1266,7 @@
         }
 
         async function loadAllData() {
-            showLoader("Memuat Data Cloud...", "Mengambil data kuitansi dari Google Sheet");
+            showLoader("Memuat Data Aplikasi", "Jangan Tutup Aplikasi");
             try {
                 const cacheBuster = "?cb=" + Date.now();
                 const response = await fetch(scriptURL + cacheBuster);
