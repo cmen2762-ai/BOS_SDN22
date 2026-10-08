@@ -99,8 +99,8 @@
                 <div class="absolute inset-2 border-2 border-indigo-400 border-b-transparent rounded-full animate-spin" style="animation-duration: 1.5s; animation-direction: reverse;"></div>
                 <img src="https://iili.io/BLlwHwQ.png" class="w-14 h-14 object-contain animate-pulse z-10" alt="Logo SDN 22">
             </div>
-            <h3 id="loader-text" class="mt-5 font-black text-blue-900 tracking-wide text-sm uppercase">Memuat Data Aplikasi</h3>
-            <p id="loader-subtext" class="text-[11px] text-slate-500 font-semibold mt-1 italic">Tunggu Sebentar</p>
+            <h3 id="loader-text" class="mt-5 font-black text-blue-900 tracking-wide text-sm uppercase">Memuat Data Cloud...</h3>
+            <p id="loader-subtext" class="text-[11px] text-slate-500 font-semibold mt-1 italic">Mengambil data dari Google Sheet</p>
         </div>
     </div>
 
@@ -111,7 +111,7 @@
                 <div id="progress-bar" class="bg-blue-600 h-full transition-all duration-300" style="width: 0%"></div>
             </div>
             <p id="progress-percent" class="text-2xl font-black text-blue-900">0%</p>
-            <p id="progress-status" class="text-xs text-slate-500 italic mt-2">Jangan Tutup Aplikasi</p>
+            <p id="progress-status" class="text-xs text-slate-500 italic mt-2">Tunggu Sebentar</p>
         </div>
     </div>
 
@@ -208,7 +208,7 @@
                     </div>
                 </div>
                 <div class="p-3 bg-blue-50 border border-blue-200 rounded-xl text-xs text-blue-900 flex items-start gap-2">
-                    <svg class="w-5 h-5 text-blue-700 shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 002-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path></svg>
+                    <svg class="w-5 h-5 text-blue-700 shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 002-2H5a2 2 0 0-2 2v10a2 2 0 002 2z"></path></svg>
                     <span>Username/Email akan <strong>diverifikasi secara otomatis</strong>. Jika email aktif, kredensial akun dikirimkan langsung ke Email Pengguna.</span>
                 </div>
             </div>
@@ -495,6 +495,14 @@
                                 <tbody id="stat-bm-item-table-body"></tbody>
                             </table>
                         </div>
+
+                        <div class="mt-4 flex items-center justify-between">
+                            <p id="bm-stat-pagination-info" class="text-xs font-bold text-slate-500"></p>
+                            <div class="flex gap-2">
+                                <button id="bm-stat-prev-btn" onclick="prevBmStatPage()" class="pagination-btn px-3 py-1.5 bg-blue-100 text-blue-900 font-bold text-xs rounded-lg hover:bg-blue-200 transition">Sebelumnya</button>
+                                <button id="bm-stat-next-btn" onclick="nextBmStatPage()" class="pagination-btn px-3 py-1.5 bg-blue-900 text-white font-bold text-xs rounded-lg hover:bg-blue-800 transition shadow-md">Selanjutnya</button>
+                            </div>
+                        </div>
                     </div>
 
                     <h2 class="text-2xl font-bold text-blue-900 uppercase mb-4 pt-4 border-t border-slate-100">Informasi Aplikasi</h2>
@@ -604,20 +612,20 @@
                     <div class="flex flex-wrap justify-between items-center mb-6 gap-4">
                         <h2 class="text-2xl font-bold text-blue-900 uppercase">Daftar Belanja Modal</h2>
                         <div class="flex flex-wrap gap-2 items-center">
-                            <input type="text" id="filter-bm" oninput="renderBelanjaModal()" class="p-3 border rounded-xl w-48 shadow-sm" placeholder="Cari Barang...">
-                            <select id="filter-jenis-bm" onchange="renderBelanjaModal()" class="p-3 border rounded-xl w-52 shadow-sm outline-none">
+                            <input type="text" id="filter-bm" oninput="resetBmPageAndRender()" class="p-3 border rounded-xl w-48 shadow-sm" placeholder="Cari Barang...">
+                            <select id="filter-jenis-bm" onchange="resetBmPageAndRender()" class="p-3 border rounded-xl w-52 shadow-sm outline-none">
                                 <option value="all">Semua Jenis Belanja</option>
                                 <option value="Belanja Modal Peralatan dan Mesin">Belanja Modal Peralatan dan Mesin</option>
                                 <option value="Belanja Modal Aset Tetap Lainnya">Belanja Modal Aset Tetap Lainnya</option>
                             </select>
-                            <select id="filter-tahun-bm" onchange="renderBelanjaModal()" class="p-3 border rounded-xl w-36 shadow-sm outline-none">
+                            <select id="filter-tahun-bm" onchange="resetBmPageAndRender()" class="p-3 border rounded-xl w-36 shadow-sm outline-none">
                                 <option value="all">Semua Tahun</option>
                             </select>
                             <div class="flex items-center gap-1 bg-slate-50 p-1.5 border rounded-xl shadow-sm">
                                 <span class="text-[11px] font-bold text-slate-500 uppercase px-1">Dari:</span>
-                                <input type="date" id="filter-start-date-bm" onchange="renderBelanjaModal()" class="p-1.5 border rounded-lg outline-none text-xs bg-white">
+                                <input type="date" id="filter-start-date-bm" onchange="resetBmPageAndRender()" class="p-1.5 border rounded-lg outline-none text-xs bg-white">
                                 <span class="text-[11px] font-bold text-slate-500 uppercase px-1">Ke:</span>
-                                <input type="date" id="filter-end-date-bm" onchange="renderBelanjaModal()" class="p-1.5 border rounded-lg outline-none text-xs bg-white">
+                                <input type="date" id="filter-end-date-bm" onchange="resetBmPageAndRender()" class="p-1.5 border rounded-lg outline-none text-xs bg-white">
                                 <button onclick="resetDateFilterBelanjaModal()" class="ml-1 px-2 py-1 bg-slate-200 hover:bg-slate-300 text-slate-700 font-bold rounded-lg text-xs transition">Reset</button>
                             </div>
                             <button onclick="openBelanjaModal()" class="bg-blue-700 hover:bg-blue-800 text-white px-4 py-3 rounded-xl font-bold shadow-md transition flex items-center gap-2 text-xs">
@@ -653,6 +661,25 @@
                             <tbody id="bm-table-body" class="text-xs"></tbody>
                         </table>
                     </div>
+
+                    <div class="mt-6 flex flex-wrap items-center justify-between gap-4">
+                        <div class="flex items-center gap-2">
+                            <span class="text-xs font-bold text-slate-500 uppercase">Tampilkan Baris:</span>
+                            <select id="bm-rows-per-page" onchange="changeBmRowsPerPage()" class="p-2 border rounded-lg text-xs font-bold bg-white outline-none shadow-sm">
+                                <option value="10">10</option>
+                                <option value="25">25</option>
+                                <option value="50">50</option>
+                                <option value="100">100</option>
+                                <option value="500">500</option>
+                                <option value="1000">1000</option>
+                            </select>
+                        </div>
+                        <p id="bm-pagination-info" class="text-xs font-bold text-slate-500"></p>
+                        <div class="flex gap-2">
+                            <button id="bm-prev-btn" onclick="prevBmPage()" class="pagination-btn px-4 py-2 bg-blue-100 text-blue-900 font-bold text-xs rounded-lg hover:bg-blue-200 transition">Sebelumnya</button>
+                            <button id="bm-next-btn" onclick="nextBmPage()" class="pagination-btn px-4 py-2 bg-blue-900 text-white font-bold text-xs rounded-lg hover:bg-blue-800 transition shadow-md">Selanjutnya</button>
+                        </div>
+                    </div>
                 </div>
             </section>
 
@@ -667,7 +694,7 @@
                             <span class="font-black text-slate-700 text-sm">Rp</span>
                             <input type="number" id="cf-saldo-awal" oninput="renderCashFlow()" class="p-3 border-2 border-blue-400 rounded-xl font-black text-lg text-blue-900 w-52 outline-none focus:border-blue-600" placeholder="0">
                             <button id="btn-save-saldo" onclick="saveSaldoAwal()" class="bg-blue-700 hover:bg-blue-800 text-white px-5 py-3 rounded-xl font-bold shadow-md transition flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed">
-                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-3m-1 4l-3 3m0 0l-3-3m3 3V4"></path></svg>
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7H5a2 2 0 002-2v9a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-3m-1 4l-3 3m0 0l-3-3m3 3V4"></path></svg>
                                 Simpan Saldo Awal
                             </button>
                         </div>
@@ -720,7 +747,7 @@
                             </button>
                             <button onclick="printCashFlow()" class="bg-blue-800 hover:bg-blue-900 text-white px-4 py-3 rounded-xl font-bold shadow-md transition flex items-center gap-2 text-xs">
                                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"></path></svg>
-                                Cetak
+                                Cetak 
                             </button>
                             <button onclick="exportCashFlowExcel()" class="bg-emerald-600 hover:bg-emerald-700 text-white px-4 py-3 rounded-xl font-bold shadow-md transition flex items-center gap-2 text-xs">
                                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
@@ -826,7 +853,7 @@
                         <div class="flex flex-wrap gap-2 items-center">
                             <button onclick="printArsipPajak()" class="bg-blue-800 hover:bg-blue-900 text-white px-4 py-3 rounded-xl font-bold shadow-md transition flex items-center gap-2 text-xs">
                                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"></path></svg>
-                                Cetak
+                                Cetak 
                             </button>
                             <button onclick="exportArsipPajakExcel()" class="bg-emerald-600 hover:bg-emerald-700 text-white px-4 py-3 rounded-xl font-bold shadow-md transition flex items-center gap-2 text-xs">
                                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
@@ -901,7 +928,7 @@
                         <div class="flex flex-wrap gap-2 items-center">
                             <button onclick="printArsipCashFlow()" class="bg-blue-800 hover:bg-blue-900 text-white px-5 py-3 rounded-xl font-bold shadow-md transition flex items-center gap-2">
                                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"></path></svg>
-                                Cetak
+                                Cetak 
                             </button>
                             <button onclick="exportArsipCashFlowExcel()" class="bg-emerald-600 hover:bg-emerald-700 text-white px-5 py-3 rounded-xl font-bold shadow-md transition flex items-center gap-2">
                                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
@@ -1097,6 +1124,12 @@
         const rowsPerPage = 7;
         let editingBmIndex = -1;
 
+        let currentBmStatPage = 1;
+        const bmStatRowsPerPage = 5;
+
+        let currentBmPage = 1;
+        let bmRowsPerPage = 10;
+
         // Flags to prevent double submission
         let isSavingBM = false;
         let isSavingCF = false;
@@ -1166,7 +1199,7 @@
             }
         }
 
-        function showLoader(title = "Memuat Data Aplikasi", subtext = "Mengambil data dari Google Sheet") {
+        function showLoader(title = "Memuat Data Aplikasi", subtext = "Jangan Tutup Aplikasi") {
             const loader = document.getElementById('loader');
             if(loader) {
                 document.getElementById('loader-text').innerText = title;
@@ -1266,7 +1299,7 @@
         }
 
         async function loadAllData() {
-            showLoader("Memuat Data Aplikasi", "Jangan Tutup Aplikasi");
+            showLoader("Memuat Data Cloud...", "Mengambil data kuitansi dari Google Sheet");
             try {
                 const cacheBuster = "?cb=" + Date.now();
                 const response = await fetch(scriptURL + cacheBuster);
@@ -1301,7 +1334,7 @@
                 populateArchiveYears();
                 populateArsipCfYears();
 
-                notify("Berhasil!", "bg-green-600");
+                notify("Data Berhasil Dimuat!", "bg-green-600");
             } catch (err) {
                 console.error("Error loading cloud data:", err);
                 notify("Gagal Memuat Data Cloud. Periksa Koneksi!", "bg-red-600");
@@ -1362,7 +1395,7 @@
             if(id === 'laporan') resetPageAndRender();
             if(id === 'arsip') resetPageArsipAndRender();
             if(id === 'arsip_pajak') renderArsipPajak();
-            if(id === 'belanja_modal') renderBelanjaModal();
+            if(id === 'belanja_modal') resetBmPageAndRender();
             if(id === 'cash_flow') renderCashFlow();
             if(id === 'arsip_cash_flow') renderArsipCashFlow();
             if(id === 'pengguna') renderUsers();
@@ -1416,7 +1449,7 @@
         function nextPage() { currentPage++; renderReports(); }
         function prevPage() { currentPage--; renderReports(); }
 
-        // --- STREAMING_CHUNK:ARSIP PAJAK RENDERING AND EXPORT LOGIC ---
+        // --- ARSIP PAJAK RENDERING AND EXPORT LOGIC ---
         function resetDateFilterArsipPajak() {
             if (document.getElementById('filter-start-date-tax')) document.getElementById('filter-start-date-tax').value = "";
             if (document.getElementById('filter-end-date-tax')) document.getElementById('filter-end-date-tax').value = "";
@@ -1427,10 +1460,8 @@
             const tbody = document.getElementById('tax-archive-table-body');
             if(!tbody) return;
 
-            // Combine active reports and archived reports
             const allReceipts = [...reports, ...archiveReports];
 
-            // Filter for items that have a tax value > 0 or a tax name other than "Tanpa Pajak"
             const taxReceipts = allReceipts.filter(r => {
                 const tVal = Math.round(parseFloat(r.taxVal) || 0);
                 const tName = String(r.taxName || "").trim().toLowerCase();
@@ -1649,7 +1680,7 @@
             exportToExcelEngine(exportData, `Arsip_Pajak_SDN22_${filePeriodSuffix}`, "Arsip Pajak");
         }
 
-        // --- STREAMING_CHUNK:USER MANAGEMENT AND REGISTRATION LOGIC ---
+        // --- USER MANAGEMENT LOGIC ---
         function openUserModal() {
             document.getElementById('user-modal').classList.remove('hidden');
             document.getElementById('user-fullname').value = "";
@@ -1828,7 +1859,7 @@
             });
         }
 
-        // --- STREAMING_CHUNK:BELANJA MODAL LOGIC AND CALCULATIONS ---
+        // --- BELANJA MODAL LOGIC AND CALCULATIONS ---
         function openBelanjaModal() {
             resetFormBelanjaModal();
             const modalTitle = document.getElementById('bm-modal-title');
@@ -1889,7 +1920,7 @@
                     const res = await apiRequest({ action: "saveBelanjaModal", ...item }, "Memperbarui Belanja Modal...");
                     if(res?.status === "success" || res?.status !== "error") {
                         belanjaModal[editingBmIndex] = item;
-                        renderBelanjaModal();
+                        resetBmPageAndRender();
                         closeBelanjaModal();
                         updateHomeStats();
                         notify("Berhasil Memperbarui Belanja Modal!", "bg-green-600");
@@ -1901,7 +1932,7 @@
                     const res = await apiRequest({ action: "saveBelanjaModal", ...item }, "Menyimpan Belanja Modal...");
                     if(res?.status === "success" || res?.status !== "error") {
                         belanjaModal.push(item);
-                        renderBelanjaModal();
+                        resetBmPageAndRender();
                         closeBelanjaModal();
                         updateHomeStats();
                         notify("Berhasil Menyimpan Belanja Modal!", "bg-green-600");
@@ -1992,6 +2023,32 @@
         function resetDateFilterBelanjaModal() {
             if (document.getElementById('filter-start-date-bm')) document.getElementById('filter-start-date-bm').value = "";
             if (document.getElementById('filter-end-date-bm')) document.getElementById('filter-end-date-bm').value = "";
+            resetBmPageAndRender();
+        }
+
+        function changeBmRowsPerPage() {
+            const select = document.getElementById('bm-rows-per-page');
+            if (select) {
+                bmRowsPerPage = parseInt(select.value) || 10;
+            }
+            currentBmPage = 1;
+            renderBelanjaModal();
+        }
+
+        function resetBmPageAndRender() {
+            currentBmPage = 1;
+            renderBelanjaModal();
+        }
+
+        function prevBmPage() {
+            if (currentBmPage > 1) {
+                currentBmPage--;
+                renderBelanjaModal();
+            }
+        }
+
+        function nextBmPage() {
+            currentBmPage++;
             renderBelanjaModal();
         }
 
@@ -2023,7 +2080,15 @@
                 return matchYear && matchJenis && matchText && matchDate;
             });
 
-            tbody.innerHTML = filtered.map((b) => {
+            const totalItems = filtered.length;
+            const totalPages = Math.ceil(totalItems / bmRowsPerPage) || 1;
+            if (currentBmPage > totalPages) currentBmPage = totalPages;
+            if (currentBmPage < 1) currentBmPage = 1;
+
+            const startIndex = (currentBmPage - 1) * bmRowsPerPage;
+            const paginatedItems = filtered.slice(startIndex, startIndex + bmRowsPerPage);
+
+            tbody.innerHTML = paginatedItems.map((b) => {
                 const actualIdx = belanjaModal.indexOf(b);
                 let badgeClass = "bg-green-100 text-green-800";
                 if(b.kerusakan === "Rusak Ringan") badgeClass = "bg-yellow-100 text-yellow-800";
@@ -2053,9 +2118,18 @@
                     </td>
                 </tr>`;
             }).join('');
+
+            if (filtered.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="10" class="p-6 text-center text-slate-400 italic">Tidak ada data Belanja Modal yang sesuai filter.</td></tr>`;
+            }
+
+            if (document.getElementById('bm-pagination-info')) {
+                document.getElementById('bm-pagination-info').innerText = totalItems > 0 ? `Halaman ${currentBmPage} dari ${totalPages} (${totalItems} Data)` : `0 Data`;
+            }
+            if (document.getElementById('bm-prev-btn')) document.getElementById('bm-prev-btn').disabled = currentBmPage === 1;
+            if (document.getElementById('bm-next-btn')) document.getElementById('bm-next-btn').disabled = currentBmPage === totalPages || totalItems === 0;
         }
 
-        // --- STREAMING_CHUNK:CASH FLOW AND LEDGER LOGIC ---
         async function saveSaldoAwal() {
             if (isSavingSaldo) return;
             const saveBtn = document.getElementById('btn-save-saldo');
@@ -2311,7 +2385,6 @@
             }).join('');
         }
 
-        // --- STREAMING_CHUNK:STATISTICS AND DASHBOARD AGGREGATION ---
         function updateHomeStats() {
             document.getElementById('stat-total-kuitansi').innerText = reports.length;
             const total = reports.reduce((a, b) => a + (Math.round(parseFloat(b.jumlah)) || 0), 0);
@@ -2343,6 +2416,18 @@
             if (document.getElementById('stat-total-keluar')) document.getElementById('stat-total-keluar').innerText = formatIDR(totalKeluar);
             if (document.getElementById('stat-saldo-akhir')) document.getElementById('stat-saldo-akhir').innerText = formatIDR(saldoAkhir);
 
+            renderBmDashboardStats();
+        }
+
+        function prevBmStatPage() {
+            if (currentBmStatPage > 1) {
+                currentBmStatPage--;
+                renderBmDashboardStats();
+            }
+        }
+
+        function nextBmStatPage() {
+            currentBmStatPage++;
             renderBmDashboardStats();
         }
 
@@ -2394,19 +2479,38 @@
             }
 
             const itemKeys = Object.keys(itemMap);
-            if (itemKeys.length === 0) {
+            const totalItems = itemKeys.length;
+
+            if (totalItems === 0) {
                 itemTableBody.innerHTML = `<tr><td colspan="5" class="p-4 text-center text-slate-400 italic">Belum ada data Belanja Modal recorded</td></tr>`;
+                if (document.getElementById('bm-stat-pagination-info')) document.getElementById('bm-stat-pagination-info').innerText = "";
+                if (document.getElementById('bm-stat-prev-btn')) document.getElementById('bm-stat-prev-btn').disabled = true;
+                if (document.getElementById('bm-stat-next-btn')) document.getElementById('bm-stat-next-btn').disabled = true;
             } else {
-                itemTableBody.innerHTML = itemKeys.map((iKey, idx) => {
+                const totalPages = Math.ceil(totalItems / bmStatRowsPerPage) || 1;
+                if (currentBmStatPage > totalPages) currentBmStatPage = totalPages;
+                if (currentBmStatPage < 1) currentBmStatPage = 1;
+
+                const startIndex = (currentBmStatPage - 1) * bmStatRowsPerPage;
+                const paginatedKeys = itemKeys.slice(startIndex, startIndex + bmStatRowsPerPage);
+
+                itemTableBody.innerHTML = paginatedKeys.map((iKey, idx) => {
                     const item = itemMap[iKey];
+                    const actualNo = startIndex + idx + 1;
                     return `<tr class="border-b hover:bg-slate-50 transition text-xs">
-                        <td class="p-3 text-center font-bold text-slate-500">${idx + 1}</td>
+                        <td class="p-3 text-center font-bold text-slate-500">${actualNo}</td>
                         <td class="p-3 font-bold text-slate-800">${item.nama}</td>
                         <td class="p-3 font-semibold text-slate-600">${item.merek}</td>
                         <td class="p-3 text-slate-600">${item.jenis}</td>
                         <td class="p-3 text-right font-bold text-blue-900">${formatIDR(item.totalVal)}</td>
                     </tr>`;
                 }).join('');
+
+                if (document.getElementById('bm-stat-pagination-info')) {
+                    document.getElementById('bm-stat-pagination-info').innerText = `Halaman ${currentBmStatPage} dari ${totalPages} (${totalItems} Data)`;
+                }
+                if (document.getElementById('bm-stat-prev-btn')) document.getElementById('bm-stat-prev-btn').disabled = currentBmStatPage === 1;
+                if (document.getElementById('bm-stat-next-btn')) document.getElementById('bm-stat-next-btn').disabled = currentBmStatPage === totalPages;
             }
         }
 
@@ -2565,7 +2669,7 @@
             });
         }
 
-        // --- STREAMING_CHUNK:PRINTING AND EXCEL ENGINE UTILITIES ---
+        // --- PRINTING AND EXCEL ENGINE UTILITIES ---
         function printBelanjaModal() {
             const filter = (document.getElementById('filter-bm')?.value || "").toLowerCase();
             const yearFilter = document.getElementById('filter-tahun-bm')?.value || "all";
@@ -3072,8 +3176,8 @@
         }
 
         function startSyncProcess() {
-            showConfirm("Tarik Data", () => {
-                simulateProgress("Tarik Data", loadAllData).then(() => {
+            showConfirm("Tarik Database?", () => {
+                simulateProgress("Tarik Database", loadAllData).then(() => {
                     notify("Berhasil Tarik Data!", "bg-green-600");
                 });
             });
